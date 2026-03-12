@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/enemy_data.gd" id="1_enemydata"]
+
+[resource]
+script = ExtResource("1_enemydata")
+enemy_id = "fast_enemy"
+enemy_name = "Scout"
+max_health = 60.0
+move_speed = 160.0
+armor = 0.0
+gold_reward = 15
+score_reward = 8
+scene_path = "res://scenes/enemies/FastEnemy.tscn"

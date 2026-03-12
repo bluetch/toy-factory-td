@@ -1,0 +1,116 @@
+## BaseTower — shared logic for all tower types.
+## Subclasses override _on_attack(target) to fire projectiles.
+class_name BaseTower
+extends Node2D
+
+## Set by GameWorld.initialize()
+var tower_data: TowerData = null
+var projectile_container: Node2D = null
+
+## Runtime upgrade level (0 = base, 1 = first upgrade, 2 = max)
+var current_level: int = 0
+
+## Computed from tower_data + current_level
+var current_damage: float = 0.0
+var current_range: float  = 0.0
+var current_attack_speed: float = 0.0
+
+## Internal
+var _attack_cooldown: float = 0.0
+var _current_target: Node2D = null
+## List of enemies currently in range (maintained by Area2D)
+var _enemies_in_range: Array[Node2D] = []
+
+@onready var detection_area: Area2D = $DetectionArea
+@onready var range_circle: Node2D = $RangeCircle   ## visual indicator
+@onready var attack_timer: Timer = $AttackTimer
+
+## Called by GameWorld after instantiation
+func initialize(data: TowerData, proj_container: Node2D) -> void:
+    tower_data = data
+    projectile_container = proj_container
+    _apply_stats()
+    _update_detection_area()
+    range_circle.hide()   ## only show on selection
+
+    detection_area.body_entered.connect(_on_body_entered)
+    detection_area.body_exited.connect(_on_body_exited)
+    attack_timer.timeout.connect(_on_attack_timer)
+    attack_timer.wait_time = 1.0 / current_attack_speed
+    attack_timer.start()
+
+func _apply_stats() -> void:
+    if tower_data == null:
+        return
+    current_damage      = tower_data.get_damage(current_level)
+    current_range       = tower_data.get_range(current_level)
+    current_attack_speed= tower_data.get_attack_speed(current_level)
+
+func _update_detection_area() -> void:
+    var shape := CircleShape2D.new()
+    shape.radius = current_range
+    var collision := detection_area.get_child(0) as CollisionShape2D
+    if collision:
+        collision.shape = shape
+
+## Upgrade to next level
+func upgrade() -> void:
+    if tower_data == null or current_level >= tower_data.upgrades.size():
+        return
+    current_level += 1
+    _apply_stats()
+    _update_detection_area()
+    attack_timer.wait_time = 1.0 / current_attack_speed
+
+## Returns upgrade cost for the NEXT level (0 if max)
+func get_upgrade_cost() -> int:
+    if tower_data == null or current_level >= tower_data.upgrades.size():
+        return 0
+    return tower_data.upgrades[current_level].upgrade_cost
+
+## Returns whether this tower can be upgraded further
+func can_upgrade() -> bool:
+    return tower_data != null and current_level < tower_data.upgrades.size()
+
+## Returns current sell value
+func get_sell_value() -> int:
+    if tower_data == null:
+        return 0
+    return tower_data.get_sell_value(current_level)
+
+## Show or hide the range circle (called by HUD on selection)
+func show_range(visible_flag: bool) -> void:
+    range_circle.visible = visible_flag
+    range_circle.queue_redraw()
+
+func _on_attack_timer() -> void:
+    _current_target = _get_best_target()
+    if _current_target != null:
+        _on_attack(_current_target)
+
+## Override in subclasses to fire projectile
+func _on_attack(_target: Node2D) -> void:
+    pass
+
+## Targeting: pick the enemy furthest along the path (highest waypoint index + progress)
+func _get_best_target() -> Node2D:
+    var best: Node2D = null
+    var best_progress: float = -1.0
+    for enemy in _enemies_in_range:
+        if not is_instance_valid(enemy):
+            continue
+        if enemy.has_method("get_path_progress"):
+            var progress: float = enemy.get_path_progress()
+            if progress > best_progress:
+                best_progress = progress
+                best = enemy
+    return best
+
+func _on_body_entered(body: Node2D) -> void:
+    if body.is_in_group("enemies"):
+        _enemies_in_range.append(body)
+
+func _on_body_exited(body: Node2D) -> void:
+    _enemies_in_range.erase(body)
+    if _current_target == body:
+        _current_target = null

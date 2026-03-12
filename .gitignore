@@ -1,0 +1,31 @@
+# Godot 4 build artifacts & editor caches
+.godot/
+*.uid
+
+# Export / build output
+export/
+builds/
+*.pck
+*.exe
+*.x86_64
+*.html
+*.wasm
+*.js
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# VS Code
+.vscode/
+
+# JetBrains Rider
+.idea/
+*.sln
+*.csproj
+
+# Godot 3 leftovers (not needed, but guard against mix-ups)
+*.import
+
+# Local save data (runtime, not source)
+# Keep data/ directory (game design data .tres)

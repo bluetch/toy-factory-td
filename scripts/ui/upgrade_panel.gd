@@ -1,0 +1,60 @@
+## UpgradePanel — shown when a placed tower is selected.
+## Displays stats, upgrade cost, and sell value.
+class_name UpgradePanel
+extends Control
+
+@onready var tower_name_label:  Label  = $TowerNameLabel
+@onready var level_label:       Label  = $LevelLabel
+@onready var stats_label:       Label  = $StatsLabel
+@onready var upgrade_button:    Button = $UpgradeButton
+@onready var sell_button:       Button = $SellButton
+
+var _current_tower: Node = null
+
+func _ready() -> void:
+	upgrade_button.pressed.connect(_on_upgrade_pressed)
+	sell_button.pressed.connect(_on_sell_pressed)
+
+## Populate fields from a BaseTower node
+func populate(tower: Node) -> void:
+	_current_tower = tower
+	var data: TowerData = tower.tower_data if "tower_data" in tower else null
+	if data == null:
+		return
+
+	tower_name_label.text = data.tower_name
+	var lvl: int = tower.current_level if "current_level" in tower else 0
+	var max_lvl: int = data.upgrades.size()
+	level_label.text = "Level: %d / %d" % [lvl + 1, max_lvl + 1]
+
+	stats_label.text = "DMG: %.0f  SPD: %.1f/s  RNG: %.0f" % [
+		data.get_damage(lvl),
+		data.get_attack_speed(lvl),
+		data.get_range(lvl)
+	]
+
+	var can_upgrade: bool = tower.has_method("can_upgrade") and tower.can_upgrade()
+	var upgrade_cost: int = tower.get_upgrade_cost() if tower.has_method("get_upgrade_cost") else 0
+	upgrade_button.visible = can_upgrade
+	if can_upgrade:
+		upgrade_button.text = "Upgrade\n%d 💰" % upgrade_cost
+		upgrade_button.disabled = not GameManager.can_afford(upgrade_cost)
+
+	var sell_val: int = tower.get_sell_value() if tower.has_method("get_sell_value") else 0
+	sell_button.text = "Sell\n+%d 💰" % sell_val
+
+func _on_upgrade_pressed() -> void:
+	var gw := get_tree().get_first_node_in_group("game_world")
+	if gw and gw.has_method("upgrade_selected_tower"):
+		gw.upgrade_selected_tower()
+	# Refresh display
+	if _current_tower and is_instance_valid(_current_tower):
+		populate(_current_tower)
+	else:
+		hide()
+
+func _on_sell_pressed() -> void:
+	var gw := get_tree().get_first_node_in_group("game_world")
+	if gw and gw.has_method("sell_selected_tower"):
+		gw.sell_selected_tower()
+	hide()

@@ -1,0 +1,57 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/victory.gd" id="1"]
+
+[node name="Victory" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+script = ExtResource("1")
+
+[node name="Dimmer" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0.05, 0, 0.75)
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -170.0
+offset_top = -150.0
+offset_right = 170.0
+offset_bottom = 150.0
+
+[node name="VBox" type="VBoxContainer" parent="PanelContainer"]
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="PanelContainer/VBox"]
+modulate = Color(0.9, 0.9, 0.1, 1)
+text = "VICTORY!"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 36
+
+[node name="ScoreLabel" type="Label" parent="PanelContainer/VBox"]
+text = "Score: 0"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 22
+
+[node name="HighScoreLabel" type="Label" parent="PanelContainer/VBox"]
+text = "Best: 0"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 16
+
+[node name="NextLevelButton" type="Button" parent="PanelContainer/VBox"]
+custom_minimum_size = Vector2(260, 55)
+text = "Next Level"
+
+[node name="MainMenuButton" type="Button" parent="PanelContainer/VBox"]
+custom_minimum_size = Vector2(260, 55)
+text = "Main Menu"

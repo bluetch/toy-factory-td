@@ -1,0 +1,167 @@
+## ============================================================
+## AudioManager — 音频管理器 (Audio Manager)
+## ============================================================
+## Purpose: Centralised control point for all game audio.
+## Owns two AudioStreamPlayer nodes (music + SFX) and exposes
+## a clean API for the rest of the game to play sounds without
+## needing direct references to any audio node.
+##
+## Bus layout (configure in Project → Audio):
+##   Master
+##   ├─ Music   (used by the music player)
+##   └─ SFX     (used by the SFX player)
+##
+## Volumes are loaded from SaveManager on _ready() so they
+## survive between sessions.
+##
+## Usage:
+##   AudioManager.play_music(preload("res://audio/music/theme.ogg"))
+##   AudioManager.play_sfx(preload("res://audio/sfx/shoot.wav"))
+##   AudioManager.set_music_volume(0.8)
+## ============================================================
+
+extends Node
+
+
+# ── 常量 (Constants) ──────────────────────────────────────────
+
+## SaveManager settings key for music volume.
+const SETTING_MUSIC_VOLUME: String = "music_volume"
+
+## SaveManager settings key for SFX volume.
+const SETTING_SFX_VOLUME: String = "sfx_volume"
+
+## Duration in seconds for the music fade-in tween.
+const MUSIC_FADE_DURATION: float = 1.5
+
+## Minimum linear volume (maps to roughly -80 dB — effectively muted).
+const MIN_VOLUME_LINEAR: float = 0.0001
+
+
+# ── 内部节点 (Internal Nodes) ─────────────────────────────────
+
+## Dedicated player for background music (long looping streams).
+var _music_player: AudioStreamPlayer
+
+## Dedicated player for short one-shot sound effects.
+var _sfx_player: AudioStreamPlayer
+
+## Active fade tween so we can kill it before starting a new one.
+var _fade_tween: Tween = null
+
+
+# ── 生命周期 (Lifecycle) ──────────────────────────────────────
+
+func _ready() -> void:
+	_build_players()
+	_load_volumes_from_save()
+
+
+## Create and configure both AudioStreamPlayer children.
+func _build_players() -> void:
+	# ── Music player ──────────────────────────────────────────
+	_music_player      = AudioStreamPlayer.new()
+	_music_player.name = "MusicPlayer"
+	_music_player.bus  = "Music"
+	# Music should loop; set the stream's loop flag when assigning.
+	add_child(_music_player)
+
+	# ── SFX player ────────────────────────────────────────────
+	_sfx_player      = AudioStreamPlayer.new()
+	_sfx_player.name = "SFXPlayer"
+	_sfx_player.bus  = "SFX"
+	add_child(_sfx_player)
+
+
+## Read stored volume preferences and apply them.
+func _load_volumes_from_save() -> void:
+	var music_vol: float = SaveManager.get_setting(SETTING_MUSIC_VOLUME)
+	var sfx_vol:   float = SaveManager.get_setting(SETTING_SFX_VOLUME)
+	_apply_volume_to_player(_music_player, music_vol)
+	_apply_volume_to_player(_sfx_player,   sfx_vol)
+
+
+# ── 音乐 API (Music API) ──────────────────────────────────────
+
+## Play [param stream] as background music.
+## If [param fade_in] is true the volume tweens from silence to
+## the current music volume over MUSIC_FADE_DURATION seconds.
+## Passing null is safe — it just stops the current music.
+func play_music(stream: AudioStream, fade_in: bool = true) -> void:
+	# Kill any in-progress fade so we don't fight ourselves.
+	if _fade_tween != null and _fade_tween.is_valid():
+		_fade_tween.kill()
+		_fade_tween = null
+
+	if stream == null:
+		stop_music()
+		return
+
+	# Remember the target volume before we potentially zero it out.
+	var target_volume_db: float = _music_player.volume_db
+
+	if fade_in:
+		# Start silent, then tween up to the stored volume.
+		_music_player.volume_db = linear_to_db(MIN_VOLUME_LINEAR)
+
+	_music_player.stream = stream
+	_music_player.play()
+
+	if fade_in:
+		_fade_tween = create_tween()
+		_fade_tween.tween_property(
+			_music_player,
+			"volume_db",
+			target_volume_db,
+			MUSIC_FADE_DURATION
+		).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+
+## Stop the music player immediately.
+func stop_music() -> void:
+	if _fade_tween != null and _fade_tween.is_valid():
+		_fade_tween.kill()
+		_fade_tween = null
+
+	if _music_player.playing:
+		_music_player.stop()
+
+
+# ── 音效 API (SFX API) ────────────────────────────────────────
+
+## Play a one-shot sound effect.
+## Null streams are silently ignored so callers don't need to
+## guard against unloaded assets during development.
+func play_sfx(stream: AudioStream) -> void:
+	if stream == null:
+		return
+	_sfx_player.stream = stream
+	_sfx_player.play()
+
+
+# ── 音量控制 (Volume Control) ─────────────────────────────────
+
+## Set music volume. [param vol] must be in the range 0.0–1.0.
+## Persists the new value to SaveManager.
+func set_music_volume(vol: float) -> void:
+	vol = clampf(vol, 0.0, 1.0)
+	_apply_volume_to_player(_music_player, vol)
+	SaveManager.set_setting(SETTING_MUSIC_VOLUME, vol)
+
+
+## Set SFX volume. [param vol] must be in the range 0.0–1.0.
+## Persists the new value to SaveManager.
+func set_sfx_volume(vol: float) -> void:
+	vol = clampf(vol, 0.0, 1.0)
+	_apply_volume_to_player(_sfx_player, vol)
+	SaveManager.set_setting(SETTING_SFX_VOLUME, vol)
+
+
+# ── 内部工具 (Internal Helpers) ───────────────────────────────
+
+## Convert a linear 0.0–1.0 value to dB and assign it to
+## [param player].  Values at or below MIN_VOLUME_LINEAR are
+## treated as effectively muted to avoid -infinity dB.
+func _apply_volume_to_player(player: AudioStreamPlayer, linear_vol: float) -> void:
+	var clamped := maxf(linear_vol, MIN_VOLUME_LINEAR)
+	player.volume_db = linear_to_db(clamped)

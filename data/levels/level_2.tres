@@ -1,0 +1,125 @@
+[gd_resource type="Resource" script_class="LevelData" load_steps=23 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/level_data.gd" id="1_leveldata"]
+[ext_resource type="Script" path="res://scripts/resources/wave_data.gd" id="2_wavedata"]
+[ext_resource type="Script" path="res://scripts/resources/wave_entry.gd" id="3_waveentry"]
+[ext_resource type="Resource" path="res://data/enemies/basic_enemy.tres" id="4_basic"]
+[ext_resource type="Resource" path="res://data/enemies/fast_enemy.tres" id="5_fast"]
+[ext_resource type="Resource" path="res://data/enemies/tank_enemy.tres" id="6_tank"]
+
+[sub_resource type="Resource" id="WaveEntry_w1_g1"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("4_basic")
+count = 6
+group_delay = 0.0
+spawn_interval = 1.5
+
+[sub_resource type="Resource" id="WaveData_w1"]
+script = ExtResource("2_wavedata")
+wave_number = 1
+auto_start_delay = -1.0
+entries = [SubResource("WaveEntry_w1_g1")]
+
+[sub_resource type="Resource" id="WaveEntry_w2_g1"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("4_basic")
+count = 8
+group_delay = 0.0
+spawn_interval = 1.5
+
+[sub_resource type="Resource" id="WaveEntry_w2_g2"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("5_fast")
+count = 4
+group_delay = 0.0
+spawn_interval = 1.0
+
+[sub_resource type="Resource" id="WaveData_w2"]
+script = ExtResource("2_wavedata")
+wave_number = 2
+auto_start_delay = -1.0
+entries = [SubResource("WaveEntry_w2_g1"), SubResource("WaveEntry_w2_g2")]
+
+[sub_resource type="Resource" id="WaveEntry_w3_g1"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("4_basic")
+count = 5
+group_delay = 0.0
+spawn_interval = 1.5
+
+[sub_resource type="Resource" id="WaveEntry_w3_g2"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("5_fast")
+count = 8
+group_delay = 0.0
+spawn_interval = 1.0
+
+[sub_resource type="Resource" id="WaveEntry_w3_g3"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("6_tank")
+count = 2
+group_delay = 0.0
+spawn_interval = 3.0
+
+[sub_resource type="Resource" id="WaveData_w3"]
+script = ExtResource("2_wavedata")
+wave_number = 3
+auto_start_delay = -1.0
+entries = [SubResource("WaveEntry_w3_g1"), SubResource("WaveEntry_w3_g2"), SubResource("WaveEntry_w3_g3")]
+
+[sub_resource type="Resource" id="WaveEntry_w4_g1"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("5_fast")
+count = 10
+group_delay = 0.0
+spawn_interval = 0.8
+
+[sub_resource type="Resource" id="WaveEntry_w4_g2"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("6_tank")
+count = 5
+group_delay = 0.0
+spawn_interval = 3.0
+
+[sub_resource type="Resource" id="WaveData_w4"]
+script = ExtResource("2_wavedata")
+wave_number = 4
+auto_start_delay = -1.0
+entries = [SubResource("WaveEntry_w4_g1"), SubResource("WaveEntry_w4_g2")]
+
+[sub_resource type="Resource" id="WaveEntry_w5_g1"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("4_basic")
+count = 15
+group_delay = 0.0
+spawn_interval = 1.0
+
+[sub_resource type="Resource" id="WaveEntry_w5_g2"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("5_fast")
+count = 8
+group_delay = 0.0
+spawn_interval = 0.8
+
+[sub_resource type="Resource" id="WaveEntry_w5_g3"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("6_tank")
+count = 4
+group_delay = 0.0
+spawn_interval = 3.0
+
+[sub_resource type="Resource" id="WaveData_w5"]
+script = ExtResource("2_wavedata")
+wave_number = 5
+auto_start_delay = -1.0
+entries = [SubResource("WaveEntry_w5_g1"), SubResource("WaveEntry_w5_g2"), SubResource("WaveEntry_w5_g3")]
+
+[resource]
+script = ExtResource("1_leveldata")
+level_id = 2
+level_name = "The Labyrinth"
+description = "Enemies take a longer, winding route."
+starting_lives = 15
+starting_gold = 175
+waypoints = [Vector2i(0, 2), Vector2i(5, 2), Vector2i(5, 7), Vector2i(13, 7), Vector2i(13, 2), Vector2i(17, 2)]
+waves = [SubResource("WaveData_w1"), SubResource("WaveData_w2"), SubResource("WaveData_w3"), SubResource("WaveData_w4"), SubResource("WaveData_w5")]

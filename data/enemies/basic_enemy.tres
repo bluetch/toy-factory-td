@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/enemy_data.gd" id="1_enemydata"]
+
+[resource]
+script = ExtResource("1_enemydata")
+enemy_id = "basic_enemy"
+enemy_name = "Grunt"
+max_health = 100.0
+move_speed = 80.0
+armor = 0.0
+gold_reward = 20
+score_reward = 10
+scene_path = "res://scenes/enemies/BasicEnemy.tscn"
