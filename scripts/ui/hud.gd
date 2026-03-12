@@ -4,13 +4,13 @@
 class_name HUD
 extends Control
 
-@onready var lives_label:    Label   = $TopBar/LivesLabel
-@onready var gold_label:     Label   = $TopBar/GoldLabel
-@onready var score_label:    Label   = $TopBar/ScoreLabel
-@onready var wave_label:     Label   = $TopBar/WaveLabel
-@onready var speed_button:   Button  = $TopBar/SpeedButton
-@onready var pause_button:   Button  = $TopBar/PauseButton
-@onready var next_wave_btn:  Button  = $TopBar/NextWaveButton
+@onready var lives_label:    Label   = $TopBar/HBoxContainer/LivesLabel
+@onready var gold_label:     Label   = $TopBar/HBoxContainer/GoldLabel
+@onready var score_label:    Label   = $TopBar/HBoxContainer/ScoreLabel
+@onready var wave_label:     Label   = $TopBar/HBoxContainer/WaveLabel
+@onready var speed_button:   Button  = $TopBar/HBoxContainer/SpeedButton
+@onready var pause_button:   Button  = $TopBar/HBoxContainer/PauseButton
+@onready var next_wave_btn:  Button  = $TopBar/HBoxContainer/NextWaveButton
 @onready var message_label:  Label   = $MessageLabel
 @onready var tower_panel:    Control = $TowerPanel
 @onready var upgrade_panel:  Control = $UpgradePanel
@@ -59,11 +59,19 @@ func show_message(text: String) -> void:
 	message_label.show()
 	_message_timer = MESSAGE_DURATION
 
-## Called by WaveManager signal
+## Called by WaveManager.next_wave_ready signal
 func on_next_wave_ready(wave_number: int, total_waves: int) -> void:
-	wave_label.text = "Wave: %d / %d" % [wave_number - 1, total_waves] if wave_number > 1 else "Wave: 0 / %d" % total_waves
-	next_wave_btn.text = "Start Wave %d" % wave_number
+	var current := wave_number - 1
+	wave_label.text = "Wave: %d / %d" % [current, total_waves]
+	next_wave_btn.text = "Start Wave %d ▶" % wave_number
 	next_wave_btn.show()
+
+## Called every frame by WaveManager.next_wave_countdown signal
+func on_wave_countdown(seconds: float) -> void:
+	if seconds > 0.0:
+		next_wave_btn.text = "Start Wave ▶  (%d)" % int(ceil(seconds))
+	else:
+		next_wave_btn.text = "Starting..."
 
 func on_all_waves_done() -> void:
 	next_wave_btn.hide()
@@ -99,7 +107,7 @@ func _on_game_resumed() -> void:
 	pause_button.text = "⏸ Pause"
 
 func _on_pause_pressed() -> void:
-	if GameManager.game_state == GameManager.GameState.PAUSED:
+	if GameManager.state == GameManager.GameState.PAUSED:
 		GameManager.resume_game()
 	else:
 		GameManager.pause_game()

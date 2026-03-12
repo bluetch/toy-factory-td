@@ -10,7 +10,7 @@ const TOWER_RESOURCES := [
 	"res://data/towers/ice_tower.tres",
 ]
 
-@onready var tower_buttons_container: VBoxContainer = $TowerButtonsContainer
+@onready var tower_buttons_container: VBoxContainer = $VBoxContainer/TowerButtonsContainer
 
 ## Reference to GameWorld for triggering placement
 var game_world: Node = null

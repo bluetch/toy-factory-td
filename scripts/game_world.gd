@@ -10,7 +10,7 @@ extends Node2D
 @onready var tower_container: Node2D   = $TowerContainer
 @onready var enemy_container: Node2D   = $EnemyContainer
 @onready var projectile_container: Node2D = $ProjectileContainer
-@onready var hud: Control = $UILayer/HUD
+@onready var hud: HUD = $UILayer/HUD
 
 ## TowerData for the currently selected tower to place (null = select mode)
 var _selected_tower_data: TowerData = null
@@ -21,6 +21,8 @@ var _selected_tower_node: Node = null
 var _world_waypoints: Array[Vector2] = []
 
 func _ready() -> void:
+	add_to_group("game_world")
+
 	# Load level data
 	var level_id := GameManager.current_level_id
 	var level_res_path := "res://data/levels/level_%d.tres" % level_id
@@ -35,21 +37,27 @@ func _ready() -> void:
 	# Set up grid (marks path cells)
 	grid_manager.setup(level_data.waypoints)
 
-	# Set up wave manager
-	wave_manager.enemy_container = enemy_container
-	wave_manager.set_waypoints(_world_waypoints)
-	wave_manager.setup(level_data.waves, _world_waypoints[0] if not _world_waypoints.is_empty() else Vector2.ZERO)
-
-	# Connect EventBus
+	# Connect EventBus FIRST — before setup() emits any signals
 	EventBus.enemy_reached_end.connect(_on_enemy_reached_end)
 	EventBus.all_waves_completed.connect(_on_all_waves_completed)
 	EventBus.tower_selected.connect(_on_tower_selected)
 	EventBus.tower_deselected.connect(_on_tower_deselected)
 	EventBus.game_speed_changed.connect(_on_game_speed_changed)
 
-	# Connect wave manager signals to HUD
+	# Give HUD and TowerPanel a reference to this GameWorld node
+	hud.set_game_world(self)
+	if hud.tower_panel.has_method("set_game_world"):
+		hud.tower_panel.set_game_world(self)
+
+	# Connect WaveManager → HUD signals BEFORE setup() emits next_wave_ready
 	wave_manager.next_wave_ready.connect(hud.on_next_wave_ready)
+	wave_manager.next_wave_countdown.connect(hud.on_wave_countdown)
 	wave_manager.all_waves_done.connect(hud.on_all_waves_done)
+
+	# Set up wave manager last — setup() emits next_wave_ready immediately
+	wave_manager.enemy_container = enemy_container
+	wave_manager.set_waypoints(_world_waypoints)
+	wave_manager.setup(level_data.waves, _world_waypoints[0] if not _world_waypoints.is_empty() else Vector2.ZERO)
 
 	# Apply initial game speed
 	Engine.time_scale = GameManager.game_speed

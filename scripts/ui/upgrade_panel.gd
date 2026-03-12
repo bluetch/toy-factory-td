@@ -3,11 +3,11 @@
 class_name UpgradePanel
 extends Control
 
-@onready var tower_name_label:  Label  = $TowerNameLabel
-@onready var level_label:       Label  = $LevelLabel
-@onready var stats_label:       Label  = $StatsLabel
-@onready var upgrade_button:    Button = $UpgradeButton
-@onready var sell_button:       Button = $SellButton
+@onready var tower_name_label:  Label  = $VBoxContainer/TowerNameLabel
+@onready var level_label:       Label  = $VBoxContainer/LevelLabel
+@onready var stats_label:       Label  = $VBoxContainer/StatsLabel
+@onready var upgrade_button:    Button = $VBoxContainer/UpgradeButton
+@onready var sell_button:       Button = $VBoxContainer/SellButton
 
 var _current_tower: Node = null
 
