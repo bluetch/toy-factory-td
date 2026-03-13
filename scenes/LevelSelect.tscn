@@ -41,19 +41,54 @@ offset_right = 120.0
 offset_bottom = 60.0
 text = "← Back"
 
+[node name="DifficultyRow" type="VBoxContainer" parent="."]
+anchor_left = 0.5
+anchor_top = 0.0
+anchor_right = 0.5
+anchor_bottom = 0.0
+offset_left = -240.0
+offset_top = 100.0
+offset_right = 240.0
+offset_bottom = 190.0
+theme_override_constants/separation = 8
+
+[node name="DifficultyLabel" type="Label" parent="DifficultyRow"]
+text = "Difficulty"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 16
+
+[node name="DifficultyButtons" type="HBoxContainer" parent="DifficultyRow"]
+alignment = 1
+theme_override_constants/separation = 12
+
+[node name="EasyButton" type="Button" parent="DifficultyRow/DifficultyButtons"]
+custom_minimum_size = Vector2(130, 44)
+text = "Easy\n+5 lives  ×1.5 gold"
+theme_override_font_sizes/font_size = 13
+
+[node name="NormalButton" type="Button" parent="DifficultyRow/DifficultyButtons"]
+custom_minimum_size = Vector2(130, 44)
+text = "Normal\nStandard"
+theme_override_font_sizes/font_size = 13
+
+[node name="HardButton" type="Button" parent="DifficultyRow/DifficultyButtons"]
+custom_minimum_size = Vector2(130, 44)
+text = "Hard\n−5 lives  ×0.7 gold"
+theme_override_font_sizes/font_size = 13
+
 [node name="LevelsContainer" type="HBoxContainer" parent="."]
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -380.0
-offset_top = -150.0
-offset_right = 380.0
-offset_bottom = 150.0
-theme_override_constants/separation = 20
+offset_left = -620.0
+offset_top = -100.0
+offset_right = 620.0
+offset_bottom = 200.0
+theme_override_constants/separation = 14
 
 [node name="LevelCard1" type="PanelContainer" parent="LevelsContainer"]
-custom_minimum_size = Vector2(220, 280)
+custom_minimum_size = Vector2(200, 270)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="LevelsContainer/LevelCard1"]
 theme_override_constants/separation = 6
@@ -95,7 +130,7 @@ color = Color(0, 0, 0, 0.7)
 visible = false
 
 [node name="LevelCard2" type="PanelContainer" parent="LevelsContainer"]
-custom_minimum_size = Vector2(220, 280)
+custom_minimum_size = Vector2(200, 270)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="LevelsContainer/LevelCard2"]
 theme_override_constants/separation = 6
@@ -137,7 +172,7 @@ color = Color(0, 0, 0, 0.7)
 visible = false
 
 [node name="LevelCard3" type="PanelContainer" parent="LevelsContainer"]
-custom_minimum_size = Vector2(220, 280)
+custom_minimum_size = Vector2(200, 270)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="LevelsContainer/LevelCard3"]
 theme_override_constants/separation = 6
@@ -170,6 +205,90 @@ custom_minimum_size = Vector2(180, 45)
 text = "Play"
 
 [node name="LockedOverlay" type="ColorRect" parent="LevelsContainer/LevelCard3/VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7)
+visible = false
+
+[node name="LevelCard4" type="PanelContainer" parent="LevelsContainer"]
+custom_minimum_size = Vector2(200, 270)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="LevelsContainer/LevelCard4"]
+theme_override_constants/separation = 6
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+
+[node name="LevelName" type="Label" parent="LevelsContainer/LevelCard4/VBoxContainer"]
+text = "Level 4: 北側防線"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 16
+
+[node name="LevelPreview" type="ColorRect" parent="LevelsContainer/LevelCard4/VBoxContainer"]
+custom_minimum_size = Vector2(180, 110)
+color = Color(0.15, 0.30, 0.35, 1)
+
+[node name="Description" type="Label" parent="LevelsContainer/LevelCard4/VBoxContainer"]
+text = "動盪即將全面展開。"
+autowrap_mode = 2
+theme_override_font_sizes/font_size = 13
+
+[node name="BestScore" type="Label" parent="LevelsContainer/LevelCard4/VBoxContainer"]
+text = "Best: 0"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 13
+
+[node name="PlayButton" type="Button" parent="LevelsContainer/LevelCard4/VBoxContainer"]
+custom_minimum_size = Vector2(160, 40)
+text = "Play"
+
+[node name="LockedOverlay" type="ColorRect" parent="LevelsContainer/LevelCard4/VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7)
+visible = false
+
+[node name="LevelCard5" type="PanelContainer" parent="LevelsContainer"]
+custom_minimum_size = Vector2(200, 270)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="LevelsContainer/LevelCard5"]
+theme_override_constants/separation = 6
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+
+[node name="LevelName" type="Label" parent="LevelsContainer/LevelCard5/VBoxContainer"]
+text = "Level 5: 記憶回廊"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 16
+
+[node name="LevelPreview" type="ColorRect" parent="LevelsContainer/LevelCard5/VBoxContainer"]
+custom_minimum_size = Vector2(180, 110)
+color = Color(0.20, 0.12, 0.30, 1)
+
+[node name="Description" type="Label" parent="LevelsContainer/LevelCard5/VBoxContainer"]
+text = "第一幕終章。真相等在前方。"
+autowrap_mode = 2
+theme_override_font_sizes/font_size = 13
+
+[node name="BestScore" type="Label" parent="LevelsContainer/LevelCard5/VBoxContainer"]
+text = "Best: 0"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 13
+
+[node name="PlayButton" type="Button" parent="LevelsContainer/LevelCard5/VBoxContainer"]
+custom_minimum_size = Vector2(160, 40)
+text = "Play"
+
+[node name="LockedOverlay" type="ColorRect" parent="LevelsContainer/LevelCard5/VBoxContainer"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0

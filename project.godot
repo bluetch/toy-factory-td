@@ -10,8 +10,8 @@ config_version=5
 
 [application]
 
-config/name="Tower Defense"
-config/description="A grid-based tower defense game with 3 levels, tower upgrades, and local high scores."
+config/name="Coco & the Factory"
+config/description="A tower defense game about sentient toys, loneliness, and being needed. Defend the factory as Coco, AK-0247."
 config/version="0.1.0"
 run/main_scene="res://scenes/MainMenu.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
@@ -24,13 +24,14 @@ GameManager="*res://scripts/autoloads/game_manager.gd"
 SaveManager="*res://scripts/autoloads/save_manager.gd"
 SceneManager="*res://scripts/autoloads/scene_manager.gd"
 AudioManager="*res://scripts/autoloads/audio_manager.gd"
+StoryDatabase="*res://scripts/autoloads/story_database.gd"
 
 [display]
 
-window/size/viewport_width=1280
-window/size/viewport_height=720
+window/size/viewport_width=1728
+window/size/viewport_height=960
+window/size/mode=2
 window/stretch/mode="canvas_items"
-window/stretch/aspect="expand"
 
 [input]
 

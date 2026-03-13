@@ -5,12 +5,19 @@ class_name GameWorld
 extends Node2D
 
 ## --- Node references (set via @onready with unique names %...) ---
-@onready var grid_manager: GridManager = $GridManager
-@onready var wave_manager: WaveManager = $WaveManager
-@onready var tower_container: Node2D   = $TowerContainer
-@onready var enemy_container: Node2D   = $EnemyContainer
-@onready var projectile_container: Node2D = $ProjectileContainer
-@onready var hud: HUD = $UILayer/HUD
+@onready var grid_manager: GridManager         = $GridManager
+@onready var wave_manager: WaveManager         = $WaveManager
+@onready var tower_container: Node2D           = $TowerContainer
+@onready var enemy_container: Node2D           = $EnemyContainer
+@onready var projectile_container: Node2D      = $ProjectileContainer
+@onready var hud: HUD                          = $UILayer/HUD
+@onready var world_background: WorldBackground = $WorldBackground
+@onready var factory_base: FactoryBase         = $FactoryBase
+@onready var _camera: Camera2D                 = $Camera2D
+
+const SHAKE_DURATION  := 0.35
+const SHAKE_MAGNITUDE := 10.0
+var _shake_timer: float = 0.0
 
 ## TowerData for the currently selected tower to place (null = select mode)
 var _selected_tower_data: TowerData = null
@@ -34,8 +41,15 @@ func _ready() -> void:
 	# Convert tile waypoints to world positions
 	_world_waypoints = _tile_waypoints_to_world(level_data.waypoints)
 
+	# Set up terrain background (must be before grid so it renders underneath)
+	world_background.setup(level_data.waypoints)
+
 	# Set up grid (marks path cells)
 	grid_manager.setup(level_data.waypoints)
+
+	# Position factory base at the end of the path
+	if not _world_waypoints.is_empty():
+		factory_base.global_position = _world_waypoints.back()
 
 	# Connect EventBus FIRST — before setup() emits any signals
 	EventBus.enemy_reached_end.connect(_on_enemy_reached_end)
@@ -88,11 +102,22 @@ func _input(event: InputEvent) -> void:
 		elif mouse_event.button_index == MOUSE_BUTTON_RIGHT and mouse_event.pressed:
 			EventBus.tower_deselected.emit()
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	# Update hover tile when in placement mode
 	if _selected_tower_data != null:
 		var tile := grid_manager.world_to_tile(get_global_mouse_position())
 		grid_manager.set_hover(tile, grid_manager.can_build(tile))
+
+	# Screen shake when factory is hit
+	if _shake_timer > 0.0:
+		_shake_timer -= delta
+		var progress := maxf(_shake_timer / SHAKE_DURATION, 0.0)
+		_camera.offset = Vector2(
+			randf_range(-1.0, 1.0) * SHAKE_MAGNITUDE * progress,
+			randf_range(-1.0, 1.0) * SHAKE_MAGNITUDE * progress
+		)
+		if _shake_timer <= 0.0:
+			_camera.offset = Vector2.ZERO
 
 ## Called by TowerPanel when player selects a tower to build
 func begin_tower_placement(tower_data: TowerData) -> void:
@@ -183,6 +208,7 @@ func _tile_waypoints_to_world(tile_waypoints: Array[Vector2i]) -> Array[Vector2]
 
 func _on_enemy_reached_end() -> void:
 	GameManager.lose_life()
+	_shake_timer = SHAKE_DURATION
 
 func _on_all_waves_completed() -> void:
 	# Short delay before showing victory screen

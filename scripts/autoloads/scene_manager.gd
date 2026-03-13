@@ -12,12 +12,14 @@ extends Node
 const MAIN_MENU_SCENE:    String = "res://scenes/MainMenu.tscn"
 const LEVEL_SELECT_SCENE: String = "res://scenes/LevelSelect.tscn"
 const GAME_WORLD_SCENE:   String = "res://scenes/GameWorld.tscn"
+const STORY_SCREEN_SCENE: String = "res://scenes/StoryScreen.tscn"
 
 const FADE_DURATION: float = 0.3
 
 # ── Internal nodes ───────────────────────────────────────────
 var _overlay: ColorRect
 var _is_transitioning: bool = false
+var _pending_after_story: Callable = Callable()
 
 func _ready() -> void:
 	# Build a full-screen black overlay on a top-level CanvasLayer
@@ -72,9 +74,32 @@ func goto_level_select() -> void:
 	goto_scene(LEVEL_SELECT_SCENE)
 
 ## Sets level data on GameManager then loads the shared GameWorld scene.
+## Shows a story cutscene first if one exists for this level.
 func goto_level(level_id: int) -> void:
 	GameManager.start_level(level_id)
-	goto_scene(GAME_WORLD_SCENE)
+	var story_id := "story_%d" % level_id
+	if StoryDatabase.has_story(story_id):
+		goto_story(story_id, func() -> void: goto_scene(GAME_WORLD_SCENE))
+	else:
+		goto_scene(GAME_WORLD_SCENE)
+
+## Show a story sequence then call after_callable when done.
+func goto_story(story_id: String, after_callable: Callable) -> void:
+	if not StoryDatabase.has_story(story_id):
+		after_callable.call()
+		return
+	StoryDatabase.current_story_id = story_id
+	_pending_after_story = after_callable
+	goto_scene(STORY_SCREEN_SCENE)
+
+## Called by StoryScreen when all entries are done (or ESC pressed).
+func story_complete() -> void:
+	var cb := _pending_after_story
+	_pending_after_story = Callable()
+	if cb.is_valid():
+		cb.call()
+	else:
+		goto_main_menu()
 
 # ── Private helpers ──────────────────────────────────────────
 

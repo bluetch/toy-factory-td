@@ -13,7 +13,7 @@ extends Control
 func _ready() -> void:
 	hide()
 	EventBus.victory_triggered.connect(_on_victory)
-	main_menu_button.pressed.connect(SceneManager.goto_main_menu)
+	main_menu_button.pressed.connect(_on_main_menu_pressed)
 
 func _on_victory() -> void:
 	var level_id := GameManager.current_level_id
@@ -21,7 +21,7 @@ func _on_victory() -> void:
 	high_score_label.text = "Best:  %d" % SaveManager.get_high_score(level_id)
 
 	var next_level := level_id + 1
-	if next_level <= 3:
+	if next_level <= SaveManager.MAX_LEVEL:
 		next_level_button.text = "Next Level (%d)" % next_level
 		# Reconnect each time to avoid duplicate connections on retry
 		if not next_level_button.pressed.is_connected(_go_next_level):
@@ -37,4 +37,9 @@ func _on_victory() -> void:
 var _next_level_id: int = 0
 
 func _go_next_level() -> void:
+	AudioManager.play_ui_click()
 	SceneManager.goto_level(_next_level_id)
+
+func _on_main_menu_pressed() -> void:
+	AudioManager.play_ui_click()
+	SceneManager.goto_main_menu()

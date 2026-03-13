@@ -24,6 +24,9 @@ enum GameState {
 	VICTORY       ## Player survived all waves.
 }
 
+## Difficulty levels selectable on the Level Select screen.
+enum Difficulty { EASY, NORMAL, HARD }
+
 
 # ── 常量 (Constants) ──────────────────────────────────────────
 
@@ -32,6 +35,11 @@ const GAME_SPEEDS: Array[float] = [1.0, 2.0]
 
 ## Upper bound for the player's life counter.
 const MAX_LIVES: int = 20
+
+## Gold multiplier per difficulty (EASY / NORMAL / HARD).
+const DIFFICULTY_GOLD_MULT: Array[float] = [1.5, 1.0, 0.7]
+## Bonus lives added to starting_lives per difficulty (can be negative).
+const DIFFICULTY_LIVES_BONUS: Array[int] = [5, 0, -5]
 
 
 # ── 运行时属性 (Runtime Properties) ──────────────────────────
@@ -51,6 +59,9 @@ var score: int = 0
 
 ## The level ID (1–3) that is currently loaded / being played.
 var current_level_id: int = 1
+
+## Currently selected difficulty. Set from LevelSelect before starting a level.
+var current_difficulty: Difficulty = Difficulty.NORMAL
 
 ## Current game-speed multiplier. Applied to Engine.time_scale.
 var game_speed: float = 1.0
@@ -89,8 +100,12 @@ func start_level(level_id: int) -> void:
 	else:
 		# LevelData is expected to expose `starting_lives: int`
 		# and `starting_gold: int` as exported properties.
-		lives = int(level_data.get("starting_lives") if level_data.get("starting_lives") != null else MAX_LIVES)
-		gold  = int(level_data.get("starting_gold")  if level_data.get("starting_gold")  != null else 150)
+		var base_lives: int = int(level_data.get("starting_lives") if level_data.get("starting_lives") != null else MAX_LIVES)
+		var base_gold: int  = int(level_data.get("starting_gold")  if level_data.get("starting_gold")  != null else 150)
+		# Apply difficulty modifiers.
+		var diff: int = int(current_difficulty)
+		lives = clampi(base_lives + DIFFICULTY_LIVES_BONUS[diff], 1, MAX_LIVES)
+		gold  = int(base_gold * DIFFICULTY_GOLD_MULT[diff])
 
 	# ── Reset per-run counters ────────────────────────────────
 	score       = 0
@@ -166,6 +181,7 @@ func game_over() -> void:
 		return  # Guard against double-call.
 
 	state = GameState.GAME_OVER
+	get_tree().paused = false
 	Engine.time_scale = 1.0
 
 	# Give SaveManager a chance to record if this run somehow
@@ -182,13 +198,14 @@ func victory() -> void:
 		return  # Guard against double-call.
 
 	state = GameState.VICTORY
+	get_tree().paused = false
 	Engine.time_scale = 1.0
 
 	# Persist progress.
 	SaveManager.set_high_score(current_level_id, score)
 
 	var next_level_id := current_level_id + 1
-	if next_level_id <= 3:
+	if next_level_id <= SaveManager.MAX_LEVEL:
 		SaveManager.unlock_level(next_level_id)
 
 	SaveManager.save()
@@ -219,6 +236,7 @@ func pause_game() -> void:
 
 	state = GameState.PAUSED
 	Engine.time_scale = 0.0
+	get_tree().paused = true
 	EventBus.game_paused.emit()
 
 
@@ -229,5 +247,6 @@ func resume_game() -> void:
 		return
 
 	state = GameState.PLAYING
+	get_tree().paused = false
 	Engine.time_scale = game_speed
 	EventBus.game_resumed.emit()

@@ -7,7 +7,7 @@ extends Resource
 @export var description: String = ""
 
 @export var starting_lives: int = 20
-@export var starting_gold: int = 200
+@export var starting_gold: int = 300
 
 ## Ordered waypoints in TILE coordinates (Vector2i).
 ## The path goes in straight horizontal/vertical segments between waypoints.

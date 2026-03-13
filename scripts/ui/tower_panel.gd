@@ -39,6 +39,7 @@ func _build_tower_buttons() -> void:
 		btn.pressed.connect(func() -> void: _on_tower_button_pressed(captured_data))
 
 func _on_tower_button_pressed(data: TowerData) -> void:
+	AudioManager.play_ui_click()
 	if game_world != null and game_world.has_method("begin_tower_placement"):
 		game_world.begin_tower_placement(data)
 

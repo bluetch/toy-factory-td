@@ -27,7 +27,8 @@ extends Node
 const SAVE_PATH: String = "user://save_data.json"
 
 ## The set of level IDs that the game supports.
-const LEVEL_IDS: Array[int] = [1, 2, 3]
+const LEVEL_IDS: Array[int] = [1, 2, 3, 4, 5]
+const MAX_LEVEL: int = 5
 
 
 # ── 内部数据 (Internal Data) ──────────────────────────────────
@@ -53,7 +54,9 @@ func _default_data() -> Dictionary:
 		"high_scores": {
 			"1": 0,
 			"2": 0,
-			"3": 0
+			"3": 0,
+			"4": 0,
+			"5": 0
 		},
 		"settings": {
 			"music_volume": 1.0,

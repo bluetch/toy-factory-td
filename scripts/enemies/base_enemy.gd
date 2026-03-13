@@ -20,6 +20,10 @@ var _slow_timer: float = 0.0
 
 @onready var health_bar_bg: ColorRect  = $HealthBar/Background
 @onready var health_bar_fill: ColorRect = $HealthBar/Fill
+## Visual sub-node that rotates to face movement direction
+@onready var _visual: Node2D = get_node_or_null("Visual")
+## AnimatedSprite2D — present on sprite-based enemies, nil on ColorRect enemies
+@onready var _anim: AnimatedSprite2D = get_node_or_null("Visual/AnimatedSprite2D")
 
 const HEALTH_BAR_WIDTH := 40.0
 
@@ -31,6 +35,7 @@ func setup(data: EnemyData, waypoints: Array[Vector2]) -> void:
     _current_waypoint_index = 1
     _update_health_bar()
     add_to_group("enemies")
+    _play_anim("walk")
 
 func _physics_process(delta: float) -> void:
     if enemy_data == null or _waypoints.is_empty():
@@ -62,6 +67,10 @@ func _physics_process(delta: float) -> void:
         _path_progress += move_amount
         move_and_slide()
 
+    # Rotate visual to face movement direction (health bar stays upright as it's a sibling)
+    if _visual != null and direction.length() > 0.01:
+        _visual.rotation = direction.angle()
+
 ## Apply a slow effect
 func apply_slow(factor: float, duration: float) -> void:
     _speed_multiplier = minf(_speed_multiplier, factor)
@@ -82,11 +91,24 @@ func take_damage(damage: float) -> void:
         _die()
 
 func _die() -> void:
+    # Remove from group immediately so towers stop targeting this enemy
+    remove_from_group("enemies")
+    set_physics_process(false)
     EventBus.enemy_died.emit(enemy_data.gold_reward, enemy_data.score_reward)
     GameManager.add_gold(enemy_data.gold_reward)
     GameManager.add_score(enemy_data.score_reward)
     _on_death()
+    # Play death animation and wait for it to finish before removing
+    if _anim != null and _anim.sprite_frames != null \
+            and _anim.sprite_frames.has_animation("death"):
+        _play_anim("death")
+        await _anim.animation_finished
     queue_free()
+
+## Play a named animation if AnimatedSprite2D is present (safe no-op otherwise)
+func _play_anim(anim_name: StringName) -> void:
+    if _anim != null:
+        _anim.play(anim_name)
 
 func _reach_end() -> void:
     EventBus.enemy_reached_end.emit()

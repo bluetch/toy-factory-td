@@ -4,10 +4,11 @@
 class_name HUD
 extends Control
 
-@onready var lives_label:    Label   = $TopBar/HBoxContainer/LivesLabel
-@onready var gold_label:     Label   = $TopBar/HBoxContainer/GoldLabel
-@onready var score_label:    Label   = $TopBar/HBoxContainer/ScoreLabel
-@onready var wave_label:     Label   = $TopBar/HBoxContainer/WaveLabel
+@onready var lives_label:      Label   = $TopBar/HBoxContainer/LivesLabel
+@onready var gold_label:       Label   = $TopBar/HBoxContainer/GoldLabel
+@onready var score_label:      Label   = $TopBar/HBoxContainer/ScoreLabel
+@onready var wave_label:       Label   = $TopBar/HBoxContainer/WaveLabel
+@onready var level_name_label: Label   = $TopBar/HBoxContainer/LevelNameLabel
 @onready var speed_button:   Button  = $TopBar/HBoxContainer/SpeedButton
 @onready var pause_button:   Button  = $TopBar/HBoxContainer/PauseButton
 @onready var next_wave_btn:  Button  = $TopBar/HBoxContainer/NextWaveButton
@@ -30,7 +31,7 @@ func _ready() -> void:
 	EventBus.game_paused.connect(_on_game_paused)
 	EventBus.game_resumed.connect(_on_game_resumed)
 
-	speed_button.pressed.connect(GameManager.toggle_speed)
+	speed_button.pressed.connect(_on_speed_pressed)
 	pause_button.pressed.connect(_on_pause_pressed)
 	next_wave_btn.pressed.connect(_on_next_wave_pressed)
 	next_wave_btn.hide()
@@ -42,6 +43,11 @@ func _ready() -> void:
 	_on_gold_changed(GameManager.gold)
 	_on_score_changed(GameManager.score)
 	_on_speed_changed(GameManager.game_speed)
+
+	# Level name from LevelData resource
+	var level_res: Resource = load("res://data/levels/level_%d.tres" % GameManager.current_level_id)
+	if level_res != null and level_res.get("level_name") != null:
+		level_name_label.text = str(level_res.get("level_name"))
 
 ## Called by GameWorld
 func set_game_world(gw: Node) -> void:
@@ -106,13 +112,19 @@ func _on_game_paused() -> void:
 func _on_game_resumed() -> void:
 	pause_button.text = "⏸ Pause"
 
+func _on_speed_pressed() -> void:
+	AudioManager.play_ui_click()
+	GameManager.toggle_speed()
+
 func _on_pause_pressed() -> void:
+	AudioManager.play_ui_click()
 	if GameManager.state == GameManager.GameState.PAUSED:
 		GameManager.resume_game()
 	else:
 		GameManager.pause_game()
 
 func _on_next_wave_pressed() -> void:
+	AudioManager.play_ui_click()
 	next_wave_btn.hide()
 	# GameWorld owns WaveManager, look it up
 	var wm: Node = get_tree().get_first_node_in_group("wave_manager")

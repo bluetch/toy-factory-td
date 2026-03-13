@@ -5,7 +5,7 @@ extends Resource
 @export var enemy_id: String = ""
 @export var enemy_name: String = ""
 
-@export var max_health: float = 100.0
+@export var max_health: float = 60.0
 @export var move_speed: float = 80.0      # pixels per second
 ## armor: fraction of damage absorbed (0.0 = no armor, 0.5 = 50% reduction)
 @export var armor: float = 0.0

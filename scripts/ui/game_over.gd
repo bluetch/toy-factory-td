@@ -12,11 +12,16 @@ func _ready() -> void:
 	# Listen for the game-over event; populate + show when received
 	EventBus.game_over_triggered.connect(_on_game_over)
 	retry_button.pressed.connect(_on_retry)
-	main_menu_button.pressed.connect(SceneManager.goto_main_menu)
+	main_menu_button.pressed.connect(_on_main_menu_pressed)
 
 func _on_game_over() -> void:
 	score_label.text = "Score: %d" % GameManager.score
 	show()
 
 func _on_retry() -> void:
+	AudioManager.play_ui_click()
 	SceneManager.goto_level(GameManager.current_level_id)
+
+func _on_main_menu_pressed() -> void:
+	AudioManager.play_ui_click()
+	SceneManager.goto_main_menu()

@@ -43,8 +43,13 @@ const MIN_VOLUME_LINEAR: float = 0.0001
 ## Dedicated player for background music (long looping streams).
 var _music_player: AudioStreamPlayer
 
-## Dedicated player for short one-shot sound effects.
-var _sfx_player: AudioStreamPlayer
+## Pool of short one-shot SFX players for polyphonic playback.
+## Multiple towers can fire simultaneously without cutting each other off.
+var _sfx_pool: Array[AudioStreamPlayer] = []
+var _sfx_pool_index: int = 0
+const SFX_POOL_SIZE: int = 8
+
+var ui_click_sfx: AudioStream = null
 
 ## Active fade tween so we can kill it before starting a new one.
 var _fade_tween: Tween = null
@@ -55,6 +60,9 @@ var _fade_tween: Tween = null
 func _ready() -> void:
 	_build_players()
 	_load_volumes_from_save()
+	ui_click_sfx = load("res://assets/audio/ui_click.wav")
+	if ui_click_sfx == null:
+		push_warning("AudioManager: ui_click.wav not found at res://assets/audio/ui_click.wav")
 
 
 ## Create and configure both AudioStreamPlayer children.
@@ -66,11 +74,13 @@ func _build_players() -> void:
 	# Music should loop; set the stream's loop flag when assigning.
 	add_child(_music_player)
 
-	# ── SFX player ────────────────────────────────────────────
-	_sfx_player      = AudioStreamPlayer.new()
-	_sfx_player.name = "SFXPlayer"
-	_sfx_player.bus  = "SFX"
-	add_child(_sfx_player)
+	# ── SFX pool ──────────────────────────────────────────────
+	for i in SFX_POOL_SIZE:
+		var p := AudioStreamPlayer.new()
+		p.name = "SFXPlayer%d" % i
+		p.bus  = "SFX"
+		add_child(p)
+		_sfx_pool.append(p)
 
 
 ## Read stored volume preferences and apply them.
@@ -78,7 +88,8 @@ func _load_volumes_from_save() -> void:
 	var music_vol: float = SaveManager.get_setting(SETTING_MUSIC_VOLUME)
 	var sfx_vol:   float = SaveManager.get_setting(SETTING_SFX_VOLUME)
 	_apply_volume_to_player(_music_player, music_vol)
-	_apply_volume_to_player(_sfx_player,   sfx_vol)
+	for p in _sfx_pool:
+		_apply_volume_to_player(p, sfx_vol)
 
 
 # ── 音乐 API (Music API) ──────────────────────────────────────
@@ -129,14 +140,23 @@ func stop_music() -> void:
 
 # ── 音效 API (SFX API) ────────────────────────────────────────
 
-## Play a one-shot sound effect.
-## Null streams are silently ignored so callers don't need to
-## guard against unloaded assets during development.
+## Play a one-shot sound effect using the round-robin pool.
+## Multiple overlapping sounds (e.g. rapid tower fire) won't cut each other off.
+## Null streams are silently ignored so callers don't need to guard against
+## unloaded assets during development.
 func play_sfx(stream: AudioStream) -> void:
 	if stream == null:
 		return
-	_sfx_player.stream = stream
-	_sfx_player.play()
+	var player: AudioStreamPlayer = _sfx_pool[_sfx_pool_index]
+	_sfx_pool_index = (_sfx_pool_index + 1) % SFX_POOL_SIZE
+	player.stream = stream
+	player.play()
+
+
+## Convenience wrapper — plays the UI click sound assigned to ui_click_sfx.
+## Call from any button pressed callback.
+func play_ui_click() -> void:
+	play_sfx(ui_click_sfx)
 
 
 # ── 音量控制 (Volume Control) ─────────────────────────────────
@@ -153,7 +173,8 @@ func set_music_volume(vol: float) -> void:
 ## Persists the new value to SaveManager.
 func set_sfx_volume(vol: float) -> void:
 	vol = clampf(vol, 0.0, 1.0)
-	_apply_volume_to_player(_sfx_player, vol)
+	for p in _sfx_pool:
+		_apply_volume_to_player(p, vol)
 	SaveManager.set_setting(SETTING_SFX_VOLUME, vol)
 
 

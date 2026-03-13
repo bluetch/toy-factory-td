@@ -18,23 +18,31 @@ func _ready() -> void:
 	high_scores_panel.hide()
 
 func _on_play_pressed() -> void:
-	# Start from the highest unlocked level — or level 1 if only level 1 unlocked
-	SceneManager.goto_level(1)
+	AudioManager.play_ui_click()
+	# Start from the highest unlocked level
+	var start_level := 1
+	for id in range(SaveManager.MAX_LEVEL, 0, -1):
+		if SaveManager.is_level_unlocked(id):
+			start_level = id
+			break
+	SceneManager.goto_level(start_level)
 
 func _on_level_select_pressed() -> void:
+	AudioManager.play_ui_click()
 	SceneManager.goto_level_select()
 
 func _on_high_scores_pressed() -> void:
+	AudioManager.play_ui_click()
 	high_scores_panel.visible = not high_scores_panel.visible
 	if high_scores_panel.visible:
 		_populate_high_scores()
 
 func _populate_high_scores() -> void:
-	# Find score labels inside the panel by name convention
-	for i in range(1, 4):
-		var label := high_scores_panel.get_node_or_null("Level%dScore" % i) as Label
+	for i in range(1, SaveManager.MAX_LEVEL + 1):
+		var label := high_scores_panel.get_node_or_null("VBoxContainer/Level%dScore" % i) as Label
 		if label:
 			label.text = "Level %d:  %d pts" % [i, SaveManager.get_high_score(i)]
 
 func _on_quit_pressed() -> void:
+	AudioManager.play_ui_click()
 	get_tree().quit()

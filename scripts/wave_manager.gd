@@ -5,10 +5,10 @@ class_name WaveManager
 extends Node
 
 # ── Tunables ─────────────────────────────────────────────────
-## Preparation time (seconds) before Wave 1 auto-starts.
-const PREP_TIME: float = 20.0
-## Countdown between waves when auto_start_delay == -1 (manual start).
-const BETWEEN_WAVE_TIME: float = 15.0
+## Preparation time before Wave 1, indexed by Difficulty (EASY/NORMAL/HARD).
+const PREP_TIMES: Array[float] = [25.0, 20.0, 15.0]
+## Inter-wave countdown when auto_start_delay == -1, indexed by Difficulty.
+const BETWEEN_WAVE_TIMES: Array[float] = [20.0, 15.0, 10.0]
 
 # ── External references (set by GameWorld) ───────────────────
 var enemy_container: Node2D
@@ -51,7 +51,7 @@ func setup(waves: Array[WaveData], spawn_pos: Vector2) -> void:
 		spawn_pos = _waypoints[0]
 
 	# Start preparation countdown → auto-starts wave 1 when it expires.
-	_start_countdown(PREP_TIME)
+	_start_countdown(PREP_TIMES[int(GameManager.current_difficulty)])
 	next_wave_ready.emit(1, _waves.size())
 
 func set_waypoints(waypoints: Array[Vector2]) -> void:
@@ -144,7 +144,8 @@ func _check_wave_complete() -> void:
 	else:
 		# Start countdown to next wave
 		var next_wave: WaveData = _waves[_current_wave_index + 1]
+		var between_time: float = BETWEEN_WAVE_TIMES[int(GameManager.current_difficulty)]
 		var wait_time := next_wave.auto_start_delay if next_wave.auto_start_delay >= 0.0 \
-						else BETWEEN_WAVE_TIME
+						else between_time
 		_start_countdown(wait_time)
 		next_wave_ready.emit(_current_wave_index + 2, _waves.size())

@@ -17,7 +17,7 @@ extends Resource
 ## --- Base stats (level 0) ---
 @export var base_damage: float = 10.0
 @export var base_attack_speed: float = 1.0   # attacks per second
-@export var base_range: float = 150.0         # pixels
+@export var base_range: float = 200.0         # pixels
 @export var projectile_speed: float = 400.0
 @export var splash_radius: float = 0.0        # 0 = no splash
 @export var slow_factor: float = 1.0          # 1.0 = no slow, 0.5 = 50% speed

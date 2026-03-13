@@ -117,9 +117,9 @@ entries = [SubResource("WaveEntry_w5_g1"), SubResource("WaveEntry_w5_g2"), SubRe
 [resource]
 script = ExtResource("1_leveldata")
 level_id = 2
-level_name = "The Labyrinth"
-description = "Enemies take a longer, winding route."
+level_name = "地下走廊"
+description = "那些被遺忘的玩具，帶著它們的憤怒湧現。"
 starting_lives = 15
 starting_gold = 175
-waypoints = [Vector2i(0, 2), Vector2i(5, 2), Vector2i(5, 7), Vector2i(13, 7), Vector2i(13, 2), Vector2i(17, 2)]
+waypoints = [Vector2i(0, 2), Vector2i(6, 2), Vector2i(6, 10), Vector2i(15, 10), Vector2i(15, 4), Vector2i(22, 4)]
 waves = [SubResource("WaveData_w1"), SubResource("WaveData_w2"), SubResource("WaveData_w3"), SubResource("WaveData_w4"), SubResource("WaveData_w5")]

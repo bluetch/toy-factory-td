@@ -3,6 +3,9 @@
 class_name BaseTower
 extends Node2D
 
+## Set by each subclass in _ready(). AudioManager.play_sfx() ignores null safely.
+var shoot_sfx: AudioStream = null
+
 ## Set by GameWorld.initialize()
 var tower_data: TowerData = null
 var projectile_container: Node2D = null
@@ -24,6 +27,8 @@ var _enemies_in_range: Array[Node2D] = []
 @onready var detection_area: Area2D = $DetectionArea
 @onready var range_circle: Node2D = $RangeCircle   ## visual indicator
 @onready var attack_timer: Timer = $AttackTimer
+## Turret node that rotates to face target (optional — only if scene has a Turret child)
+@onready var _turret: Node2D = get_node_or_null("Turret")
 
 ## Called by GameWorld after instantiation
 func initialize(data: TowerData, proj_container: Node2D) -> void:
@@ -83,9 +88,18 @@ func show_range(visible_flag: bool) -> void:
     range_circle.visible = visible_flag
     range_circle.queue_redraw()
 
+## Smoothly rotate turret toward current target each frame
+func _process(delta: float) -> void:
+    if _turret == null:
+        return
+    if is_instance_valid(_current_target):
+        var desired_angle := (_current_target.global_position - global_position).angle()
+        _turret.rotation = lerp_angle(_turret.rotation, desired_angle, delta * 10.0)
+
 func _on_attack_timer() -> void:
     _current_target = _get_best_target()
     if _current_target != null:
+        AudioManager.play_sfx(shoot_sfx)
         _on_attack(_current_target)
 
 ## Override in subclasses to fire projectile

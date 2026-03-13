@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="LevelData" load_steps=18 format=3]
+[gd_resource type="Resource" script_class="LevelData" format=3 uid="uid://b44ymacuh2hir"]
 
-[ext_resource type="Script" path="res://scripts/resources/level_data.gd" id="1_leveldata"]
-[ext_resource type="Script" path="res://scripts/resources/wave_data.gd" id="2_wavedata"]
-[ext_resource type="Script" path="res://scripts/resources/wave_entry.gd" id="3_waveentry"]
+[ext_resource type="Script" uid="uid://4i61j53xrm86" path="res://scripts/resources/level_data.gd" id="1_leveldata"]
+[ext_resource type="Script" uid="uid://beexhc87ybw7b" path="res://scripts/resources/wave_data.gd" id="2_wavedata"]
+[ext_resource type="Script" uid="uid://b2qrexmyiul46" path="res://scripts/resources/wave_entry.gd" id="3_waveentry"]
 [ext_resource type="Resource" path="res://data/enemies/basic_enemy.tres" id="4_basic"]
 [ext_resource type="Resource" path="res://data/enemies/fast_enemy.tres" id="5_fast"]
 [ext_resource type="Resource" path="res://data/enemies/tank_enemy.tres" id="6_tank"]
@@ -10,21 +10,16 @@
 [sub_resource type="Resource" id="WaveEntry_w1_g1"]
 script = ExtResource("3_waveentry")
 enemy_data = ExtResource("4_basic")
-count = 5
-group_delay = 0.0
 spawn_interval = 1.5
 
 [sub_resource type="Resource" id="WaveData_w1"]
 script = ExtResource("2_wavedata")
-wave_number = 1
-auto_start_delay = -1.0
-entries = [SubResource("WaveEntry_w1_g1")]
+entries = Array[ExtResource("3_waveentry")]([SubResource("WaveEntry_w1_g1")])
 
 [sub_resource type="Resource" id="WaveEntry_w2_g1"]
 script = ExtResource("3_waveentry")
 enemy_data = ExtResource("4_basic")
 count = 8
-group_delay = 0.0
 spawn_interval = 1.5
 
 [sub_resource type="Resource" id="WaveEntry_w2_g2"]
@@ -37,62 +32,48 @@ spawn_interval = 1.5
 [sub_resource type="Resource" id="WaveData_w2"]
 script = ExtResource("2_wavedata")
 wave_number = 2
-auto_start_delay = -1.0
-entries = [SubResource("WaveEntry_w2_g1"), SubResource("WaveEntry_w2_g2")]
+entries = Array[ExtResource("3_waveentry")]([SubResource("WaveEntry_w2_g1"), SubResource("WaveEntry_w2_g2")])
 
 [sub_resource type="Resource" id="WaveEntry_w3_g1"]
 script = ExtResource("3_waveentry")
 enemy_data = ExtResource("4_basic")
 count = 6
-group_delay = 0.0
-spawn_interval = 1.0
 
 [sub_resource type="Resource" id="WaveEntry_w3_g2"]
 script = ExtResource("3_waveentry")
 enemy_data = ExtResource("5_fast")
 count = 6
-group_delay = 0.0
-spawn_interval = 1.0
 
 [sub_resource type="Resource" id="WaveData_w3"]
 script = ExtResource("2_wavedata")
 wave_number = 3
-auto_start_delay = -1.0
-entries = [SubResource("WaveEntry_w3_g1"), SubResource("WaveEntry_w3_g2")]
+entries = Array[ExtResource("3_waveentry")]([SubResource("WaveEntry_w3_g1"), SubResource("WaveEntry_w3_g2")])
 
 [sub_resource type="Resource" id="WaveEntry_w4_g1"]
 script = ExtResource("3_waveentry")
 enemy_data = ExtResource("4_basic")
 count = 10
-group_delay = 0.0
-spawn_interval = 1.0
 
 [sub_resource type="Resource" id="WaveEntry_w4_g2"]
 script = ExtResource("3_waveentry")
 enemy_data = ExtResource("5_fast")
-count = 5
-group_delay = 0.0
-spawn_interval = 1.0
 
 [sub_resource type="Resource" id="WaveEntry_w4_g3"]
 script = ExtResource("3_waveentry")
 enemy_data = ExtResource("6_tank")
 count = 2
-group_delay = 0.0
 spawn_interval = 2.0
 
 [sub_resource type="Resource" id="WaveData_w4"]
 script = ExtResource("2_wavedata")
 wave_number = 4
-auto_start_delay = -1.0
-entries = [SubResource("WaveEntry_w4_g1"), SubResource("WaveEntry_w4_g2"), SubResource("WaveEntry_w4_g3")]
+entries = Array[ExtResource("3_waveentry")]([SubResource("WaveEntry_w4_g1"), SubResource("WaveEntry_w4_g2"), SubResource("WaveEntry_w4_g3")])
 
 [resource]
 script = ExtResource("1_leveldata")
-level_id = 1
-level_name = "The Valley"
-description = "Learn the basics on this simple path."
+level_name = "工廠東翼"
+description = "Coco 的第一次出擊。在熟悉中重新站立。"
 starting_lives = 20
 starting_gold = 200
-waypoints = [Vector2i(0, 4), Vector2i(10, 4), Vector2i(10, 7), Vector2i(17, 7)]
-waves = [SubResource("WaveData_w1"), SubResource("WaveData_w2"), SubResource("WaveData_w3"), SubResource("WaveData_w4")]
+waypoints = Array[Vector2i]([Vector2i(0, 6), Vector2i(12, 6), Vector2i(12, 3), Vector2i(22, 3)])
+waves = Array[ExtResource("2_wavedata")]([SubResource("WaveData_w1"), SubResource("WaveData_w2"), SubResource("WaveData_w3"), SubResource("WaveData_w4")])

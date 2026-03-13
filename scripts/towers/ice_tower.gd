@@ -4,6 +4,11 @@ extends BaseTower
 
 const ICE_SCENE := preload("res://scenes/projectiles/IceProjectile.tscn")
 
+func _ready() -> void:
+    shoot_sfx = load("res://assets/audio/shoot_ice.wav")
+    if shoot_sfx == null:
+        push_warning("IceTower: shoot_ice.wav not found")
+
 func _on_attack(target: Node2D) -> void:
     if not is_instance_valid(target) or projectile_container == null:
         return
