@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "godot": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "/Users/kenhuang/Game/godot-mcp/build/index.js"
+      ],
+      "env": {}
+    }
+  }
+}

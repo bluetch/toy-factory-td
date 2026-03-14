@@ -33,6 +33,8 @@ func _build_tower_buttons() -> void:
 		btn.text = "%s\n%d 💰" % [data.tower_name, data.build_cost]
 		btn.custom_minimum_size = Vector2(120.0, 60.0)
 		btn.tooltip_text = data.description
+		# Store cost as metadata so affordability checks don't rely on text parsing
+		btn.set_meta("build_cost", data.build_cost)
 		tower_buttons_container.add_child(btn)
 		# Capture data for closure
 		var captured_data := data
@@ -47,9 +49,7 @@ func _on_tower_button_pressed(data: TowerData) -> void:
 func _on_gold_changed(new_gold: int) -> void:
 	for child in tower_buttons_container.get_children():
 		if child is Button:
-			# Try to parse the cost from button text (second line)
-			var lines := (child as Button).text.split("\n")
-			if lines.size() >= 2:
-				var cost_str := lines[1].replace(" 💰", "").strip_edges()
-				if cost_str.is_valid_int():
-					child.modulate.a = 1.0 if new_gold >= int(cost_str) else 0.5
+			var btn := child as Button
+			if btn.has_meta("build_cost"):
+				var cost: int = btn.get_meta("build_cost")
+				btn.modulate.a = 1.0 if new_gold >= cost else 0.5

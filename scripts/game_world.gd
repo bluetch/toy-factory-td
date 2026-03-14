@@ -77,6 +77,15 @@ func _ready() -> void:
 	Engine.time_scale = GameManager.game_speed
 
 func _input(event: InputEvent) -> void:
+	# ESC: cancel tower placement first, then pause
+	if event is InputEventKey:
+		var key_event := event as InputEventKey
+		if key_event.pressed and not key_event.echo and key_event.keycode == KEY_ESCAPE:
+			if _selected_tower_data != null:
+				cancel_tower_placement()
+				get_viewport().set_input_as_handled()
+				return
+
 	# Pause toggle
 	if event.is_action_pressed("pause_game"):
 		if GameManager.state == GameManager.GameState.PLAYING:
@@ -108,13 +117,19 @@ func _process(delta: float) -> void:
 		var tile := grid_manager.world_to_tile(get_global_mouse_position())
 		grid_manager.set_hover(tile, grid_manager.can_build(tile))
 
-	# Screen shake when factory is hit
+	# Screen shake (enemy reached end, or boss death)
 	if _shake_timer > 0.0:
 		_shake_timer -= delta
-		var progress := maxf(_shake_timer / SHAKE_DURATION, 0.0)
+		var magnitude: float
+		if _shake_override_timer > 0.0:
+			_shake_override_timer -= delta
+			magnitude = _shake_magnitude_override
+		else:
+			magnitude = SHAKE_MAGNITUDE
+		var progress := maxf(_shake_timer / maxf(SHAKE_DURATION, 0.01), 0.0)
 		_camera.offset = Vector2(
-			randf_range(-1.0, 1.0) * SHAKE_MAGNITUDE * progress,
-			randf_range(-1.0, 1.0) * SHAKE_MAGNITUDE * progress
+			randf_range(-1.0, 1.0) * magnitude * progress,
+			randf_range(-1.0, 1.0) * magnitude * progress
 		)
 		if _shake_timer <= 0.0:
 			_camera.offset = Vector2.ZERO
@@ -205,6 +220,15 @@ func _tile_waypoints_to_world(tile_waypoints: Array[Vector2i]) -> Array[Vector2]
 	return world_wps
 
 # ---- EventBus callbacks ----
+
+## Public: trigger a camera shake (used by BossEnemy on death)
+func trigger_shake(duration: float, magnitude: float) -> void:
+	_shake_timer              = maxf(_shake_timer, duration)
+	_shake_magnitude_override = magnitude
+	_shake_override_timer     = duration
+
+var _shake_magnitude_override: float = 0.0
+var _shake_override_timer:     float = 0.0
 
 func _on_enemy_reached_end() -> void:
 	GameManager.lose_life()

@@ -108,11 +108,13 @@ func _on_attack(_target: Node2D) -> void:
 
 ## Targeting: pick the enemy furthest along the path (highest waypoint index + progress)
 func _get_best_target() -> Node2D:
+    # Purge stale references (enemies that died without triggering body_exited)
+    _enemies_in_range = _enemies_in_range.filter(
+        func(e: Node2D) -> bool: return is_instance_valid(e)
+    )
     var best: Node2D = null
     var best_progress: float = -1.0
     for enemy in _enemies_in_range:
-        if not is_instance_valid(enemy):
-            continue
         if enemy.has_method("get_path_progress"):
             var progress: float = enemy.get_path_progress()
             if progress > best_progress:

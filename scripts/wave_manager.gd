@@ -99,8 +99,8 @@ func _spawn_wave(wave_data: WaveData) -> void:
 		_enemies_alive += entry.count
 		for i in range(entry.count):
 			var delay := entry.group_delay + i * entry.spawn_interval
-			# Scale delay with game speed so fast-forward works correctly.
-			get_tree().create_timer(delay / GameManager.game_speed).timeout.connect(
+			# create_timer respects Engine.time_scale automatically — no manual division needed.
+			get_tree().create_timer(delay).timeout.connect(
 				func() -> void: _spawn_enemy(entry.enemy_data)
 			)
 

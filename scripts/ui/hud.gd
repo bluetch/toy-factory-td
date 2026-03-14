@@ -22,6 +22,10 @@ var game_world: Node = null
 var _message_timer: float = 0.0
 const MESSAGE_DURATION := 2.0
 
+## Dynamically-created wave announcement banner
+var _wave_banner: Label = null
+var _banner_tween: Tween = null
+
 func _ready() -> void:
 	# Connect EventBus signals
 	EventBus.lives_changed.connect(_on_lives_changed)
@@ -30,6 +34,9 @@ func _ready() -> void:
 	EventBus.game_speed_changed.connect(_on_speed_changed)
 	EventBus.game_paused.connect(_on_game_paused)
 	EventBus.game_resumed.connect(_on_game_resumed)
+	EventBus.wave_started.connect(_on_wave_started)
+
+	_build_wave_banner()
 
 	speed_button.pressed.connect(_on_speed_pressed)
 	pause_button.pressed.connect(_on_pause_pressed)
@@ -48,6 +55,40 @@ func _ready() -> void:
 	var level_res: Resource = load("res://data/levels/level_%d.tres" % GameManager.current_level_id)
 	if level_res != null and level_res.get("level_name") != null:
 		level_name_label.text = str(level_res.get("level_name"))
+
+## Build a centered wave banner label (hidden until a wave starts)
+func _build_wave_banner() -> void:
+	_wave_banner = Label.new()
+	_wave_banner.name = "WaveBanner"
+	_wave_banner.anchor_left   = 0.5
+	_wave_banner.anchor_right  = 0.5
+	_wave_banner.anchor_top    = 0.0
+	_wave_banner.anchor_bottom = 0.0
+	_wave_banner.offset_left   = -200.0
+	_wave_banner.offset_right  = 200.0
+	_wave_banner.offset_top    = 64.0
+	_wave_banner.offset_bottom = 110.0
+	_wave_banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_wave_banner.vertical_alignment   = VERTICAL_ALIGNMENT_CENTER
+	_wave_banner.add_theme_font_size_override("font_size", 28)
+	_wave_banner.add_theme_color_override("font_color", Color(1.0, 0.88, 0.35))
+	_wave_banner.modulate.a = 0.0
+	add_child(_wave_banner)
+
+## Called by EventBus.wave_started
+func _on_wave_started(wave_number: int, total_waves: int) -> void:
+	if _wave_banner == null:
+		return
+	_wave_banner.text = "— 波次 %d / %d —" % [wave_number, total_waves]
+	if _banner_tween:
+		_banner_tween.kill()
+	_banner_tween = create_tween()
+	_banner_tween.tween_property(_wave_banner, "modulate:a", 1.0, 0.25)
+	_banner_tween.tween_interval(1.5)
+	_banner_tween.tween_property(_wave_banner, "modulate:a", 0.0, 0.5)
+
+	# Also update wave label immediately
+	wave_label.text = "波次: %d / %d" % [wave_number, total_waves]
 
 ## Called by GameWorld
 func set_game_world(gw: Node) -> void:
@@ -68,20 +109,20 @@ func show_message(text: String) -> void:
 ## Called by WaveManager.next_wave_ready signal
 func on_next_wave_ready(wave_number: int, total_waves: int) -> void:
 	var current := wave_number - 1
-	wave_label.text = "Wave: %d / %d" % [current, total_waves]
-	next_wave_btn.text = "Start Wave %d ▶" % wave_number
+	wave_label.text = "波次: %d / %d" % [current, total_waves]
+	next_wave_btn.text = "開始波次 %d ▶" % wave_number
 	next_wave_btn.show()
 
 ## Called every frame by WaveManager.next_wave_countdown signal
 func on_wave_countdown(seconds: float) -> void:
 	if seconds > 0.0:
-		next_wave_btn.text = "Start Wave ▶  (%d)" % int(ceil(seconds))
+		next_wave_btn.text = "開始波次 ▶  (%d)" % int(ceil(seconds))
 	else:
-		next_wave_btn.text = "Starting..."
+		next_wave_btn.text = "準備中…"
 
 func on_all_waves_done() -> void:
 	next_wave_btn.hide()
-	wave_label.text = "All waves complete!"
+	wave_label.text = "全部波次完成！"
 
 ## Show upgrade panel for the selected tower
 func show_upgrade_panel(tower: Node) -> void:

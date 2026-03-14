@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_enemydata")
 enemy_id = "fast_enemy"
-enemy_name = "Scout"
+enemy_name = "斥候"
 max_health = 60.0
 move_speed = 160.0
 armor = 0.0

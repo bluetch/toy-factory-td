@@ -5,10 +5,10 @@
 [resource]
 script = ExtResource("1_enemydata")
 enemy_id = "boss_enemy"
-enemy_name = "Boss"
-max_health = 1000.0
-move_speed = 55.0
-armor = 0.4
-gold_reward = 150
-score_reward = 100
-scene_path = "res://scenes/enemies/TankEnemy.tscn"
+enemy_name = "渴望"
+max_health = 1200.0
+move_speed = 50.0
+armor = 0.35
+gold_reward = 200
+score_reward = 200
+scene_path = "res://scenes/enemies/BossEnemy.tscn"

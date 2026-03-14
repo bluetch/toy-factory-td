@@ -5,8 +5,8 @@
 
 [sub_resource type="Resource" id="Resource_upgrade1"]
 script = ExtResource("2_upgradedata")
-upgrade_name = "Sharp Arrows"
-description = "Increased damage"
+upgrade_name = "強化箭矢"
+description = "傷害大幅提升"
 upgrade_cost = 75
 damage_multiplier = 1.5
 range_multiplier = 1.1
@@ -14,8 +14,8 @@ speed_multiplier = 1.0
 
 [sub_resource type="Resource" id="Resource_upgrade2"]
 script = ExtResource("2_upgradedata")
-upgrade_name = "Rapid Fire"
-description = "Even more damage and faster fire rate"
+upgrade_name = "急速連射"
+description = "傷害再提升，射速大幅加快"
 upgrade_cost = 150
 damage_multiplier = 1.6
 range_multiplier = 1.1
@@ -24,8 +24,8 @@ speed_multiplier = 1.3
 [resource]
 script = ExtResource("1_towerdata")
 tower_id = "arrow_tower"
-tower_name = "Arrow Tower"
-description = "Fast single-target tower. Great against light enemies."
+tower_name = "弩塔"
+description = "快速單體攻擊。對輕型敵人效果極佳。"
 build_cost = 100
 sell_ratio = 0.7
 base_damage = 15.0

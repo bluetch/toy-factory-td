@@ -87,8 +87,17 @@ func take_damage(damage: float) -> void:
     var effective_damage := damage * (1.0 - enemy_data.armor)
     current_health -= effective_damage
     _update_health_bar()
+    _flash_hit()
     if current_health <= 0.0:
         _die()
+
+## Brief white flash to signal a hit.
+func _flash_hit() -> void:
+    if _visual == null:
+        return
+    var tween := create_tween()
+    tween.tween_property(_visual, "modulate", Color(2.5, 2.5, 2.5), 0.05)
+    tween.tween_property(_visual, "modulate", Color(1, 1, 1), 0.12)
 
 func _die() -> void:
     # Remove from group immediately so towers stop targeting this enemy
@@ -97,6 +106,7 @@ func _die() -> void:
     EventBus.enemy_died.emit(enemy_data.gold_reward, enemy_data.score_reward)
     GameManager.add_gold(enemy_data.gold_reward)
     GameManager.add_score(enemy_data.score_reward)
+    _spawn_float_text("+%d 💰" % enemy_data.gold_reward, Color(1.0, 0.88, 0.25))
     _on_death()
     # Play death animation and wait for it to finish before removing
     if _anim != null and _anim.sprite_frames != null \
@@ -104,6 +114,16 @@ func _die() -> void:
         _play_anim("death")
         await _anim.animation_finished
     queue_free()
+
+## Spawn a floating gold label above the enemy's death position.
+func _spawn_float_text(text: String, color: Color) -> void:
+    var packed: PackedScene = load("res://scenes/ui/FloatingText.tscn")
+    if packed == null or get_parent() == null:
+        return
+    var ft: FloatingText = packed.instantiate() as FloatingText
+    get_parent().add_child(ft)
+    ft.global_position = global_position + Vector2(0, -24)
+    ft.setup(text, color)
 
 ## Play a named animation if AnimatedSprite2D is present (safe no-op otherwise)
 func _play_anim(anim_name: StringName) -> void:
