@@ -30,6 +30,7 @@ var _entry_tween: Tween   = null
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	AudioManager.play_track("story")
 	var story_id := StoryDatabase.current_story_id
 	_entries = StoryDatabase.get_story(story_id)
 	if _entries.is_empty():

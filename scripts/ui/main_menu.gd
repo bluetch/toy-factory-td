@@ -11,6 +11,7 @@ extends Control
 @onready var high_scores_panel:   Control = $HighScoresPanel
 
 func _ready() -> void:
+	AudioManager.play_track("menu")
 	version_label.text = "v" + ProjectSettings.get_setting("application/config/version", "0.1.0")
 	play_button.pressed.connect(_on_play_pressed)
 	level_select_button.pressed.connect(_on_level_select_pressed)

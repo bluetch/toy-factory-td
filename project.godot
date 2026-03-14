@@ -26,6 +26,7 @@ SceneManager="*res://scripts/autoloads/scene_manager.gd"
 AudioManager="*res://scripts/autoloads/audio_manager.gd"
 StoryDatabase="*res://scripts/autoloads/story_database.gd"
 AchievementManager="*res://scripts/autoloads/achievement_manager.gd"
+TutorialManager="*res://scripts/autoloads/tutorial_manager.gd"
 
 [display]
 

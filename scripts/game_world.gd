@@ -57,6 +57,7 @@ func _ready() -> void:
 	EventBus.tower_selected.connect(_on_tower_selected)
 	EventBus.tower_deselected.connect(_on_tower_deselected)
 	EventBus.game_speed_changed.connect(_on_game_speed_changed)
+	EventBus.wave_started.connect(_on_wave_started_music)
 
 	# Give HUD and TowerPanel a reference to this GameWorld node
 	hud.set_game_world(self)
@@ -75,6 +76,9 @@ func _ready() -> void:
 
 	# Notify achievement tracker of level start
 	AchievementManager.start_level(level_id, GameManager.lives)
+
+	# 播放遊戲音樂
+	AudioManager.play_track("gameplay")
 
 	# Apply initial game speed
 	Engine.time_scale = GameManager.game_speed
@@ -253,3 +257,8 @@ func _on_tower_deselected() -> void:
 
 func _on_game_speed_changed(new_speed: float) -> void:
 	Engine.time_scale = new_speed
+
+## 最後一波開始時切換為 Boss 音樂
+func _on_wave_started_music(wave_number: int, total_waves: int) -> void:
+	if wave_number == total_waves:
+		AudioManager.play_track("boss")

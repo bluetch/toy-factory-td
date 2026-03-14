@@ -112,6 +112,12 @@ layout_mode = 2
 [node name="Separator2" type="HSeparator" parent="Panel/VBox"]
 layout_mode = 2
 
+[node name="ResetTutorialButton" type="Button" parent="Panel/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(220, 36)
+text = "重置教學引導"
+theme_override_font_sizes/font_size = 13
+
 [node name="BackButton" type="Button" parent="Panel/VBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(220, 46)

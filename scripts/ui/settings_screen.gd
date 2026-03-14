@@ -6,8 +6,9 @@ extends Control
 @onready var music_value:     Label       = $Panel/VBox/MusicRow/MusicValueLabel
 @onready var sfx_slider:      HSlider     = $Panel/VBox/SFXRow/SFXSlider
 @onready var sfx_value:       Label       = $Panel/VBox/SFXRow/SFXValueLabel
-@onready var fullscreen_btn:  CheckButton = $Panel/VBox/FullscreenRow/FullscreenButton
-@onready var back_button:     Button      = $Panel/VBox/BackButton
+@onready var fullscreen_btn:       CheckButton = $Panel/VBox/FullscreenRow/FullscreenButton
+@onready var reset_tutorial_btn:   Button      = $Panel/VBox/ResetTutorialButton
+@onready var back_button:          Button      = $Panel/VBox/BackButton
 
 func _ready() -> void:
 	# Populate from saved settings
@@ -21,6 +22,7 @@ func _ready() -> void:
 	music_slider.value_changed.connect(_on_music_changed)
 	sfx_slider.value_changed.connect(_on_sfx_changed)
 	fullscreen_btn.toggled.connect(_on_fullscreen_toggled)
+	reset_tutorial_btn.pressed.connect(_on_reset_tutorial_pressed)
 	back_button.pressed.connect(_on_back_pressed)
 
 # ── Slider callbacks ─────────────────────────────────────────
@@ -40,6 +42,12 @@ func _on_fullscreen_toggled(pressed: bool) -> void:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
 	else:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+
+func _on_reset_tutorial_pressed() -> void:
+	AudioManager.play_ui_click()
+	TutorialManager.reset_tutorial()
+	reset_tutorial_btn.text = "✅ 教學已重置（下次遊玩時觸發）"
+	reset_tutorial_btn.disabled = true
 
 func _on_back_pressed() -> void:
 	AudioManager.play_ui_click()

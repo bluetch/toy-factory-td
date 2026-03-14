@@ -60,9 +60,10 @@ func _default_data() -> Dictionary:
 			"5": 0
 		},
 		"settings": {
-			"music_volume": 1.0,
-			"sfx_volume":   1.0,
-			"fullscreen":   false
+			"music_volume":   1.0,
+			"sfx_volume":     1.0,
+			"fullscreen":     false,
+			"tutorial_done":  false
 		},
 		"achievements": [],
 		"stats": {

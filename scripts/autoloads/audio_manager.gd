@@ -28,6 +28,20 @@ extends Node
 ## SaveManager settings key for music volume.
 const SETTING_MUSIC_VOLUME: String = "music_volume"
 
+## ── 音樂軌道路徑 (Music Track Paths) ────────────────────────
+## 將音樂檔案放置於對應路徑後即可自動載入並播放。
+## 格式：Ogg Vorbis（.ogg），建議取自 OpenGameArt / Freesound（CC0 授權）。
+const MUSIC_TRACKS: Dictionary = {
+	"menu":      "res://assets/audio/music/music_menu.ogg",
+	"gameplay":  "res://assets/audio/music/music_gameplay.ogg",
+	"boss":      "res://assets/audio/music/music_boss.ogg",
+	"victory":   "res://assets/audio/music/music_victory.ogg",
+	"story":     "res://assets/audio/music/music_story.ogg",
+}
+
+## 目前正在播放的軌道名稱（空字串 = 無音樂）
+var _current_track: String = ""
+
 ## SaveManager settings key for SFX volume.
 const SETTING_SFX_VOLUME: String = "sfx_volume"
 
@@ -127,6 +141,25 @@ func play_music(stream: AudioStream, fade_in: bool = true) -> void:
 			MUSIC_FADE_DURATION
 		).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
+
+## 以軌道名稱播放音樂（如 "menu", "gameplay", "boss"）。
+## 若音樂檔案不存在則靜默忽略，不影響遊戲運作。
+## 若已在播放相同軌道則不重複啟動。
+func play_track(track_name: String, fade_in: bool = true) -> void:
+	if track_name == _current_track and _music_player.playing:
+		return
+	if not MUSIC_TRACKS.has(track_name):
+		push_warning("AudioManager: Unknown track '%s'." % track_name)
+		return
+	var path: String = MUSIC_TRACKS[track_name]
+	if not ResourceLoader.exists(path):
+		# 音樂檔案尚未放入，靜默略過
+		return
+	var stream: AudioStream = load(path)
+	if stream == null:
+		return
+	_current_track = track_name
+	play_music(stream, fade_in)
 
 ## Stop the music player immediately.
 func stop_music() -> void:
