@@ -80,6 +80,16 @@ func apply_slow(factor: float, duration: float) -> void:
 func get_path_progress() -> float:
     return _path_progress
 
+## Apply damage that bypasses all armor (used by armor-piercing towers).
+func take_damage_piercing(damage: float) -> void:
+    if enemy_data == null:
+        return
+    current_health -= damage
+    _update_health_bar()
+    _flash_hit()
+    if current_health <= 0.0:
+        _die()
+
 ## Apply damage (armor reduces incoming damage)
 func take_damage(damage: float) -> void:
     if enemy_data == null:

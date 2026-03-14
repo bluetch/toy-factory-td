@@ -1,0 +1,31 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/achievement_toast.gd" id="1"]
+
+[node name="AchievementToast" type="Control"]
+process_mode = 3
+anchor_right = 0.0
+anchor_bottom = 0.0
+script = ExtResource("1")
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 340.0
+offset_bottom = 70.0
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="TitleLabel" type="Label" parent="Panel/VBox"]
+layout_mode = 2
+text = "成就解鎖！"
+theme_override_font_sizes/font_size = 11
+modulate = Color(0.95, 0.82, 0.45, 1.0)
+
+[node name="NameLabel" type="Label" parent="Panel/VBox"]
+layout_mode = 2
+text = "🏆 首次勝利"
+theme_override_font_sizes/font_size = 17

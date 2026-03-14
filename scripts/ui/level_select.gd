@@ -36,9 +36,9 @@ func _ready() -> void:
 		if score_label:
 			if unlocked:
 				var best := SaveManager.get_high_score(i)
-				score_label.text = "Best: %d" % best if best > 0 else "Not played"
+				score_label.text = "最佳：%d" % best if best > 0 else "未遊玩"
 			else:
-				score_label.text = "Locked"
+				score_label.text = "🔒 未解鎖"
 
 		# Play button
 		var play_btn := card.get_node_or_null("VBoxContainer/PlayButton") as Button

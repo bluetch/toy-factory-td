@@ -26,6 +26,11 @@ const MESSAGE_DURATION := 2.0
 var _wave_banner: Label = null
 var _banner_tween: Tween = null
 
+## Red vignette overlay that pulses when lives are critically low
+var _vignette: ColorRect = null
+var _vignette_tween: Tween = null
+const DANGER_LIVES := 3
+
 func _ready() -> void:
 	# Connect EventBus signals
 	EventBus.lives_changed.connect(_on_lives_changed)
@@ -37,6 +42,7 @@ func _ready() -> void:
 	EventBus.wave_started.connect(_on_wave_started)
 
 	_build_wave_banner()
+	_build_vignette()
 
 	speed_button.pressed.connect(_on_speed_pressed)
 	pause_button.pressed.connect(_on_pause_pressed)
@@ -90,6 +96,32 @@ func _on_wave_started(wave_number: int, total_waves: int) -> void:
 	# Also update wave label immediately
 	wave_label.text = "波次: %d / %d" % [wave_number, total_waves]
 
+## Build a full-screen red vignette that pulses on low lives
+func _build_vignette() -> void:
+	_vignette = ColorRect.new()
+	_vignette.anchor_right  = 1.0
+	_vignette.anchor_bottom = 1.0
+	_vignette.grow_horizontal = 2
+	_vignette.grow_vertical   = 2
+	_vignette.color = Color(0.85, 0.0, 0.0, 0.0)
+	_vignette.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_vignette.z_index = -1    ## render below HUD elements
+	add_child(_vignette)
+
+func _start_vignette_pulse() -> void:
+	if _vignette_tween != null and _vignette_tween.is_valid():
+		return   ## already pulsing
+	_vignette_tween = create_tween().set_loops()
+	_vignette_tween.tween_property(_vignette, "color:a", 0.28, 0.6).set_trans(Tween.TRANS_SINE)
+	_vignette_tween.tween_property(_vignette, "color:a", 0.0,  0.6).set_trans(Tween.TRANS_SINE)
+
+func _stop_vignette_pulse() -> void:
+	if _vignette_tween != null and _vignette_tween.is_valid():
+		_vignette_tween.kill()
+		_vignette_tween = null
+	if _vignette != null:
+		_vignette.color.a = 0.0
+
 ## Called by GameWorld
 func set_game_world(gw: Node) -> void:
 	game_world = gw
@@ -137,6 +169,10 @@ func hide_upgrade_panel() -> void:
 
 func _on_lives_changed(new_lives: int) -> void:
 	lives_label.text = "❤ %d" % new_lives
+	if new_lives <= DANGER_LIVES and new_lives > 0:
+		_start_vignette_pulse()
+	else:
+		_stop_vignette_pulse()
 
 func _on_gold_changed(new_gold: int) -> void:
 	gold_label.text = "💰 %d" % new_gold
@@ -148,10 +184,10 @@ func _on_speed_changed(new_speed: float) -> void:
 	speed_button.text = "%.0fx" % new_speed
 
 func _on_game_paused() -> void:
-	pause_button.text = "▶ Resume"
+	pause_button.text = "▶ 繼續"
 
 func _on_game_resumed() -> void:
-	pause_button.text = "⏸ Pause"
+	pause_button.text = "⏸ 暫停"
 
 func _on_speed_pressed() -> void:
 	AudioManager.play_ui_click()

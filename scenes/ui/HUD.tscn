@@ -39,7 +39,7 @@ text = "⭐ 0"
 theme_override_font_sizes/font_size = 18
 
 [node name="WaveLabel" type="Label" parent="TopBar/HBoxContainer"]
-text = "Wave: 0 / 0"
+text = "波次: 0 / 0"
 theme_override_font_sizes/font_size = 18
 
 [node name="NextWaveButton" type="Button" parent="TopBar/HBoxContainer"]
@@ -53,7 +53,7 @@ text = "1x"
 
 [node name="PauseButton" type="Button" parent="TopBar/HBoxContainer"]
 custom_minimum_size = Vector2(90, 36)
-text = "⏸ Pause"
+text = "⏸ 暫停"
 
 [node name="TowerPanel" parent="." instance=ExtResource("2")]
 anchor_left = 1.0

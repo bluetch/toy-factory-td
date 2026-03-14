@@ -73,6 +73,9 @@ func _ready() -> void:
 	wave_manager.set_waypoints(_world_waypoints)
 	wave_manager.setup(level_data.waves, _world_waypoints[0] if not _world_waypoints.is_empty() else Vector2.ZERO)
 
+	# Notify achievement tracker of level start
+	AchievementManager.start_level(level_id, GameManager.lives)
+
 	# Apply initial game speed
 	Engine.time_scale = GameManager.game_speed
 

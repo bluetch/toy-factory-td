@@ -13,6 +13,7 @@ const MAIN_MENU_SCENE:    String = "res://scenes/MainMenu.tscn"
 const LEVEL_SELECT_SCENE: String = "res://scenes/LevelSelect.tscn"
 const GAME_WORLD_SCENE:   String = "res://scenes/GameWorld.tscn"
 const STORY_SCREEN_SCENE: String = "res://scenes/StoryScreen.tscn"
+const SETTINGS_SCENE:     String = "res://scenes/SettingsScreen.tscn"
 
 const FADE_DURATION: float = 0.3
 
@@ -20,6 +21,7 @@ const FADE_DURATION: float = 0.3
 var _overlay: ColorRect
 var _is_transitioning: bool = false
 var _pending_after_story: Callable = Callable()
+var _settings_return_path: String = ""
 
 func _ready() -> void:
 	# Build a full-screen black overlay on a top-level CanvasLayer
@@ -98,6 +100,20 @@ func story_complete() -> void:
 	_pending_after_story = Callable()
 	if cb.is_valid():
 		cb.call()
+	else:
+		goto_main_menu()
+
+## Open the settings screen and return to [param return_path] when done.
+func goto_settings(return_path: String) -> void:
+	_settings_return_path = return_path
+	goto_scene(SETTINGS_SCENE)
+
+## Called by SettingsScreen back button — returns to the scene that opened settings.
+func settings_done() -> void:
+	var path := _settings_return_path
+	_settings_return_path = ""
+	if path != "":
+		goto_scene(path)
 	else:
 		goto_main_menu()
 

@@ -7,6 +7,8 @@ extends Control
 
 @onready var score_label:       Label  = $PanelContainer/VBox/ScoreLabel
 @onready var high_score_label:  Label  = $PanelContainer/VBox/HighScoreLabel
+@onready var enemies_label:     Label  = $PanelContainer/VBox/EnemiesLabel
+@onready var towers_label:      Label  = $PanelContainer/VBox/TowersLabel
 @onready var next_level_button: Button = $PanelContainer/VBox/NextLevelButton
 @onready var main_menu_button:  Button = $PanelContainer/VBox/MainMenuButton
 
@@ -18,12 +20,14 @@ func _ready() -> void:
 
 func _on_victory() -> void:
 	var level_id := GameManager.current_level_id
-	score_label.text      = "Score: %d" % GameManager.score
-	high_score_label.text = "Best:  %d" % SaveManager.get_high_score(level_id)
+	score_label.text      = "分數：%d" % GameManager.score
+	high_score_label.text = "最佳：%d" % SaveManager.get_high_score(level_id)
+	enemies_label.text    = "擊殺敵人：%d" % AchievementManager.get_session_enemies()
+	towers_label.text     = "建造防禦塔：%d" % AchievementManager.get_session_towers()
 
 	var next_level := level_id + 1
 	if next_level <= SaveManager.MAX_LEVEL:
-		next_level_button.text     = "Next Level (%d)" % next_level
+		next_level_button.text     = "下一關 (%d) ▶" % next_level
 		next_level_button.disabled = false
 	else:
 		# Last level cleared — offer epilogue

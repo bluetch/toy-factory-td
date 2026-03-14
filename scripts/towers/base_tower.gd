@@ -44,6 +44,11 @@ func initialize(data: TowerData, proj_container: Node2D) -> void:
     attack_timer.wait_time = 1.0 / current_attack_speed
     attack_timer.start()
 
+    # Spawn-in animation: pop from small to full size
+    scale = Vector2(0.3, 0.3)
+    var tween := create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+    tween.tween_property(self, "scale", Vector2.ONE, 0.22)
+
 func _apply_stats() -> void:
     if tower_data == null:
         return

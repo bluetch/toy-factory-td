@@ -94,3 +94,8 @@ signal game_over_triggered
 
 ## Emitted when the player survives all waves — show the Victory screen.
 signal victory_triggered
+
+## Emitted when an achievement is unlocked.
+## [param achievement_id]   Internal identifier string.
+## [param achievement_name] Localised display name (with icon prefix).
+signal achievement_unlocked(achievement_id: String, achievement_name: String)

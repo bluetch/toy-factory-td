@@ -26,26 +26,30 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -120.0
-offset_top = -120.0
+offset_top = -155.0
 offset_right = 120.0
-offset_bottom = 120.0
+offset_bottom = 155.0
 
 [node name="VBox" type="VBoxContainer" parent="PanelContainer"]
 theme_override_constants/separation = 12
 
 [node name="Title" type="Label" parent="PanelContainer/VBox"]
-text = "Paused"
+text = "已暫停"
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 28
 
 [node name="ResumeButton" type="Button" parent="PanelContainer/VBox"]
 custom_minimum_size = Vector2(200, 50)
-text = "▶ Resume"
+text = "▶ 繼續"
+
+[node name="SettingsButton" type="Button" parent="PanelContainer/VBox"]
+custom_minimum_size = Vector2(200, 50)
+text = "⚙ Settings"
 
 [node name="MainMenuButton" type="Button" parent="PanelContainer/VBox"]
 custom_minimum_size = Vector2(200, 50)
-text = "Main Menu"
+text = "主選單"
 
 [node name="QuitButton" type="Button" parent="PanelContainer/VBox"]
 custom_minimum_size = Vector2(200, 50)
-text = "Quit Game"
+text = "退出遊戲"

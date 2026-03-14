@@ -1,0 +1,39 @@
+[gd_resource type="Resource" script_class="TowerData" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/tower_data.gd" id="1_towerdata"]
+[ext_resource type="Script" path="res://scripts/resources/upgrade_data.gd" id="2_upgradedata"]
+
+[sub_resource type="Resource" id="Resource_upgrade1"]
+script = ExtResource("2_upgradedata")
+upgrade_name = "穿甲彈頭"
+description = "傷害顯著提升，射程進一步延長"
+upgrade_cost = 150
+damage_multiplier = 1.6
+range_multiplier = 1.2
+speed_multiplier = 1.0
+
+[sub_resource type="Resource" id="Resource_upgrade2"]
+script = ExtResource("2_upgradedata")
+upgrade_name = "反器材狙擊"
+description = "傷害大幅提升，攻速略為加快"
+upgrade_cost = 280
+damage_multiplier = 1.8
+range_multiplier = 1.1
+speed_multiplier = 1.3
+
+[resource]
+script = ExtResource("1_towerdata")
+tower_id = "sniper_tower"
+tower_name = "狙擊塔"
+description = "超長射程，穿甲狙擊。優先攻擊血量最低的目標，給予致命一擊。"
+build_cost = 200
+sell_ratio = 0.7
+base_damage = 65.0
+base_attack_speed = 0.5
+base_range = 280.0
+projectile_speed = 0.0
+splash_radius = 0.0
+slow_factor = 1.0
+slow_duration = 0.0
+scene_path = "res://scenes/towers/SniperTower.tscn"
+upgrades = [SubResource("Resource_upgrade1"), SubResource("Resource_upgrade2")]

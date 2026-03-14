@@ -24,17 +24,17 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -160.0
-offset_top = -130.0
-offset_right = 160.0
-offset_bottom = 130.0
+offset_left = -170.0
+offset_top = -165.0
+offset_right = 170.0
+offset_bottom = 165.0
 
 [node name="VBox" type="VBoxContainer" parent="PanelContainer"]
 theme_override_constants/separation = 12
 
 [node name="Title" type="Label" parent="PanelContainer/VBox"]
 modulate = Color(0.9, 0.2, 0.2, 1)
-text = "GAME OVER"
+text = "遊戲結束"
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 36
 
@@ -43,10 +43,16 @@ text = "Score: 0"
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 22
 
+[node name="EnemiesLabel" type="Label" parent="PanelContainer/VBox"]
+text = "擊殺敵人：0"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+modulate = Color(0.8, 0.8, 0.8, 1)
+
 [node name="RetryButton" type="Button" parent="PanelContainer/VBox"]
 custom_minimum_size = Vector2(240, 55)
-text = "Retry"
+text = "再試一次"
 
 [node name="MainMenuButton" type="Button" parent="PanelContainer/VBox"]
 custom_minimum_size = Vector2(240, 55)
-text = "Main Menu"
+text = "主選單"

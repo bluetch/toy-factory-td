@@ -8,6 +8,8 @@ const TOWER_RESOURCES := [
 	"res://data/towers/arrow_tower.tres",
 	"res://data/towers/cannon_tower.tres",
 	"res://data/towers/ice_tower.tres",
+	"res://data/towers/lightning_tower.tres",
+	"res://data/towers/sniper_tower.tres",
 ]
 
 @onready var tower_buttons_container: VBoxContainer = $VBoxContainer/TowerButtonsContainer

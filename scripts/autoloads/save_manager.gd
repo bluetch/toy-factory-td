@@ -42,6 +42,7 @@ var _data: Dictionary = {}
 
 func _ready() -> void:
 	load_data()
+	apply_display_settings()
 
 
 # ── 默认数据 (Default Data) ───────────────────────────────────
@@ -60,7 +61,14 @@ func _default_data() -> Dictionary:
 		},
 		"settings": {
 			"music_volume": 1.0,
-			"sfx_volume":   1.0
+			"sfx_volume":   1.0,
+			"fullscreen":   false
+		},
+		"achievements": [],
+		"stats": {
+			"enemies_killed": 0,
+			"towers_placed":  0,
+			"games_won":      0
 		}
 	}
 
@@ -132,6 +140,17 @@ func _migrate_data() -> void:
 		if not _data["settings"].has(setting_key):
 			_data["settings"][setting_key] = defaults["settings"][setting_key]
 
+	# Ensure stats dictionary and every known stat key exist.
+	if not _data.has("stats"):
+		_data["stats"] = {}
+	for stat_key in defaults["stats"]:
+		if not _data["stats"].has(stat_key):
+			_data["stats"][stat_key] = 0
+
+	# Ensure achievements list exists.
+	if not _data.has("achievements"):
+		_data["achievements"] = []
+
 
 # ── 高分操作 (High Score Operations) ─────────────────────────
 
@@ -191,3 +210,70 @@ func set_setting(key: String, value: float) -> void:
 		_data["settings"] = {}
 	_data["settings"][key] = value
 	save()
+
+
+## Return a boolean setting. Returns [param default_val] if the key does not exist.
+func get_setting_bool(key: String, default_val: bool = false) -> bool:
+	var settings: Dictionary = _data.get("settings", {})
+	if settings.has(key):
+		return bool(settings[key])
+	return default_val
+
+
+## Store a boolean setting and persist to disk.
+func set_setting_bool(key: String, value: bool) -> void:
+	if not _data.has("settings"):
+		_data["settings"] = {}
+	_data["settings"][key] = value
+	save()
+
+
+## ── Achievement Operations ───────────────────────────────────
+
+## Return true if [param achievement_id] has been unlocked.
+func is_achievement_unlocked(achievement_id: String) -> bool:
+	var list: Array = _data.get("achievements", [])
+	return achievement_id in list
+
+
+## Mark [param achievement_id] as unlocked and save.
+## Has no effect if already unlocked.
+func unlock_achievement(achievement_id: String) -> void:
+	if not _data.has("achievements"):
+		_data["achievements"] = []
+	var list: Array = _data["achievements"]
+	if achievement_id not in list:
+		list.append(achievement_id)
+		save()
+
+
+## Return all unlocked achievement IDs.
+func get_all_achievements() -> Array:
+	return _data.get("achievements", []).duplicate()
+
+
+## ── Stats Operations ─────────────────────────────────────────
+
+## Return an integer gameplay stat by key (0 if missing).
+func get_stat_int(key: String) -> int:
+	var stats: Dictionary = _data.get("stats", {})
+	if stats.has(key):
+		return int(stats[key])
+	return 0
+
+
+## Set an integer gameplay stat and save.
+func set_stat_int(key: String, value: int) -> void:
+	if not _data.has("stats"):
+		_data["stats"] = {}
+	_data["stats"][key] = value
+	save()
+
+
+## Apply display settings (fullscreen mode) from the save file.
+## Call once after all autoloads are ready.
+func apply_display_settings() -> void:
+	if get_setting_bool("fullscreen", false):
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+	else:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)

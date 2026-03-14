@@ -26,7 +26,7 @@ offset_left = -150.0
 offset_top = 40.0
 offset_right = 150.0
 offset_bottom = 90.0
-text = "Select Level"
+text = "選擇關卡"
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 36
 
@@ -39,7 +39,7 @@ offset_left = 20.0
 offset_top = 20.0
 offset_right = 120.0
 offset_bottom = 60.0
-text = "← Back"
+text = "← 返回"
 
 [node name="DifficultyRow" type="VBoxContainer" parent="."]
 anchor_left = 0.5
@@ -53,7 +53,7 @@ offset_bottom = 190.0
 theme_override_constants/separation = 8
 
 [node name="DifficultyLabel" type="Label" parent="DifficultyRow"]
-text = "Difficulty"
+text = "難度選擇"
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 16
 
@@ -63,17 +63,17 @@ theme_override_constants/separation = 12
 
 [node name="EasyButton" type="Button" parent="DifficultyRow/DifficultyButtons"]
 custom_minimum_size = Vector2(130, 44)
-text = "Easy\n+5 lives  ×1.5 gold"
+text = "簡單\n+5 生命  ×1.5 金幣"
 theme_override_font_sizes/font_size = 13
 
 [node name="NormalButton" type="Button" parent="DifficultyRow/DifficultyButtons"]
 custom_minimum_size = Vector2(130, 44)
-text = "Normal\nStandard"
+text = "普通\n標準難度"
 theme_override_font_sizes/font_size = 13
 
 [node name="HardButton" type="Button" parent="DifficultyRow/DifficultyButtons"]
 custom_minimum_size = Vector2(130, 44)
-text = "Hard\n−5 lives  ×0.7 gold"
+text = "困難\n−5 生命  ×0.7 金幣"
 theme_override_font_sizes/font_size = 13
 
 [node name="LevelsContainer" type="HBoxContainer" parent="."]
@@ -98,7 +98,7 @@ offset_right = -10.0
 offset_bottom = -10.0
 
 [node name="LevelName" type="Label" parent="LevelsContainer/LevelCard1/VBoxContainer"]
-text = "Level 1: The Valley"
+text = "第一關：幽谷之路"
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 18
 
@@ -107,18 +107,18 @@ custom_minimum_size = Vector2(200, 120)
 color = Color(0.2, 0.4, 0.2, 1)
 
 [node name="Description" type="Label" parent="LevelsContainer/LevelCard1/VBoxContainer"]
-text = "Learn the basics."
+text = "學習基本操作，建立第一道防線。"
 autowrap_mode = 2
 theme_override_font_sizes/font_size = 13
 
 [node name="BestScore" type="Label" parent="LevelsContainer/LevelCard1/VBoxContainer"]
-text = "Best: 0"
+text = "最佳：0"
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 13
 
 [node name="PlayButton" type="Button" parent="LevelsContainer/LevelCard1/VBoxContainer"]
 custom_minimum_size = Vector2(180, 45)
-text = "Play"
+text = "開始"
 
 [node name="LockedOverlay" type="ColorRect" parent="LevelsContainer/LevelCard1/VBoxContainer"]
 anchors_preset = 15
@@ -140,7 +140,7 @@ offset_right = -10.0
 offset_bottom = -10.0
 
 [node name="LevelName" type="Label" parent="LevelsContainer/LevelCard2/VBoxContainer"]
-text = "Level 2: The Labyrinth"
+text = "第二關：蜿蜒迷徑"
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 18
 
@@ -149,18 +149,18 @@ custom_minimum_size = Vector2(200, 120)
 color = Color(0.2, 0.4, 0.2, 1)
 
 [node name="Description" type="Label" parent="LevelsContainer/LevelCard2/VBoxContainer"]
-text = "Enemies take a longer route."
+text = "敵人迂迴而來，善用彎道守住防線。"
 autowrap_mode = 2
 theme_override_font_sizes/font_size = 13
 
 [node name="BestScore" type="Label" parent="LevelsContainer/LevelCard2/VBoxContainer"]
-text = "Best: 0"
+text = "最佳：0"
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 13
 
 [node name="PlayButton" type="Button" parent="LevelsContainer/LevelCard2/VBoxContainer"]
 custom_minimum_size = Vector2(180, 45)
-text = "Play"
+text = "開始"
 
 [node name="LockedOverlay" type="ColorRect" parent="LevelsContainer/LevelCard2/VBoxContainer"]
 anchors_preset = 15
@@ -182,7 +182,7 @@ offset_right = -10.0
 offset_bottom = -10.0
 
 [node name="LevelName" type="Label" parent="LevelsContainer/LevelCard3/VBoxContainer"]
-text = "Level 3: The Gauntlet"
+text = "第三關：鐵壁攻防"
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 18
 
@@ -191,18 +191,18 @@ custom_minimum_size = Vector2(200, 120)
 color = Color(0.2, 0.4, 0.2, 1)
 
 [node name="Description" type="Label" parent="LevelsContainer/LevelCard3/VBoxContainer"]
-text = "The ultimate challenge."
+text = "重甲兵與快速斥候交替進攻，壓力倍增。"
 autowrap_mode = 2
 theme_override_font_sizes/font_size = 13
 
 [node name="BestScore" type="Label" parent="LevelsContainer/LevelCard3/VBoxContainer"]
-text = "Best: 0"
+text = "最佳：0"
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 13
 
 [node name="PlayButton" type="Button" parent="LevelsContainer/LevelCard3/VBoxContainer"]
 custom_minimum_size = Vector2(180, 45)
-text = "Play"
+text = "開始"
 
 [node name="LockedOverlay" type="ColorRect" parent="LevelsContainer/LevelCard3/VBoxContainer"]
 anchors_preset = 15
@@ -238,13 +238,13 @@ autowrap_mode = 2
 theme_override_font_sizes/font_size = 13
 
 [node name="BestScore" type="Label" parent="LevelsContainer/LevelCard4/VBoxContainer"]
-text = "Best: 0"
+text = "最佳：0"
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 13
 
 [node name="PlayButton" type="Button" parent="LevelsContainer/LevelCard4/VBoxContainer"]
 custom_minimum_size = Vector2(160, 40)
-text = "Play"
+text = "開始"
 
 [node name="LockedOverlay" type="ColorRect" parent="LevelsContainer/LevelCard4/VBoxContainer"]
 anchors_preset = 15
@@ -280,13 +280,13 @@ autowrap_mode = 2
 theme_override_font_sizes/font_size = 13
 
 [node name="BestScore" type="Label" parent="LevelsContainer/LevelCard5/VBoxContainer"]
-text = "Best: 0"
+text = "最佳：0"
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 13
 
 [node name="PlayButton" type="Button" parent="LevelsContainer/LevelCard5/VBoxContainer"]
 custom_minimum_size = Vector2(160, 40)
-text = "Play"
+text = "開始"
 
 [node name="LockedOverlay" type="ColorRect" parent="LevelsContainer/LevelCard5/VBoxContainer"]
 anchors_preset = 15

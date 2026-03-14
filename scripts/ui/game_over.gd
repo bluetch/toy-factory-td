@@ -4,6 +4,7 @@ class_name GameOverUI
 extends Control
 
 @onready var score_label:      Label  = $PanelContainer/VBox/ScoreLabel
+@onready var enemies_label:    Label  = $PanelContainer/VBox/EnemiesLabel
 @onready var retry_button:     Button = $PanelContainer/VBox/RetryButton
 @onready var main_menu_button: Button = $PanelContainer/VBox/MainMenuButton
 
@@ -15,7 +16,8 @@ func _ready() -> void:
 	main_menu_button.pressed.connect(_on_main_menu_pressed)
 
 func _on_game_over() -> void:
-	score_label.text = "Score: %d" % GameManager.score
+	score_label.text   = "分數：%d" % GameManager.score
+	enemies_label.text = "擊殺敵人：%d" % AchievementManager.get_session_enemies()
 	show()
 
 func _on_retry() -> void:
