@@ -19,6 +19,7 @@ func _ready() -> void:
 	main_menu_button.pressed.connect(_on_main_menu_pressed)
 
 func _on_victory() -> void:
+	AudioManager.play_victory_sting()
 	AudioManager.play_track("victory")
 	var level_id := GameManager.current_level_id
 	score_label.text      = "分數：%d" % GameManager.score

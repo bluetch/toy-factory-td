@@ -76,16 +76,18 @@ custom_minimum_size = Vector2(130, 44)
 text = "困難\n−5 生命  ×0.7 金幣"
 theme_override_font_sizes/font_size = 13
 
-[node name="LevelsContainer" type="HBoxContainer" parent="."]
+[node name="LevelsContainer" type="GridContainer" parent="."]
 anchor_left = 0.5
-anchor_top = 0.5
+anchor_top = 0.0
 anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -620.0
-offset_top = -100.0
-offset_right = 620.0
-offset_bottom = 200.0
-theme_override_constants/separation = 14
+anchor_bottom = 0.0
+offset_left = -432.0
+offset_top = 205.0
+offset_right = 432.0
+offset_bottom = 760.0
+theme_override_constants/h_separation = 14
+theme_override_constants/v_separation = 14
+columns = 4
 
 [node name="LevelCard1" type="PanelContainer" parent="LevelsContainer"]
 custom_minimum_size = Vector2(200, 270)
@@ -224,9 +226,9 @@ offset_right = -10.0
 offset_bottom = -10.0
 
 [node name="LevelName" type="Label" parent="LevelsContainer/LevelCard4/VBoxContainer"]
-text = "Level 4: 北側防線"
+text = "第四關：北側防線"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 18
 
 [node name="LevelPreview" type="ColorRect" parent="LevelsContainer/LevelCard4/VBoxContainer"]
 custom_minimum_size = Vector2(180, 110)
@@ -266,9 +268,9 @@ offset_right = -10.0
 offset_bottom = -10.0
 
 [node name="LevelName" type="Label" parent="LevelsContainer/LevelCard5/VBoxContainer"]
-text = "Level 5: 記憶回廊"
+text = "第五關：記憶回廊"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 18
 
 [node name="LevelPreview" type="ColorRect" parent="LevelsContainer/LevelCard5/VBoxContainer"]
 custom_minimum_size = Vector2(180, 110)
@@ -289,6 +291,132 @@ custom_minimum_size = Vector2(160, 40)
 text = "開始"
 
 [node name="LockedOverlay" type="ColorRect" parent="LevelsContainer/LevelCard5/VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7)
+visible = false
+
+[node name="LevelCard6" type="PanelContainer" parent="LevelsContainer"]
+custom_minimum_size = Vector2(200, 270)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="LevelsContainer/LevelCard6"]
+theme_override_constants/separation = 6
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+
+[node name="LevelName" type="Label" parent="LevelsContainer/LevelCard6/VBoxContainer"]
+text = "第六關：廢墟之間"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 18
+
+[node name="LevelPreview" type="ColorRect" parent="LevelsContainer/LevelCard6/VBoxContainer"]
+custom_minimum_size = Vector2(200, 120)
+color = Color(0.28, 0.22, 0.16, 1)
+
+[node name="Description" type="Label" parent="LevelsContainer/LevelCard6/VBoxContainer"]
+text = "雙重迴廊，四面夾擊。精銳部隊全面來犯。"
+autowrap_mode = 2
+theme_override_font_sizes/font_size = 13
+
+[node name="BestScore" type="Label" parent="LevelsContainer/LevelCard6/VBoxContainer"]
+text = "最佳：0"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 13
+
+[node name="PlayButton" type="Button" parent="LevelsContainer/LevelCard6/VBoxContainer"]
+custom_minimum_size = Vector2(180, 45)
+text = "開始"
+
+[node name="LockedOverlay" type="ColorRect" parent="LevelsContainer/LevelCard6/VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7)
+visible = false
+
+[node name="LevelCard7" type="PanelContainer" parent="LevelsContainer"]
+custom_minimum_size = Vector2(200, 270)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="LevelsContainer/LevelCard7"]
+theme_override_constants/separation = 6
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+
+[node name="LevelName" type="Label" parent="LevelsContainer/LevelCard7/VBoxContainer"]
+text = "第七關：機械迷宮"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 18
+
+[node name="LevelPreview" type="ColorRect" parent="LevelsContainer/LevelCard7/VBoxContainer"]
+custom_minimum_size = Vector2(200, 120)
+color = Color(0.16, 0.16, 0.28, 1)
+
+[node name="Description" type="Label" parent="LevelsContainer/LevelCard7/VBoxContainer"]
+text = "螺旋路徑深入工廠核心。Boss成群出沒。"
+autowrap_mode = 2
+theme_override_font_sizes/font_size = 13
+
+[node name="BestScore" type="Label" parent="LevelsContainer/LevelCard7/VBoxContainer"]
+text = "最佳：0"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 13
+
+[node name="PlayButton" type="Button" parent="LevelsContainer/LevelCard7/VBoxContainer"]
+custom_minimum_size = Vector2(180, 45)
+text = "開始"
+
+[node name="LockedOverlay" type="ColorRect" parent="LevelsContainer/LevelCard7/VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7)
+visible = false
+
+[node name="LevelCard8" type="PanelContainer" parent="LevelsContainer"]
+custom_minimum_size = Vector2(200, 270)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="LevelsContainer/LevelCard8"]
+theme_override_constants/separation = 6
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+
+[node name="LevelName" type="Label" parent="LevelsContainer/LevelCard8/VBoxContainer"]
+text = "第八關：最終決戰"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 18
+
+[node name="LevelPreview" type="ColorRect" parent="LevelsContainer/LevelCard8/VBoxContainer"]
+custom_minimum_size = Vector2(200, 120)
+color = Color(0.35, 0.08, 0.08, 1)
+
+[node name="Description" type="Label" parent="LevelsContainer/LevelCard8/VBoxContainer"]
+text = "工廠的心臟。Coco的最後一戰。守住它。"
+autowrap_mode = 2
+theme_override_font_sizes/font_size = 13
+
+[node name="BestScore" type="Label" parent="LevelsContainer/LevelCard8/VBoxContainer"]
+text = "最佳：0"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 13
+
+[node name="PlayButton" type="Button" parent="LevelsContainer/LevelCard8/VBoxContainer"]
+custom_minimum_size = Vector2(180, 45)
+text = "開始"
+
+[node name="LockedOverlay" type="ColorRect" parent="LevelsContainer/LevelCard8/VBoxContainer"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0

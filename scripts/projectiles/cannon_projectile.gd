@@ -24,4 +24,25 @@ func _on_hit() -> void:
         var body: Node2D = result["collider"] as Node2D
         if body != null and body.is_in_group("enemies"):
             _damage_enemy(body)
+    _spawn_explosion_ring()
     queue_free()
+
+func _spawn_explosion_ring() -> void:
+    if get_parent() == null:
+        return
+    var ring := Node2D.new()
+    ring.global_position = global_position
+    get_parent().add_child(ring)
+    var tween := ring.create_tween()
+    tween.set_parallel(true)
+    tween.tween_method(func(r: float) -> void:
+        ring.queue_redraw()
+        ring.set_meta("_r", r)
+        ring.set_meta("_a", 1.0 - r / _splash_radius)
+    , 4.0, _splash_radius, 0.3)
+    ring.draw.connect(func() -> void:
+        if ring.has_meta("_r"):
+            ring.draw_arc(Vector2.ZERO, ring.get_meta("_r"), 0.0, TAU,
+                32, Color(1.0, 0.55, 0.1, ring.get_meta("_a")), 3.0)
+    )
+    tween.tween_callback(ring.queue_free).set_delay(0.32)

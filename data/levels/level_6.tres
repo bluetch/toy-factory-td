@@ -1,0 +1,194 @@
+[gd_resource type="Resource" script_class="LevelData" load_steps=36 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/level_data.gd" id="1_leveldata"]
+[ext_resource type="Script" path="res://scripts/resources/wave_data.gd" id="2_wavedata"]
+[ext_resource type="Script" path="res://scripts/resources/wave_entry.gd" id="3_waveentry"]
+[ext_resource type="Resource" path="res://data/enemies/basic_enemy.tres" id="4_basic"]
+[ext_resource type="Resource" path="res://data/enemies/fast_enemy.tres" id="5_fast"]
+[ext_resource type="Resource" path="res://data/enemies/tank_enemy.tres" id="6_tank"]
+[ext_resource type="Resource" path="res://data/enemies/boss_enemy.tres" id="7_boss"]
+
+[sub_resource type="Resource" id="WaveEntry_w1_g1"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("4_basic")
+count = 12
+spawn_interval = 1.0
+
+[sub_resource type="Resource" id="WaveEntry_w1_g2"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("5_fast")
+count = 8
+group_delay = 2.0
+spawn_interval = 0.85
+
+[sub_resource type="Resource" id="WaveData_w1"]
+script = ExtResource("2_wavedata")
+wave_number = 1
+auto_start_delay = -1.0
+entries = [SubResource("WaveEntry_w1_g1"), SubResource("WaveEntry_w1_g2")]
+
+[sub_resource type="Resource" id="WaveEntry_w2_g1"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("5_fast")
+count = 14
+spawn_interval = 0.8
+
+[sub_resource type="Resource" id="WaveEntry_w2_g2"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("6_tank")
+count = 5
+group_delay = 3.0
+spawn_interval = 2.5
+
+[sub_resource type="Resource" id="WaveData_w2"]
+script = ExtResource("2_wavedata")
+wave_number = 2
+auto_start_delay = -1.0
+entries = [SubResource("WaveEntry_w2_g1"), SubResource("WaveEntry_w2_g2")]
+
+[sub_resource type="Resource" id="WaveEntry_w3_g1"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("4_basic")
+count = 18
+spawn_interval = 0.75
+
+[sub_resource type="Resource" id="WaveEntry_w3_g2"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("5_fast")
+count = 12
+group_delay = 2.0
+spawn_interval = 0.7
+
+[sub_resource type="Resource" id="WaveEntry_w3_g3"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("6_tank")
+count = 6
+group_delay = 4.0
+spawn_interval = 2.2
+
+[sub_resource type="Resource" id="WaveData_w3"]
+script = ExtResource("2_wavedata")
+wave_number = 3
+auto_start_delay = -1.0
+entries = [SubResource("WaveEntry_w3_g1"), SubResource("WaveEntry_w3_g2"), SubResource("WaveEntry_w3_g3")]
+
+[sub_resource type="Resource" id="WaveEntry_w4_g1"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("5_fast")
+count = 20
+spawn_interval = 0.65
+
+[sub_resource type="Resource" id="WaveEntry_w4_g2"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("6_tank")
+count = 8
+group_delay = 3.0
+spawn_interval = 2.0
+
+[sub_resource type="Resource" id="WaveEntry_w4_g3"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("7_boss")
+count = 1
+group_delay = 15.0
+spawn_interval = 1.0
+
+[sub_resource type="Resource" id="WaveData_w4"]
+script = ExtResource("2_wavedata")
+wave_number = 4
+auto_start_delay = -1.0
+entries = [SubResource("WaveEntry_w4_g1"), SubResource("WaveEntry_w4_g2"), SubResource("WaveEntry_w4_g3")]
+
+[sub_resource type="Resource" id="WaveEntry_w5_g1"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("4_basic")
+count = 22
+spawn_interval = 0.7
+
+[sub_resource type="Resource" id="WaveEntry_w5_g2"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("5_fast")
+count = 16
+group_delay = 2.0
+spawn_interval = 0.6
+
+[sub_resource type="Resource" id="WaveEntry_w5_g3"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("6_tank")
+count = 9
+group_delay = 5.0
+spawn_interval = 2.0
+
+[sub_resource type="Resource" id="WaveData_w5"]
+script = ExtResource("2_wavedata")
+wave_number = 5
+auto_start_delay = -1.0
+entries = [SubResource("WaveEntry_w5_g1"), SubResource("WaveEntry_w5_g2"), SubResource("WaveEntry_w5_g3")]
+
+[sub_resource type="Resource" id="WaveEntry_w6_g1"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("5_fast")
+count = 22
+spawn_interval = 0.55
+
+[sub_resource type="Resource" id="WaveEntry_w6_g2"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("6_tank")
+count = 10
+group_delay = 3.0
+spawn_interval = 1.8
+
+[sub_resource type="Resource" id="WaveEntry_w6_g3"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("7_boss")
+count = 2
+group_delay = 20.0
+spawn_interval = 10.0
+
+[sub_resource type="Resource" id="WaveData_w6"]
+script = ExtResource("2_wavedata")
+wave_number = 6
+auto_start_delay = -1.0
+entries = [SubResource("WaveEntry_w6_g1"), SubResource("WaveEntry_w6_g2"), SubResource("WaveEntry_w6_g3")]
+
+[sub_resource type="Resource" id="WaveEntry_w7_g1"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("4_basic")
+count = 25
+spawn_interval = 0.6
+
+[sub_resource type="Resource" id="WaveEntry_w7_g2"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("5_fast")
+count = 18
+group_delay = 2.0
+spawn_interval = 0.5
+
+[sub_resource type="Resource" id="WaveEntry_w7_g3"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("6_tank")
+count = 12
+group_delay = 4.0
+spawn_interval = 1.8
+
+[sub_resource type="Resource" id="WaveEntry_w7_g4"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("7_boss")
+count = 3
+group_delay = 20.0
+spawn_interval = 8.0
+
+[sub_resource type="Resource" id="WaveData_w7"]
+script = ExtResource("2_wavedata")
+wave_number = 7
+auto_start_delay = -1.0
+entries = [SubResource("WaveEntry_w7_g1"), SubResource("WaveEntry_w7_g2"), SubResource("WaveEntry_w7_g3"), SubResource("WaveEntry_w7_g4")]
+
+[resource]
+script = ExtResource("1_leveldata")
+level_id = 6
+level_name = "廢墟之間"
+description = "雙重迴廊。敵人懂得迂迴——你也必須。"
+starting_lives = 12
+starting_gold = 200
+waypoints = Array[Vector2i]([Vector2i(0, 3), Vector2i(20, 3), Vector2i(20, 6), Vector2i(3, 6), Vector2i(3, 10), Vector2i(22, 10)])
+waves = Array[ExtResource("2_wavedata")]([SubResource("WaveData_w1"), SubResource("WaveData_w2"), SubResource("WaveData_w3"), SubResource("WaveData_w4"), SubResource("WaveData_w5"), SubResource("WaveData_w6"), SubResource("WaveData_w7")])

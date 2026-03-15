@@ -85,13 +85,14 @@ func _on_victory() -> void:
 	if wins >= 10:
 		_try_unlock("veteran")
 
-	# All 5 levels unlocked means the player just finished level 5.
-	if SaveManager.is_level_unlocked(5) and GameManager.current_level_id == 5:
+	# All levels cleared when the player finishes the final level.
+	if SaveManager.is_level_unlocked(SaveManager.MAX_LEVEL - 1) \
+			and GameManager.current_level_id == SaveManager.MAX_LEVEL:
 		_try_unlock("completionist")
 
 	if GameManager.lives == _session_max_lives:
 		_try_unlock("iron_defense")
-		if GameManager.current_level_id == 5:
+		if GameManager.current_level_id == SaveManager.MAX_LEVEL:
 			_try_unlock("flawless_5")
 
 	if GameManager.game_speed >= 2.0:

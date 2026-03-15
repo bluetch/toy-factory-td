@@ -18,6 +18,8 @@ extends Node2D
 const SHAKE_DURATION  := 0.35
 const SHAKE_MAGNITUDE := 10.0
 var _shake_timer: float = 0.0
+var _shake_magnitude_override: float = 0.0
+var _shake_override_timer:     float = 0.0
 
 ## TowerData for the currently selected tower to place (null = select mode)
 var _selected_tower_data: TowerData = null
@@ -58,6 +60,9 @@ func _ready() -> void:
 	EventBus.tower_deselected.connect(_on_tower_deselected)
 	EventBus.game_speed_changed.connect(_on_game_speed_changed)
 	EventBus.wave_started.connect(_on_wave_started_music)
+	EventBus.tower_placed.connect(func(_t, _tile): AudioManager.play_tower_place())
+	EventBus.tower_upgraded.connect(func(_t, _lvl): AudioManager.play_tower_upgrade())
+	EventBus.tower_sold.connect(func(_tile, _val): AudioManager.play_tower_sell())
 
 	# Give HUD and TowerPanel a reference to this GameWorld node
 	hud.set_game_world(self)
@@ -145,7 +150,7 @@ func _process(delta: float) -> void:
 func begin_tower_placement(tower_data: TowerData) -> void:
 	# Check if player can afford it
 	if not GameManager.can_afford(tower_data.build_cost):
-		hud.show_message("Not enough gold!")
+		hud.show_message("金幣不足！")
 		return
 	_selected_tower_data = tower_data
 	EventBus.tower_deselected.emit()
@@ -159,10 +164,10 @@ func cancel_tower_placement() -> void:
 func _try_place_tower(world_pos: Vector2) -> void:
 	var tile := grid_manager.world_to_tile(world_pos)
 	if not grid_manager.can_build(tile):
-		hud.show_message("Cannot build here!")
+		hud.show_message("此處無法建造！")
 		return
 	if not GameManager.spend_gold(_selected_tower_data.build_cost):
-		hud.show_message("Not enough gold!")
+		hud.show_message("金幣不足！")
 		return
 
 	# Instantiate tower scene
@@ -214,7 +219,7 @@ func upgrade_selected_tower() -> void:
 		return
 	var upgrade_cost: int = _selected_tower_node.get_upgrade_cost()
 	if not GameManager.spend_gold(upgrade_cost):
-		hud.show_message("Not enough gold!")
+		hud.show_message("金幣不足！")
 		return
 	_selected_tower_node.upgrade()
 	EventBus.tower_upgraded.emit(_selected_tower_node, _selected_tower_node.current_level)
@@ -234,11 +239,9 @@ func trigger_shake(duration: float, magnitude: float) -> void:
 	_shake_magnitude_override = magnitude
 	_shake_override_timer     = duration
 
-var _shake_magnitude_override: float = 0.0
-var _shake_override_timer:     float = 0.0
-
 func _on_enemy_reached_end() -> void:
 	GameManager.lose_life()
+	AudioManager.play_life_lost()
 	_shake_timer = SHAKE_DURATION
 
 func _on_all_waves_completed() -> void:

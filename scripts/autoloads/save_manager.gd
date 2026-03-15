@@ -27,8 +27,8 @@ extends Node
 const SAVE_PATH: String = "user://save_data.json"
 
 ## The set of level IDs that the game supports.
-const LEVEL_IDS: Array[int] = [1, 2, 3, 4, 5]
-const MAX_LEVEL: int = 5
+const LEVEL_IDS: Array[int] = [1, 2, 3, 4, 5, 6, 7, 8]
+const MAX_LEVEL: int = 8
 
 
 # ── 内部数据 (Internal Data) ──────────────────────────────────

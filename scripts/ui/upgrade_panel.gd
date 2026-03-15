@@ -25,9 +25,9 @@ func populate(tower: Node) -> void:
 	tower_name_label.text = data.tower_name
 	var lvl: int = tower.current_level if "current_level" in tower else 0
 	var max_lvl: int = data.upgrades.size()
-	level_label.text = "Level: %d / %d" % [lvl + 1, max_lvl + 1]
+	level_label.text = "等級：%d / %d" % [lvl + 1, max_lvl + 1]
 
-	stats_label.text = "DMG: %.0f  SPD: %.1f/s  RNG: %.0f" % [
+	stats_label.text = "傷害：%.0f  速度：%.1f/s  射程：%.0f" % [
 		data.get_damage(lvl),
 		data.get_attack_speed(lvl),
 		data.get_range(lvl)
@@ -37,11 +37,11 @@ func populate(tower: Node) -> void:
 	var upgrade_cost: int = tower.get_upgrade_cost() if tower.has_method("get_upgrade_cost") else 0
 	upgrade_button.visible = can_upgrade
 	if can_upgrade:
-		upgrade_button.text = "Upgrade\n%d 💰" % upgrade_cost
+		upgrade_button.text = "升級\n%d 💰" % upgrade_cost
 		upgrade_button.disabled = not GameManager.can_afford(upgrade_cost)
 
 	var sell_val: int = tower.get_sell_value() if tower.has_method("get_sell_value") else 0
-	sell_button.text = "Sell\n+%d 💰" % sell_val
+	sell_button.text = "出售\n+%d 💰" % sell_val
 
 func _on_upgrade_pressed() -> void:
 	AudioManager.play_ui_click()

@@ -65,6 +65,15 @@ const SFX_POOL_SIZE: int = 8
 
 var ui_click_sfx: AudioStream = null
 
+## Game event SFX (loaded lazily — null if file not present)
+var _sfx_tower_place:   AudioStream = null
+var _sfx_tower_upgrade: AudioStream = null
+var _sfx_tower_sell:    AudioStream = null
+var _sfx_enemy_die:     AudioStream = null
+var _sfx_life_lost:     AudioStream = null
+var _sfx_game_over:     AudioStream = null
+var _sfx_victory_sting: AudioStream = null
+
 ## Active fade tween so we can kill it before starting a new one.
 var _fade_tween: Tween = null
 
@@ -74,9 +83,14 @@ var _fade_tween: Tween = null
 func _ready() -> void:
 	_build_players()
 	_load_volumes_from_save()
-	ui_click_sfx = load("res://assets/audio/ui_click.wav")
-	if ui_click_sfx == null:
-		push_warning("AudioManager: ui_click.wav not found at res://assets/audio/ui_click.wav")
+	ui_click_sfx        = load("res://assets/audio/ui_click.wav")
+	_sfx_tower_place    = load("res://assets/audio/sfx_tower_place.ogg")
+	_sfx_tower_upgrade  = load("res://assets/audio/sfx_tower_upgrade.ogg")
+	_sfx_tower_sell     = load("res://assets/audio/sfx_tower_sell.ogg")
+	_sfx_enemy_die      = load("res://assets/audio/sfx_enemy_die.ogg")
+	_sfx_life_lost      = load("res://assets/audio/sfx_life_lost.ogg")
+	_sfx_game_over      = load("res://assets/audio/sfx_game_over.ogg")
+	_sfx_victory_sting  = load("res://assets/audio/sfx_victory.ogg")
 
 
 ## Create and configure both AudioStreamPlayer children.
@@ -190,6 +204,15 @@ func play_sfx(stream: AudioStream) -> void:
 ## Call from any button pressed callback.
 func play_ui_click() -> void:
 	play_sfx(ui_click_sfx)
+
+## Game event SFX convenience methods
+func play_tower_place()   -> void: play_sfx(_sfx_tower_place)
+func play_tower_upgrade() -> void: play_sfx(_sfx_tower_upgrade)
+func play_tower_sell()    -> void: play_sfx(_sfx_tower_sell)
+func play_enemy_die()     -> void: play_sfx(_sfx_enemy_die)
+func play_life_lost()     -> void: play_sfx(_sfx_life_lost)
+func play_game_over()     -> void: play_sfx(_sfx_game_over)
+func play_victory_sting() -> void: play_sfx(_sfx_victory_sting)
 
 
 # ── 音量控制 (Volume Control) ─────────────────────────────────

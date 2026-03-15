@@ -16,6 +16,7 @@ func _ready() -> void:
 	main_menu_button.pressed.connect(_on_main_menu_pressed)
 
 func _on_game_over() -> void:
+	AudioManager.play_game_over()
 	score_label.text   = "分數：%d" % GameManager.score
 	enemies_label.text = "擊殺敵人：%d" % AchievementManager.get_session_enemies()
 	show()

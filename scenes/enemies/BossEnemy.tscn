@@ -1,6 +1,7 @@
-[gd_scene format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/enemies/boss_enemy_scene.gd" id="1_boss"]
+[ext_resource type="Texture2D" path="res://assets/kenney_tower-defense-kit/Previews/enemy-ufo-d.png" id="2"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(58, 58)
@@ -12,27 +13,12 @@ script = ExtResource("1_boss")
 
 [node name="Visual" type="Node2D" parent="."]
 
-[node name="Body" type="ColorRect" parent="Visual"]
-offset_left = -28.0
-offset_top = -28.0
-size = Vector2(56, 56)
-color = Color(0.28, 0.10, 0.38, 1)
-
-[node name="Outline" type="ColorRect" parent="Visual"]
-offset_left = -30.0
-offset_top = -30.0
-size = Vector2(60, 60)
-color = Color(0.55, 0.20, 0.80, 0.6)
-z_index = -1
-
-[node name="Core" type="ColorRect" parent="Visual"]
-offset_left = -10.0
-offset_top = -10.0
-size = Vector2(20, 20)
-color = Color(0.85, 0.55, 1.0, 1.0)
+[node name="Sprite" type="Sprite2D" parent="Visual"]
+texture = ExtResource("2")
+scale = Vector2(1.2, 1.2)
 
 [node name="HealthBar" type="Node2D" parent="."]
-position = Vector2(0, -38)
+position = Vector2(0, -46)
 
 [node name="Background" type="ColorRect" parent="HealthBar"]
 offset_left = -28.0

@@ -113,6 +113,7 @@ func _die() -> void:
     # Remove from group immediately so towers stop targeting this enemy
     remove_from_group("enemies")
     set_physics_process(false)
+    AudioManager.play_enemy_die()
     EventBus.enemy_died.emit(enemy_data.gold_reward, enemy_data.score_reward)
     GameManager.add_gold(enemy_data.gold_reward)
     GameManager.add_score(enemy_data.score_reward)
@@ -123,6 +124,13 @@ func _die() -> void:
             and _anim.sprite_frames.has_animation("death"):
         _play_anim("death")
         await _anim.animation_finished
+    elif _visual != null:
+        # Sprite2D enemies: scale-up + fade out
+        var tween := create_tween()
+        tween.set_parallel(true)
+        tween.tween_property(_visual, "scale", _visual.scale * 1.6, 0.25)
+        tween.tween_property(_visual, "modulate:a", 0.0, 0.25)
+        await tween.finished
     queue_free()
 
 ## Spawn a floating gold label above the enemy's death position.

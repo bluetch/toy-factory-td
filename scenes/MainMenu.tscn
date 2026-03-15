@@ -129,20 +129,32 @@ horizontal_alignment = 1
 
 [node name="Level1Score" type="Label" parent="HighScoresPanel/VBoxContainer" unique_id=1671477316]
 layout_mode = 2
-text = "Level 1: 0 pts"
+text = "第 1 關：0 分"
 
 [node name="Level2Score" type="Label" parent="HighScoresPanel/VBoxContainer" unique_id=845643826]
 layout_mode = 2
-text = "Level 2: 0 pts"
+text = "第 2 關：0 分"
 
 [node name="Level3Score" type="Label" parent="HighScoresPanel/VBoxContainer" unique_id=1278397530]
 layout_mode = 2
-text = "Level 3: 0 pts"
+text = "第 3 關：0 分"
 
 [node name="Level4Score" type="Label" parent="HighScoresPanel/VBoxContainer"]
 layout_mode = 2
-text = "Level 4: 0 pts"
+text = "第 4 關：0 分"
 
 [node name="Level5Score" type="Label" parent="HighScoresPanel/VBoxContainer"]
 layout_mode = 2
-text = "Level 5: 0 pts"
+text = "第 5 關：0 分"
+
+[node name="Level6Score" type="Label" parent="HighScoresPanel/VBoxContainer"]
+layout_mode = 2
+text = "第 6 關：0 分"
+
+[node name="Level7Score" type="Label" parent="HighScoresPanel/VBoxContainer"]
+layout_mode = 2
+text = "第 7 關：0 分"
+
+[node name="Level8Score" type="Label" parent="HighScoresPanel/VBoxContainer"]
+layout_mode = 2
+text = "第 8 關：0 分"
