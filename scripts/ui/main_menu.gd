@@ -2,13 +2,14 @@
 class_name MainMenuUI
 extends Control
 
-@onready var play_button:         Button = $MenuContainer/PlayButton
-@onready var level_select_button: Button = $MenuContainer/LevelSelectButton
-@onready var high_scores_button:  Button = $MenuContainer/HighScoresButton
-@onready var settings_button:     Button = $MenuContainer/SettingsButton
-@onready var quit_button:         Button = $MenuContainer/QuitButton
-@onready var version_label:       Label  = $VersionLabel
+@onready var play_button:         Button  = $CenterPanel/VBox/MenuContainer/PlayButton
+@onready var level_select_button: Button  = $CenterPanel/VBox/MenuContainer/LevelSelectButton
+@onready var high_scores_button:  Button  = $CenterPanel/VBox/MenuContainer/HighScoresButton
+@onready var settings_button:     Button  = $CenterPanel/VBox/MenuContainer/SettingsButton
+@onready var quit_button:         Button  = $CenterPanel/VBox/MenuContainer/QuitButton
+@onready var version_label:       Label   = $VersionLabel
 @onready var high_scores_panel:   Control = $HighScoresPanel
+
 
 func _ready() -> void:
 	AudioManager.play_track("menu")
@@ -20,6 +21,7 @@ func _ready() -> void:
 	quit_button.pressed.connect(_on_quit_pressed)
 	high_scores_panel.hide()
 
+
 func _on_play_pressed() -> void:
 	AudioManager.play_ui_click()
 	# Start from the highest unlocked level
@@ -30,9 +32,11 @@ func _on_play_pressed() -> void:
 			break
 	SceneManager.goto_level(start_level)
 
+
 func _on_level_select_pressed() -> void:
 	AudioManager.play_ui_click()
 	SceneManager.goto_level_select()
+
 
 func _on_high_scores_pressed() -> void:
 	AudioManager.play_ui_click()
@@ -40,15 +44,18 @@ func _on_high_scores_pressed() -> void:
 	if high_scores_panel.visible:
 		_populate_high_scores()
 
+
 func _populate_high_scores() -> void:
 	for i in range(1, SaveManager.MAX_LEVEL + 1):
 		var label := high_scores_panel.get_node_or_null("VBoxContainer/Level%dScore" % i) as Label
 		if label:
 			label.text = "第 %d 關：%d 分" % [i, SaveManager.get_high_score(i)]
 
+
 func _on_settings_pressed() -> void:
 	AudioManager.play_ui_click()
 	SceneManager.goto_settings(SceneManager.MAIN_MENU_SCENE)
+
 
 func _on_quit_pressed() -> void:
 	AudioManager.play_ui_click()

@@ -1,6 +1,83 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/level_select.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/ui/main_menu_bg.gd" id="2"]
+
+[sub_resource type="StyleBoxFlat" id="SBF_card"]
+bg_color = Color(0.05, 0.08, 0.18, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.55, 0.43, 0.18, 0.82)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+content_margin_left = 10.0
+content_margin_right = 10.0
+content_margin_top = 10.0
+content_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxFlat" id="SBF_btn_n"]
+bg_color = Color(0.09, 0.15, 0.33, 0.88)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.60, 0.47, 0.20, 0.90)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+content_margin_left = 10.0
+content_margin_right = 10.0
+content_margin_top = 8.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="SBF_btn_h"]
+bg_color = Color(0.18, 0.29, 0.58, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.88, 0.72, 0.32, 1.0)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+content_margin_left = 10.0
+content_margin_right = 10.0
+content_margin_top = 8.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="SBF_btn_p"]
+bg_color = Color(0.05, 0.09, 0.22, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.50, 0.38, 0.15, 1.0)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+content_margin_left = 10.0
+content_margin_right = 10.0
+content_margin_top = 8.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="SBF_title_bg"]
+bg_color = Color(0.04, 0.07, 0.17, 0.78)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 2
+border_color = Color(0.58, 0.45, 0.18, 0.60)
+content_margin_left = 20.0
+content_margin_right = 20.0
+content_margin_top = 10.0
+content_margin_bottom = 10.0
 
 [node name="LevelSelect" type="Control"]
 anchor_right = 1.0
@@ -9,78 +86,112 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="MainMenuBg" type="Node2D" parent="."]
+script = ExtResource("2")
+
+[node name="DimOverlay" type="ColorRect" parent="."]
+layout_mode = 0
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.08, 0.1, 0.18, 1)
+color = Color(0, 0, 0, 0.45)
 
 [node name="Title" type="Label" parent="."]
+layout_mode = 0
 anchor_left = 0.5
-anchor_top = 0.0
 anchor_right = 0.5
-anchor_bottom = 0.0
-offset_left = -150.0
-offset_top = 40.0
-offset_right = 150.0
-offset_bottom = 90.0
+offset_left = -200.0
+offset_top = 36.0
+offset_right = 200.0
+offset_bottom = 88.0
+theme_override_font_sizes/font_size = 36
+theme_override_colors/font_color = Color(0.97, 0.84, 0.42, 1.0)
 text = "選擇關卡"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 36
 
 [node name="BackButton" type="Button" parent="."]
+layout_mode = 0
 anchor_left = 0.0
 anchor_top = 0.0
 anchor_right = 0.0
 anchor_bottom = 0.0
 offset_left = 20.0
-offset_top = 20.0
-offset_right = 120.0
-offset_bottom = 60.0
+offset_top = 18.0
+offset_right = 140.0
+offset_bottom = 58.0
+theme_override_styles/normal = SubResource("SBF_btn_n")
+theme_override_styles/hover = SubResource("SBF_btn_h")
+theme_override_styles/pressed = SubResource("SBF_btn_p")
+theme_override_styles/focus = SubResource("SBF_btn_h")
+theme_override_colors/font_color = Color(0.92, 0.84, 0.56, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 0.95, 0.72, 1.0)
+theme_override_font_sizes/font_size = 15
 text = "← 返回"
 
 [node name="DifficultyRow" type="VBoxContainer" parent="."]
+layout_mode = 0
 anchor_left = 0.5
-anchor_top = 0.0
 anchor_right = 0.5
-anchor_bottom = 0.0
 offset_left = -240.0
-offset_top = 100.0
+offset_top = 98.0
 offset_right = 240.0
 offset_bottom = 190.0
 theme_override_constants/separation = 8
 
 [node name="DifficultyLabel" type="Label" parent="DifficultyRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.78, 0.70, 0.52, 0.85)
 text = "難度選擇"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 16
 
 [node name="DifficultyButtons" type="HBoxContainer" parent="DifficultyRow"]
+layout_mode = 2
 alignment = 1
 theme_override_constants/separation = 12
 
 [node name="EasyButton" type="Button" parent="DifficultyRow/DifficultyButtons"]
 custom_minimum_size = Vector2(130, 44)
-text = "簡單\n+5 生命  ×1.5 金幣"
+layout_mode = 2
+theme_override_styles/normal = SubResource("SBF_btn_n")
+theme_override_styles/hover = SubResource("SBF_btn_h")
+theme_override_styles/pressed = SubResource("SBF_btn_p")
+theme_override_styles/focus = SubResource("SBF_btn_h")
+theme_override_colors/font_color = Color(0.60, 0.92, 0.60, 1.0)
+theme_override_colors/font_hover_color = Color(0.75, 1.0, 0.75, 1.0)
 theme_override_font_sizes/font_size = 13
+text = "簡單\n+5 生命  ×1.5 金幣"
 
 [node name="NormalButton" type="Button" parent="DifficultyRow/DifficultyButtons"]
 custom_minimum_size = Vector2(130, 44)
-text = "普通\n標準難度"
+layout_mode = 2
+theme_override_styles/normal = SubResource("SBF_btn_n")
+theme_override_styles/hover = SubResource("SBF_btn_h")
+theme_override_styles/pressed = SubResource("SBF_btn_p")
+theme_override_styles/focus = SubResource("SBF_btn_h")
+theme_override_colors/font_color = Color(0.92, 0.84, 0.56, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 0.95, 0.72, 1.0)
 theme_override_font_sizes/font_size = 13
+text = "普通\n標準難度"
 
 [node name="HardButton" type="Button" parent="DifficultyRow/DifficultyButtons"]
 custom_minimum_size = Vector2(130, 44)
-text = "困難\n−5 生命  ×0.7 金幣"
+layout_mode = 2
+theme_override_styles/normal = SubResource("SBF_btn_n")
+theme_override_styles/hover = SubResource("SBF_btn_h")
+theme_override_styles/pressed = SubResource("SBF_btn_p")
+theme_override_styles/focus = SubResource("SBF_btn_h")
+theme_override_colors/font_color = Color(0.95, 0.55, 0.55, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 0.72, 0.72, 1.0)
 theme_override_font_sizes/font_size = 13
+text = "困難\n−5 生命  ×0.7 金幣"
 
 [node name="LevelsContainer" type="GridContainer" parent="."]
+layout_mode = 0
 anchor_left = 0.5
-anchor_top = 0.0
 anchor_right = 0.5
-anchor_bottom = 0.0
 offset_left = -432.0
 offset_top = 205.0
 offset_right = 432.0
@@ -91,38 +202,52 @@ columns = 4
 
 [node name="LevelCard1" type="PanelContainer" parent="LevelsContainer"]
 custom_minimum_size = Vector2(200, 270)
+theme_override_styles/panel = SubResource("SBF_card")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="LevelsContainer/LevelCard1"]
+layout_mode = 2
 theme_override_constants/separation = 6
-offset_left = 10.0
-offset_top = 10.0
-offset_right = -10.0
-offset_bottom = -10.0
 
 [node name="LevelName" type="Label" parent="LevelsContainer/LevelCard1/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.97, 0.84, 0.42, 1.0)
 text = "第一關：幽谷之路"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 18
 
 [node name="LevelPreview" type="ColorRect" parent="LevelsContainer/LevelCard1/VBoxContainer"]
-custom_minimum_size = Vector2(200, 120)
-color = Color(0.2, 0.4, 0.2, 1)
+layout_mode = 2
+custom_minimum_size = Vector2(200, 110)
+color = Color(0.18, 0.35, 0.16, 1)
 
 [node name="Description" type="Label" parent="LevelsContainer/LevelCard1/VBoxContainer"]
-text = "學習基本操作，建立第一道防線。"
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.72, 0.68, 0.56, 0.90)
 autowrap_mode = 2
-theme_override_font_sizes/font_size = 13
+text = "學習基本操作，建立第一道防線。"
 
 [node name="BestScore" type="Label" parent="LevelsContainer/LevelCard1/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.80, 0.74, 0.48, 1.0)
 text = "最佳：0"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 13
 
 [node name="PlayButton" type="Button" parent="LevelsContainer/LevelCard1/VBoxContainer"]
-custom_minimum_size = Vector2(180, 45)
-text = "開始"
+custom_minimum_size = Vector2(180, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("SBF_btn_n")
+theme_override_styles/hover = SubResource("SBF_btn_h")
+theme_override_styles/pressed = SubResource("SBF_btn_p")
+theme_override_styles/focus = SubResource("SBF_btn_h")
+theme_override_colors/font_color = Color(0.92, 0.84, 0.56, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 0.95, 0.72, 1.0)
+theme_override_font_sizes/font_size = 15
+text = "▶ 開始"
 
 [node name="LockedOverlay" type="ColorRect" parent="LevelsContainer/LevelCard1/VBoxContainer"]
+layout_mode = 2
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -133,38 +258,52 @@ visible = false
 
 [node name="LevelCard2" type="PanelContainer" parent="LevelsContainer"]
 custom_minimum_size = Vector2(200, 270)
+theme_override_styles/panel = SubResource("SBF_card")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="LevelsContainer/LevelCard2"]
+layout_mode = 2
 theme_override_constants/separation = 6
-offset_left = 10.0
-offset_top = 10.0
-offset_right = -10.0
-offset_bottom = -10.0
 
 [node name="LevelName" type="Label" parent="LevelsContainer/LevelCard2/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.97, 0.84, 0.42, 1.0)
 text = "第二關：蜿蜒迷徑"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 18
 
 [node name="LevelPreview" type="ColorRect" parent="LevelsContainer/LevelCard2/VBoxContainer"]
-custom_minimum_size = Vector2(200, 120)
-color = Color(0.2, 0.4, 0.2, 1)
+layout_mode = 2
+custom_minimum_size = Vector2(200, 110)
+color = Color(0.20, 0.38, 0.18, 1)
 
 [node name="Description" type="Label" parent="LevelsContainer/LevelCard2/VBoxContainer"]
-text = "敵人迂迴而來，善用彎道守住防線。"
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.72, 0.68, 0.56, 0.90)
 autowrap_mode = 2
-theme_override_font_sizes/font_size = 13
+text = "敵人迂迴而來，善用彎道守住防線。"
 
 [node name="BestScore" type="Label" parent="LevelsContainer/LevelCard2/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.80, 0.74, 0.48, 1.0)
 text = "最佳：0"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 13
 
 [node name="PlayButton" type="Button" parent="LevelsContainer/LevelCard2/VBoxContainer"]
-custom_minimum_size = Vector2(180, 45)
-text = "開始"
+custom_minimum_size = Vector2(180, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("SBF_btn_n")
+theme_override_styles/hover = SubResource("SBF_btn_h")
+theme_override_styles/pressed = SubResource("SBF_btn_p")
+theme_override_styles/focus = SubResource("SBF_btn_h")
+theme_override_colors/font_color = Color(0.92, 0.84, 0.56, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 0.95, 0.72, 1.0)
+theme_override_font_sizes/font_size = 15
+text = "▶ 開始"
 
 [node name="LockedOverlay" type="ColorRect" parent="LevelsContainer/LevelCard2/VBoxContainer"]
+layout_mode = 2
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -175,38 +314,52 @@ visible = false
 
 [node name="LevelCard3" type="PanelContainer" parent="LevelsContainer"]
 custom_minimum_size = Vector2(200, 270)
+theme_override_styles/panel = SubResource("SBF_card")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="LevelsContainer/LevelCard3"]
+layout_mode = 2
 theme_override_constants/separation = 6
-offset_left = 10.0
-offset_top = 10.0
-offset_right = -10.0
-offset_bottom = -10.0
 
 [node name="LevelName" type="Label" parent="LevelsContainer/LevelCard3/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.97, 0.84, 0.42, 1.0)
 text = "第三關：鐵壁攻防"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 18
 
 [node name="LevelPreview" type="ColorRect" parent="LevelsContainer/LevelCard3/VBoxContainer"]
-custom_minimum_size = Vector2(200, 120)
-color = Color(0.2, 0.4, 0.2, 1)
+layout_mode = 2
+custom_minimum_size = Vector2(200, 110)
+color = Color(0.22, 0.36, 0.14, 1)
 
 [node name="Description" type="Label" parent="LevelsContainer/LevelCard3/VBoxContainer"]
-text = "重甲兵與快速斥候交替進攻，壓力倍增。"
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.72, 0.68, 0.56, 0.90)
 autowrap_mode = 2
-theme_override_font_sizes/font_size = 13
+text = "重甲兵與快速斥候交替進攻，壓力倍增。"
 
 [node name="BestScore" type="Label" parent="LevelsContainer/LevelCard3/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.80, 0.74, 0.48, 1.0)
 text = "最佳：0"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 13
 
 [node name="PlayButton" type="Button" parent="LevelsContainer/LevelCard3/VBoxContainer"]
-custom_minimum_size = Vector2(180, 45)
-text = "開始"
+custom_minimum_size = Vector2(180, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("SBF_btn_n")
+theme_override_styles/hover = SubResource("SBF_btn_h")
+theme_override_styles/pressed = SubResource("SBF_btn_p")
+theme_override_styles/focus = SubResource("SBF_btn_h")
+theme_override_colors/font_color = Color(0.92, 0.84, 0.56, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 0.95, 0.72, 1.0)
+theme_override_font_sizes/font_size = 15
+text = "▶ 開始"
 
 [node name="LockedOverlay" type="ColorRect" parent="LevelsContainer/LevelCard3/VBoxContainer"]
+layout_mode = 2
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -217,38 +370,52 @@ visible = false
 
 [node name="LevelCard4" type="PanelContainer" parent="LevelsContainer"]
 custom_minimum_size = Vector2(200, 270)
+theme_override_styles/panel = SubResource("SBF_card")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="LevelsContainer/LevelCard4"]
+layout_mode = 2
 theme_override_constants/separation = 6
-offset_left = 10.0
-offset_top = 10.0
-offset_right = -10.0
-offset_bottom = -10.0
 
 [node name="LevelName" type="Label" parent="LevelsContainer/LevelCard4/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.97, 0.84, 0.42, 1.0)
 text = "第四關：北側防線"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 18
 
 [node name="LevelPreview" type="ColorRect" parent="LevelsContainer/LevelCard4/VBoxContainer"]
-custom_minimum_size = Vector2(180, 110)
-color = Color(0.15, 0.30, 0.35, 1)
+layout_mode = 2
+custom_minimum_size = Vector2(200, 110)
+color = Color(0.14, 0.28, 0.34, 1)
 
 [node name="Description" type="Label" parent="LevelsContainer/LevelCard4/VBoxContainer"]
-text = "動盪即將全面展開。"
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.72, 0.68, 0.56, 0.90)
 autowrap_mode = 2
-theme_override_font_sizes/font_size = 13
+text = "動盪即將全面展開。"
 
 [node name="BestScore" type="Label" parent="LevelsContainer/LevelCard4/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.80, 0.74, 0.48, 1.0)
 text = "最佳：0"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 13
 
 [node name="PlayButton" type="Button" parent="LevelsContainer/LevelCard4/VBoxContainer"]
-custom_minimum_size = Vector2(160, 40)
-text = "開始"
+custom_minimum_size = Vector2(180, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("SBF_btn_n")
+theme_override_styles/hover = SubResource("SBF_btn_h")
+theme_override_styles/pressed = SubResource("SBF_btn_p")
+theme_override_styles/focus = SubResource("SBF_btn_h")
+theme_override_colors/font_color = Color(0.92, 0.84, 0.56, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 0.95, 0.72, 1.0)
+theme_override_font_sizes/font_size = 15
+text = "▶ 開始"
 
 [node name="LockedOverlay" type="ColorRect" parent="LevelsContainer/LevelCard4/VBoxContainer"]
+layout_mode = 2
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -259,38 +426,52 @@ visible = false
 
 [node name="LevelCard5" type="PanelContainer" parent="LevelsContainer"]
 custom_minimum_size = Vector2(200, 270)
+theme_override_styles/panel = SubResource("SBF_card")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="LevelsContainer/LevelCard5"]
+layout_mode = 2
 theme_override_constants/separation = 6
-offset_left = 10.0
-offset_top = 10.0
-offset_right = -10.0
-offset_bottom = -10.0
 
 [node name="LevelName" type="Label" parent="LevelsContainer/LevelCard5/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.97, 0.84, 0.42, 1.0)
 text = "第五關：記憶回廊"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 18
 
 [node name="LevelPreview" type="ColorRect" parent="LevelsContainer/LevelCard5/VBoxContainer"]
-custom_minimum_size = Vector2(180, 110)
-color = Color(0.20, 0.12, 0.30, 1)
+layout_mode = 2
+custom_minimum_size = Vector2(200, 110)
+color = Color(0.20, 0.12, 0.32, 1)
 
 [node name="Description" type="Label" parent="LevelsContainer/LevelCard5/VBoxContainer"]
-text = "第一幕終章。真相等在前方。"
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.72, 0.68, 0.56, 0.90)
 autowrap_mode = 2
-theme_override_font_sizes/font_size = 13
+text = "第一幕終章。真相等在前方。"
 
 [node name="BestScore" type="Label" parent="LevelsContainer/LevelCard5/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.80, 0.74, 0.48, 1.0)
 text = "最佳：0"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 13
 
 [node name="PlayButton" type="Button" parent="LevelsContainer/LevelCard5/VBoxContainer"]
-custom_minimum_size = Vector2(160, 40)
-text = "開始"
+custom_minimum_size = Vector2(180, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("SBF_btn_n")
+theme_override_styles/hover = SubResource("SBF_btn_h")
+theme_override_styles/pressed = SubResource("SBF_btn_p")
+theme_override_styles/focus = SubResource("SBF_btn_h")
+theme_override_colors/font_color = Color(0.92, 0.84, 0.56, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 0.95, 0.72, 1.0)
+theme_override_font_sizes/font_size = 15
+text = "▶ 開始"
 
 [node name="LockedOverlay" type="ColorRect" parent="LevelsContainer/LevelCard5/VBoxContainer"]
+layout_mode = 2
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -301,38 +482,52 @@ visible = false
 
 [node name="LevelCard6" type="PanelContainer" parent="LevelsContainer"]
 custom_minimum_size = Vector2(200, 270)
+theme_override_styles/panel = SubResource("SBF_card")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="LevelsContainer/LevelCard6"]
+layout_mode = 2
 theme_override_constants/separation = 6
-offset_left = 10.0
-offset_top = 10.0
-offset_right = -10.0
-offset_bottom = -10.0
 
 [node name="LevelName" type="Label" parent="LevelsContainer/LevelCard6/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.97, 0.84, 0.42, 1.0)
 text = "第六關：廢墟之間"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 18
 
 [node name="LevelPreview" type="ColorRect" parent="LevelsContainer/LevelCard6/VBoxContainer"]
-custom_minimum_size = Vector2(200, 120)
-color = Color(0.28, 0.22, 0.16, 1)
+layout_mode = 2
+custom_minimum_size = Vector2(200, 110)
+color = Color(0.28, 0.22, 0.14, 1)
 
 [node name="Description" type="Label" parent="LevelsContainer/LevelCard6/VBoxContainer"]
-text = "雙重迴廊，四面夾擊。精銳部隊全面來犯。"
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.72, 0.68, 0.56, 0.90)
 autowrap_mode = 2
-theme_override_font_sizes/font_size = 13
+text = "雙重迴廊，四面夾擊。精銳部隊全面來犯。"
 
 [node name="BestScore" type="Label" parent="LevelsContainer/LevelCard6/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.80, 0.74, 0.48, 1.0)
 text = "最佳：0"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 13
 
 [node name="PlayButton" type="Button" parent="LevelsContainer/LevelCard6/VBoxContainer"]
-custom_minimum_size = Vector2(180, 45)
-text = "開始"
+custom_minimum_size = Vector2(180, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("SBF_btn_n")
+theme_override_styles/hover = SubResource("SBF_btn_h")
+theme_override_styles/pressed = SubResource("SBF_btn_p")
+theme_override_styles/focus = SubResource("SBF_btn_h")
+theme_override_colors/font_color = Color(0.92, 0.84, 0.56, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 0.95, 0.72, 1.0)
+theme_override_font_sizes/font_size = 15
+text = "▶ 開始"
 
 [node name="LockedOverlay" type="ColorRect" parent="LevelsContainer/LevelCard6/VBoxContainer"]
+layout_mode = 2
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -343,38 +538,52 @@ visible = false
 
 [node name="LevelCard7" type="PanelContainer" parent="LevelsContainer"]
 custom_minimum_size = Vector2(200, 270)
+theme_override_styles/panel = SubResource("SBF_card")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="LevelsContainer/LevelCard7"]
+layout_mode = 2
 theme_override_constants/separation = 6
-offset_left = 10.0
-offset_top = 10.0
-offset_right = -10.0
-offset_bottom = -10.0
 
 [node name="LevelName" type="Label" parent="LevelsContainer/LevelCard7/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.97, 0.84, 0.42, 1.0)
 text = "第七關：機械迷宮"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 18
 
 [node name="LevelPreview" type="ColorRect" parent="LevelsContainer/LevelCard7/VBoxContainer"]
-custom_minimum_size = Vector2(200, 120)
-color = Color(0.16, 0.16, 0.28, 1)
+layout_mode = 2
+custom_minimum_size = Vector2(200, 110)
+color = Color(0.15, 0.14, 0.28, 1)
 
 [node name="Description" type="Label" parent="LevelsContainer/LevelCard7/VBoxContainer"]
-text = "螺旋路徑深入工廠核心。Boss成群出沒。"
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.72, 0.68, 0.56, 0.90)
 autowrap_mode = 2
-theme_override_font_sizes/font_size = 13
+text = "螺旋路徑深入工廠核心。Boss成群出沒。"
 
 [node name="BestScore" type="Label" parent="LevelsContainer/LevelCard7/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.80, 0.74, 0.48, 1.0)
 text = "最佳：0"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 13
 
 [node name="PlayButton" type="Button" parent="LevelsContainer/LevelCard7/VBoxContainer"]
-custom_minimum_size = Vector2(180, 45)
-text = "開始"
+custom_minimum_size = Vector2(180, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("SBF_btn_n")
+theme_override_styles/hover = SubResource("SBF_btn_h")
+theme_override_styles/pressed = SubResource("SBF_btn_p")
+theme_override_styles/focus = SubResource("SBF_btn_h")
+theme_override_colors/font_color = Color(0.92, 0.84, 0.56, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 0.95, 0.72, 1.0)
+theme_override_font_sizes/font_size = 15
+text = "▶ 開始"
 
 [node name="LockedOverlay" type="ColorRect" parent="LevelsContainer/LevelCard7/VBoxContainer"]
+layout_mode = 2
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -385,38 +594,52 @@ visible = false
 
 [node name="LevelCard8" type="PanelContainer" parent="LevelsContainer"]
 custom_minimum_size = Vector2(200, 270)
+theme_override_styles/panel = SubResource("SBF_card")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="LevelsContainer/LevelCard8"]
+layout_mode = 2
 theme_override_constants/separation = 6
-offset_left = 10.0
-offset_top = 10.0
-offset_right = -10.0
-offset_bottom = -10.0
 
 [node name="LevelName" type="Label" parent="LevelsContainer/LevelCard8/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.97, 0.84, 0.42, 1.0)
 text = "第八關：最終決戰"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 18
 
 [node name="LevelPreview" type="ColorRect" parent="LevelsContainer/LevelCard8/VBoxContainer"]
-custom_minimum_size = Vector2(200, 120)
-color = Color(0.35, 0.08, 0.08, 1)
+layout_mode = 2
+custom_minimum_size = Vector2(200, 110)
+color = Color(0.36, 0.07, 0.07, 1)
 
 [node name="Description" type="Label" parent="LevelsContainer/LevelCard8/VBoxContainer"]
-text = "工廠的心臟。Coco的最後一戰。守住它。"
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.72, 0.68, 0.56, 0.90)
 autowrap_mode = 2
-theme_override_font_sizes/font_size = 13
+text = "工廠的心臟。Coco的最後一戰。守住它。"
 
 [node name="BestScore" type="Label" parent="LevelsContainer/LevelCard8/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.80, 0.74, 0.48, 1.0)
 text = "最佳：0"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 13
 
 [node name="PlayButton" type="Button" parent="LevelsContainer/LevelCard8/VBoxContainer"]
-custom_minimum_size = Vector2(180, 45)
-text = "開始"
+custom_minimum_size = Vector2(180, 42)
+layout_mode = 2
+theme_override_styles/normal = SubResource("SBF_btn_n")
+theme_override_styles/hover = SubResource("SBF_btn_h")
+theme_override_styles/pressed = SubResource("SBF_btn_p")
+theme_override_styles/focus = SubResource("SBF_btn_h")
+theme_override_colors/font_color = Color(0.92, 0.84, 0.56, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 0.95, 0.72, 1.0)
+theme_override_font_sizes/font_size = 15
+text = "▶ 開始"
 
 [node name="LockedOverlay" type="ColorRect" parent="LevelsContainer/LevelCard8/VBoxContainer"]
+layout_mode = 2
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
