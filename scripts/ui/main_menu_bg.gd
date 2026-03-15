@@ -138,23 +138,24 @@ func _draw_ufos() -> void:
 
 func _draw_vignette() -> void:
 	## Smooth gradient dark border to focus attention on the centre panel.
+	## draw_polygon() supports per-vertex PackedColorArray for gradient fills.
 	var W := 1728.0
 	var H :=  960.0
 	var D :=  420.0  ## vignette depth
 
-	# Left gradient
-	draw_colored_polygon(
+	# Left gradient: dark at left edge, transparent at right
+	draw_polygon(
 		PackedVector2Array([Vector2(0,0), Vector2(D,0), Vector2(D,H), Vector2(0,H)]),
 		PackedColorArray([Color(0,0,0,0.78), Color(0,0,0,0), Color(0,0,0,0), Color(0,0,0,0.78)]))
-	# Right gradient
-	draw_colored_polygon(
+	# Right gradient: transparent at left, dark at right edge
+	draw_polygon(
 		PackedVector2Array([Vector2(W-D,0), Vector2(W,0), Vector2(W,H), Vector2(W-D,H)]),
 		PackedColorArray([Color(0,0,0,0), Color(0,0,0,0.78), Color(0,0,0,0.78), Color(0,0,0,0)]))
-	# Top gradient
-	draw_colored_polygon(
+	# Top gradient: dark at top, transparent at bottom
+	draw_polygon(
 		PackedVector2Array([Vector2(0,0), Vector2(W,0), Vector2(W,D*0.45), Vector2(0,D*0.45)]),
 		PackedColorArray([Color(0,0,0,0.50), Color(0,0,0,0.50), Color(0,0,0,0), Color(0,0,0,0)]))
-	# Bottom gradient
-	draw_colored_polygon(
+	# Bottom gradient: transparent at top, dark at bottom edge
+	draw_polygon(
 		PackedVector2Array([Vector2(0,H-D*0.45), Vector2(W,H-D*0.45), Vector2(W,H), Vector2(0,H)]),
 		PackedColorArray([Color(0,0,0,0), Color(0,0,0,0), Color(0,0,0,0.50), Color(0,0,0,0.50)]))
