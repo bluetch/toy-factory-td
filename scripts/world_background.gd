@@ -21,14 +21,18 @@ enum TileType {
 	SPAWN, GOAL
 }
 
+## Overlay sprites drawn on top of certain tiles
+enum OverlayType { NONE, TREE_LARGE, ROCKS_LARGE, CRYSTAL, SPAWN_MARKER }
+
 ## Background fill colours (drawn first to fill transparent sprite edges)
 const BG_GRASS := Color(0.17, 0.30, 0.13, 1.0)
 const BG_PATH  := Color(0.35, 0.26, 0.16, 1.0)
 
 ## Texture cache (loaded in setup)
 var _tex: Dictionary = {}
+var _overlay_tex: Dictionary = {}  ## OverlayType → Texture2D
 
-## [col][row] → {type: TileType, rot: float}  (rot in radians)
+## [col][row] → {type: TileType, rot: float, overlay: OverlayType}
 var _tiles: Array[Array] = []
 
 
@@ -62,13 +66,23 @@ func _load_textures() -> void:
 		if ResourceLoader.exists(path):
 			_tex[k] = load(path)
 
+	var overlay_names := {
+		OverlayType.TREE_LARGE:    "detail-tree-large.png",
+		OverlayType.ROCKS_LARGE:   "detail-rocks-large.png",
+		OverlayType.CRYSTAL:       "detail-crystal.png",
+		OverlayType.SPAWN_MARKER:  "spawn-round.png",
+	}
+	for k in overlay_names:
+		var path: String = BASE + overlay_names[k]
+		if ResourceLoader.exists(path):
+			_overlay_tex[k] = load(path)
+
 
 func _build_tiles(waypoints: Array[Vector2i]) -> void:
 	if waypoints.is_empty():
 		return
 
 	# ── 1. Collect path info per tile ──────────────────────
-	# path_dirs[tile] = set of directions that have a path neighbour
 	var path_dirs: Dictionary = {}  ## Vector2i → Dictionary{dir: true}
 
 	for i in range(waypoints.size() - 1):
@@ -110,9 +124,9 @@ func _build_tiles(waypoints: Array[Vector2i]) -> void:
 func _classify_path(tv: Vector2i, dirs: Dictionary,
 		spawn: Vector2i, goal: Vector2i) -> Dictionary:
 	if tv == spawn:
-		return {type = TileType.SPAWN, rot = 0.0}
+		return {type = TileType.SPAWN, rot = 0.0, overlay = OverlayType.SPAWN_MARKER}
 	if tv == goal:
-		return {type = TileType.GOAL, rot = 0.0}
+		return {type = TileType.GOAL, rot = 0.0, overlay = OverlayType.NONE}
 
 	var has_e := dirs.has(Vector2i( 1,  0))
 	var has_w := dirs.has(Vector2i(-1,  0))
@@ -121,28 +135,41 @@ func _classify_path(tv: Vector2i, dirs: Dictionary,
 
 	# Straight
 	if (has_e or has_w) and not (has_n or has_s):
-		return {type = TileType.PATH_H, rot = 0.0}
+		return {type = TileType.PATH_H, rot = 0.0, overlay = OverlayType.NONE}
 	if (has_n or has_s) and not (has_e or has_w):
-		return {type = TileType.PATH_V, rot = PI * 0.5}
+		return {type = TileType.PATH_V, rot = PI * 0.5, overlay = OverlayType.NONE}
 
 	# Corners  (tile-corner-round.png default = SE corner: enters from W, exits to S)
-	if has_e and has_s:  return {type = TileType.CORNER_SE, rot = 0.0}
-	if has_s and has_w:  return {type = TileType.CORNER_SW, rot = PI * 0.5}
-	if has_w and has_n:  return {type = TileType.CORNER_NW, rot = PI}
-	if has_n and has_e:  return {type = TileType.CORNER_NE, rot = PI * 1.5}
+	if has_e and has_s:  return {type = TileType.CORNER_SE, rot = 0.0,       overlay = OverlayType.NONE}
+	if has_s and has_w:  return {type = TileType.CORNER_SW, rot = PI * 0.5,  overlay = OverlayType.NONE}
+	if has_w and has_n:  return {type = TileType.CORNER_NW, rot = PI,        overlay = OverlayType.NONE}
+	if has_n and has_e:  return {type = TileType.CORNER_NE, rot = PI * 1.5,  overlay = OverlayType.NONE}
 
 	# Fallback: treat as horizontal
-	return {type = TileType.PATH_H, rot = 0.0}
+	return {type = TileType.PATH_H, rot = 0.0, overlay = OverlayType.NONE}
 
 
 func _random_grass(rng: RandomNumberGenerator) -> Dictionary:
 	var r := rng.randf()
-	var t: TileType
-	if r < 0.65:  t = TileType.GRASS
-	elif r < 0.80: t = TileType.GRASS_BUMP
-	elif r < 0.90: t = TileType.GRASS_ROCK
-	else:          t = TileType.GRASS_TREE
-	return {type = t, rot = 0.0}
+	var tile_type: TileType
+	var overlay: OverlayType = OverlayType.NONE
+
+	if r < 0.55:
+		tile_type = TileType.GRASS
+		# Small chance of a detail overlay on plain grass
+		var r2 := rng.randf()
+		if r2 < 0.06:
+			overlay = OverlayType.CRYSTAL
+	elif r < 0.72:
+		tile_type = TileType.GRASS_BUMP
+	elif r < 0.84:
+		tile_type = TileType.GRASS_ROCK
+		overlay = OverlayType.ROCKS_LARGE
+	else:
+		tile_type = TileType.GRASS_TREE
+		overlay = OverlayType.TREE_LARGE
+
+	return {type = tile_type, rot = 0.0, overlay = overlay}
 
 
 # ── Drawing ──────────────────────────────────────────────────
@@ -165,15 +192,19 @@ func _draw() -> void:
 			var bg := BG_PATH if is_path else BG_GRASS
 			draw_rect(Rect2(ox, oy, TILE_SIZE, TILE_SIZE), bg)
 
-			# Sprite
-			if not _tex.has(cell_type):
-				continue
-			var tex: Texture2D = _tex[cell_type]
-			var rot: float = cell.rot
-			if rot == 0.0:
-				draw_texture(tex, Vector2(ox, oy))
-			else:
-				var center := Vector2(ox + HALF, oy + HALF)
-				draw_set_transform(center, rot, Vector2.ONE)
-				draw_texture(tex, Vector2(-HALF, -HALF))
-				draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			# Base tile sprite
+			if _tex.has(cell_type):
+				var tex: Texture2D = _tex[cell_type]
+				var rot: float = cell.rot
+				if rot == 0.0:
+					draw_texture(tex, Vector2(ox, oy))
+				else:
+					var center := Vector2(ox + HALF, oy + HALF)
+					draw_set_transform(center, rot, Vector2.ONE)
+					draw_texture(tex, Vector2(-HALF, -HALF))
+					draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+			# Detail overlay sprite (3D objects placed on grass tiles)
+			var ov: OverlayType = cell.overlay
+			if ov != OverlayType.NONE and _overlay_tex.has(ov):
+				draw_texture(_overlay_tex[ov], Vector2(ox, oy))
