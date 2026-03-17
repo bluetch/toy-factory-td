@@ -73,6 +73,7 @@ entries = Array[ExtResource("3_waveentry")]([SubResource("WaveEntry_w4_g1"), Sub
 
 [resource]
 script = ExtResource("1_leveldata")
+level_id = 1
 level_name = "工廠東翼"
 description = "Coco 的第一次出擊。在熟悉中重新站立。"
 starting_lives = 20

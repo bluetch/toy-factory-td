@@ -31,12 +31,16 @@ const SETTING_MUSIC_VOLUME: String = "music_volume"
 ## ── 音樂軌道路徑 (Music Track Paths) ────────────────────────
 ## 將音樂檔案放置於對應路徑後即可自動載入並播放。
 ## 格式：Ogg Vorbis（.ogg），建議取自 OpenGameArt / Freesound（CC0 授權）。
+## 每個軌道依序嘗試路徑清單，第一個存在的檔案將被載入。
+## 這樣可以讓高品質 Sonniss 檔案自動覆蓋佔位 .ogg。
 const MUSIC_TRACKS: Dictionary = {
-	"menu":      "res://assets/audio/music/music_menu.ogg",
-	"gameplay":  "res://assets/audio/music/music_gameplay.ogg",
-	"boss":      "res://assets/audio/music/music_boss.ogg",
-	"victory":   "res://assets/audio/music/music_victory.ogg",
-	"story":     "res://assets/audio/music/music_story.ogg",
+	"menu":     ["res://assets/audio/music/music_menu_box.wav",
+	             "res://assets/audio/music/music_menu.ogg"],
+	"gameplay": ["res://assets/audio/music/music_gameplay.ogg"],
+	"boss":     ["res://assets/audio/music/music_boss.ogg"],
+	"victory":  ["res://assets/audio/music/music_victory.ogg"],
+	"story":    ["res://assets/audio/music/music_story.wav",
+	             "res://assets/audio/music/music_story.ogg"],
 }
 
 ## 目前正在播放的軌道名稱（空字串 = 無音樂）
@@ -89,20 +93,27 @@ func _ready() -> void:
 	_build_players()
 	_load_volumes_from_save()
 	ui_click_sfx        = load("res://assets/audio/ui_click.wav")
-	_sfx_tower_place    = load("res://assets/audio/sfx_tower_place.ogg")
+	_sfx_tower_place    = _load_first(["res://assets/audio/sfx_tower_place_hq.wav",
+	                                   "res://assets/audio/sfx_tower_place.ogg"])
 	_sfx_tower_upgrade  = load("res://assets/audio/sfx_tower_upgrade.ogg")
 	_sfx_tower_sell     = load("res://assets/audio/sfx_tower_sell.ogg")
 	_sfx_enemy_die      = load("res://assets/audio/sfx_enemy_die.ogg")
 	_sfx_life_lost      = load("res://assets/audio/sfx_life_lost.ogg")
 	_sfx_game_over      = load("res://assets/audio/sfx_game_over.ogg")
 	_sfx_victory_sting  = load("res://assets/audio/sfx_victory.ogg")
-	## Optional dedicated files first; fall back to Kenney packs if present
-	_try_load_sfx("res://assets/audio/sfx_enemy_hit.ogg",         "_sfx_enemy_hit")
-	_try_load_sfx("res://assets/audio/sfx_slow_applied.ogg",      "_sfx_slow_applied")
-	_try_load_sfx("res://assets/audio/sfx_explosion.ogg",         "_sfx_explosion")
-	_try_load_sfx("res://assets/audio/sfx_tower_select.ogg",      "_sfx_tower_select")
-	_try_load_sfx("res://assets/audio/sfx_invalid_placement.ogg", "_sfx_invalid_placement")
-	## Kenney fallbacks (always present)
+	## Sonniss high-quality SFX (tower-defense specific, best quality)
+	_try_load_sfx("res://assets/audio/sfx_enemy_hit.wav",         "_sfx_enemy_hit")
+	_try_load_sfx("res://assets/audio/sfx_slow_applied.wav",      "_sfx_slow_applied")
+	_try_load_sfx("res://assets/audio/sfx_explosion.wav",         "_sfx_explosion")
+	_try_load_sfx("res://assets/audio/sfx_tower_select.wav",      "_sfx_tower_select")
+	_try_load_sfx("res://assets/audio/sfx_invalid_placement.wav", "_sfx_invalid_placement")
+	## .ogg custom files (second priority)
+	if _sfx_enemy_hit     == null: _try_load_sfx("res://assets/audio/sfx_enemy_hit.ogg",         "_sfx_enemy_hit")
+	if _sfx_slow_applied  == null: _try_load_sfx("res://assets/audio/sfx_slow_applied.ogg",      "_sfx_slow_applied")
+	if _sfx_explosion     == null: _try_load_sfx("res://assets/audio/sfx_explosion.ogg",         "_sfx_explosion")
+	if _sfx_tower_select  == null: _try_load_sfx("res://assets/audio/sfx_tower_select.ogg",      "_sfx_tower_select")
+	if _sfx_invalid_placement == null: _try_load_sfx("res://assets/audio/sfx_invalid_placement.ogg", "_sfx_invalid_placement")
+	## Kenney fallbacks (last resort)
 	if _sfx_enemy_hit     == null:
 		_try_load_sfx("res://assets/kenney_impact-sounds/Audio/impactGeneric_light_000.ogg", "_sfx_enemy_hit")
 	if _sfx_slow_applied  == null:
@@ -187,13 +198,16 @@ func play_track(track_name: String, fade_in: bool = true) -> void:
 	if not MUSIC_TRACKS.has(track_name):
 		push_warning("AudioManager: Unknown track '%s'." % track_name)
 		return
-	var path: String = MUSIC_TRACKS[track_name]
-	if not ResourceLoader.exists(path):
-		# 音樂檔案尚未放入，靜默略過
-		return
-	var stream: AudioStream = load(path)
+	# Each track is now an Array of candidate paths; first existing file wins.
+	var paths: Array = MUSIC_TRACKS[track_name]
+	var stream: AudioStream = null
+	for path: String in paths:
+		if ResourceLoader.exists(path):
+			stream = load(path)
+			if stream != null:
+				break
 	if stream == null:
-		return
+		return   ## 所有候選路徑皆不存在，靜默略過
 	_current_track = track_name
 	play_music(stream, fade_in)
 
@@ -262,6 +276,15 @@ func set_sfx_volume(vol: float) -> void:
 
 
 # ── 内部工具 (Internal Helpers) ───────────────────────────────
+
+## Load the first existing path from a list; returns null if none found.
+func _load_first(paths: Array) -> AudioStream:
+	for path: String in paths:
+		if ResourceLoader.exists(path):
+			var s: AudioStream = load(path)
+			if s != null:
+				return s
+	return null
 
 ## Load an optional SFX file into the named property; silent no-op if missing.
 func _try_load_sfx(path: String, property: String) -> void:

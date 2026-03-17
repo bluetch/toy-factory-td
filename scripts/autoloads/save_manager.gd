@@ -53,11 +53,8 @@ func _default_data() -> Dictionary:
 	return {
 		"unlocked_levels": [1],
 		"high_scores": {
-			"1": 0,
-			"2": 0,
-			"3": 0,
-			"4": 0,
-			"5": 0
+			"1": 0, "2": 0, "3": 0, "4": 0,
+			"5": 0, "6": 0, "7": 0, "8": 0
 		},
 		"settings": {
 			"music_volume":   1.0,
