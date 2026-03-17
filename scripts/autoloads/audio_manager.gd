@@ -66,13 +66,18 @@ const SFX_POOL_SIZE: int = 8
 var ui_click_sfx: AudioStream = null
 
 ## Game event SFX (loaded lazily — null if file not present)
-var _sfx_tower_place:   AudioStream = null
-var _sfx_tower_upgrade: AudioStream = null
-var _sfx_tower_sell:    AudioStream = null
-var _sfx_enemy_die:     AudioStream = null
-var _sfx_life_lost:     AudioStream = null
-var _sfx_game_over:     AudioStream = null
-var _sfx_victory_sting: AudioStream = null
+var _sfx_tower_place:        AudioStream = null
+var _sfx_tower_upgrade:      AudioStream = null
+var _sfx_tower_sell:         AudioStream = null
+var _sfx_enemy_die:          AudioStream = null
+var _sfx_life_lost:          AudioStream = null
+var _sfx_game_over:          AudioStream = null
+var _sfx_victory_sting:      AudioStream = null
+var _sfx_enemy_hit:          AudioStream = null
+var _sfx_slow_applied:       AudioStream = null
+var _sfx_explosion:          AudioStream = null
+var _sfx_tower_select:       AudioStream = null
+var _sfx_invalid_placement:  AudioStream = null
 
 ## Active fade tween so we can kill it before starting a new one.
 var _fade_tween: Tween = null
@@ -91,6 +96,12 @@ func _ready() -> void:
 	_sfx_life_lost      = load("res://assets/audio/sfx_life_lost.ogg")
 	_sfx_game_over      = load("res://assets/audio/sfx_game_over.ogg")
 	_sfx_victory_sting  = load("res://assets/audio/sfx_victory.ogg")
+	## Optional files — silently ignored if not present
+	_try_load_sfx("res://assets/audio/sfx_enemy_hit.ogg",         "_sfx_enemy_hit")
+	_try_load_sfx("res://assets/audio/sfx_slow_applied.ogg",      "_sfx_slow_applied")
+	_try_load_sfx("res://assets/audio/sfx_explosion.ogg",         "_sfx_explosion")
+	_try_load_sfx("res://assets/audio/sfx_tower_select.ogg",      "_sfx_tower_select")
+	_try_load_sfx("res://assets/audio/sfx_invalid_placement.ogg", "_sfx_invalid_placement")
 
 
 ## Create and configure both AudioStreamPlayer children.
@@ -206,13 +217,18 @@ func play_ui_click() -> void:
 	play_sfx(ui_click_sfx)
 
 ## Game event SFX convenience methods
-func play_tower_place()   -> void: play_sfx(_sfx_tower_place)
-func play_tower_upgrade() -> void: play_sfx(_sfx_tower_upgrade)
-func play_tower_sell()    -> void: play_sfx(_sfx_tower_sell)
-func play_enemy_die()     -> void: play_sfx(_sfx_enemy_die)
-func play_life_lost()     -> void: play_sfx(_sfx_life_lost)
-func play_game_over()     -> void: play_sfx(_sfx_game_over)
-func play_victory_sting() -> void: play_sfx(_sfx_victory_sting)
+func play_tower_place()        -> void: play_sfx(_sfx_tower_place)
+func play_tower_upgrade()      -> void: play_sfx(_sfx_tower_upgrade)
+func play_tower_sell()         -> void: play_sfx(_sfx_tower_sell)
+func play_enemy_die()          -> void: play_sfx(_sfx_enemy_die)
+func play_life_lost()          -> void: play_sfx(_sfx_life_lost)
+func play_game_over()          -> void: play_sfx(_sfx_game_over)
+func play_victory_sting()      -> void: play_sfx(_sfx_victory_sting)
+func play_enemy_hit()          -> void: play_sfx(_sfx_enemy_hit)
+func play_slow_applied()       -> void: play_sfx(_sfx_slow_applied)
+func play_explosion()          -> void: play_sfx(_sfx_explosion)
+func play_tower_select()       -> void: play_sfx(_sfx_tower_select)
+func play_invalid_placement()  -> void: play_sfx(_sfx_invalid_placement)
 
 
 # ── 音量控制 (Volume Control) ─────────────────────────────────
@@ -235,6 +251,12 @@ func set_sfx_volume(vol: float) -> void:
 
 
 # ── 内部工具 (Internal Helpers) ───────────────────────────────
+
+## Load an optional SFX file into the named property; silent no-op if missing.
+func _try_load_sfx(path: String, property: String) -> void:
+	if ResourceLoader.exists(path):
+		set(property, load(path))
+
 
 ## Convert a linear 0.0–1.0 value to dB and assign it to
 ## [param player].  Values at or below MIN_VOLUME_LINEAR are

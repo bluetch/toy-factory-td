@@ -24,6 +24,7 @@ func _on_hit() -> void:
         var body: Node2D = result["collider"] as Node2D
         if body != null and body.is_in_group("enemies"):
             _damage_enemy(body)
+    AudioManager.play_explosion()
     _spawn_explosion_ring()
     queue_free()
 

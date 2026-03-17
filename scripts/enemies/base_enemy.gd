@@ -17,6 +17,7 @@ var _path_progress: float = 0.0
 ## Slow effect state
 var _speed_multiplier: float = 1.0
 var _slow_timer: float = 0.0
+var _is_slowed: bool = false
 
 @onready var health_bar_bg: ColorRect  = $HealthBar/Background
 @onready var health_bar_fill: ColorRect = $HealthBar/Fill
@@ -49,6 +50,9 @@ func _physics_process(delta: float) -> void:
         _slow_timer -= delta
         if _slow_timer <= 0.0:
             _speed_multiplier = 1.0
+            _is_slowed = false
+            if _visual != null:
+                _visual.modulate = Color(1, 1, 1)
 
     # Move toward current waypoint
     var target_pos := _waypoints[_current_waypoint_index]
@@ -75,6 +79,10 @@ func _physics_process(delta: float) -> void:
 func apply_slow(factor: float, duration: float) -> void:
     _speed_multiplier = minf(_speed_multiplier, factor)
     _slow_timer = maxf(_slow_timer, duration)
+    if not _is_slowed:
+        _is_slowed = true
+        if _visual != null:
+            _visual.modulate = Color(0.55, 0.85, 1.0)
 
 ## Returns total path progress for targeting priority
 func get_path_progress() -> float:
@@ -87,6 +95,8 @@ func take_damage_piercing(damage: float) -> void:
     current_health -= damage
     _update_health_bar()
     _flash_hit()
+    if int(damage) > 0:
+        _spawn_damage_text(int(damage))
     if current_health <= 0.0:
         _die()
 
@@ -98,16 +108,20 @@ func take_damage(damage: float) -> void:
     current_health -= effective_damage
     _update_health_bar()
     _flash_hit()
+    if int(effective_damage) > 0:
+        _spawn_damage_text(int(effective_damage))
     if current_health <= 0.0:
         _die()
 
 ## Brief white flash to signal a hit.
 func _flash_hit() -> void:
+    AudioManager.play_enemy_hit()
     if _visual == null:
         return
+    var base_color := Color(0.55, 0.85, 1.0) if _is_slowed else Color(1, 1, 1)
     var tween := create_tween()
     tween.tween_property(_visual, "modulate", Color(2.5, 2.5, 2.5), 0.05)
-    tween.tween_property(_visual, "modulate", Color(1, 1, 1), 0.12)
+    tween.tween_property(_visual, "modulate", base_color, 0.12)
 
 func _die() -> void:
     # Remove from group immediately so towers stop targeting this enemy
@@ -132,6 +146,17 @@ func _die() -> void:
         tween.tween_property(_visual, "modulate:a", 0.0, 0.25)
         await tween.finished
     queue_free()
+
+## Spawn a red damage number slightly to the side of the enemy.
+func _spawn_damage_text(amount: int) -> void:
+    var packed: PackedScene = load("res://scenes/ui/FloatingText.tscn")
+    if packed == null or get_parent() == null:
+        return
+    var ft: FloatingText = packed.instantiate() as FloatingText
+    get_parent().add_child(ft)
+    var x_offset := randf_range(-16.0, 16.0)
+    ft.global_position = global_position + Vector2(x_offset, -18)
+    ft.setup("-%d" % amount, Color(1.0, 0.35, 0.35))
 
 ## Spawn a floating gold label above the enemy's death position.
 func _spawn_float_text(text: String, color: Color) -> void:

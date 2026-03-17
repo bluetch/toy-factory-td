@@ -150,6 +150,7 @@ func _process(delta: float) -> void:
 func begin_tower_placement(tower_data: TowerData) -> void:
 	# Check if player can afford it
 	if not GameManager.can_afford(tower_data.build_cost):
+		AudioManager.play_invalid_placement()
 		hud.show_message("金幣不足！")
 		return
 	_selected_tower_data = tower_data
@@ -164,9 +165,11 @@ func cancel_tower_placement() -> void:
 func _try_place_tower(world_pos: Vector2) -> void:
 	var tile := grid_manager.world_to_tile(world_pos)
 	if not grid_manager.can_build(tile):
+		AudioManager.play_invalid_placement()
 		hud.show_message("此處無法建造！")
 		return
 	if not GameManager.spend_gold(_selected_tower_data.build_cost):
+		AudioManager.play_invalid_placement()
 		hud.show_message("金幣不足！")
 		return
 
@@ -252,6 +255,7 @@ func _on_all_waves_completed() -> void:
 func _on_tower_selected(tower: Node) -> void:
 	_selected_tower_node = tower
 	cancel_tower_placement()
+	AudioManager.play_tower_select()
 	hud.show_upgrade_panel(tower)
 
 func _on_tower_deselected() -> void:

@@ -29,6 +29,7 @@ func _on_hit() -> void:
             _damage_enemy(body)
             if body.has_method("apply_slow"):
                 body.apply_slow(_slow_factor, _slow_duration)
+    AudioManager.play_slow_applied()
     _spawn_freeze_ring()
     queue_free()
 
