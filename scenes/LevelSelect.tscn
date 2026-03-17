@@ -1,7 +1,11 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/level_select.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/ui/main_menu_bg.gd" id="2"]
+[ext_resource type="Texture2D" path="res://assets/kenney_tower-defense-kit/Previews/enemy-ufo-a.png" id="ufo_a"]
+[ext_resource type="Texture2D" path="res://assets/kenney_tower-defense-kit/Previews/enemy-ufo-b.png" id="ufo_b"]
+[ext_resource type="Texture2D" path="res://assets/kenney_tower-defense-kit/Previews/enemy-ufo-c.png" id="ufo_c"]
+[ext_resource type="Texture2D" path="res://assets/kenney_tower-defense-kit/Previews/enemy-ufo-d.png" id="ufo_d"]
 
 [sub_resource type="StyleBoxFlat" id="SBF_card"]
 bg_color = Color(0.05, 0.08, 0.18, 0.92)
@@ -215,10 +219,12 @@ theme_override_colors/font_color = Color(0.97, 0.84, 0.42, 1.0)
 text = "第一關：幽谷之路"
 horizontal_alignment = 1
 
-[node name="LevelPreview" type="ColorRect" parent="LevelsContainer/LevelCard1/VBoxContainer"]
+[node name="LevelPreview" type="TextureRect" parent="LevelsContainer/LevelCard1/VBoxContainer"]
 layout_mode = 2
 custom_minimum_size = Vector2(200, 110)
-color = Color(0.18, 0.35, 0.16, 1)
+texture = ExtResource("ufo_a")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Description" type="Label" parent="LevelsContainer/LevelCard1/VBoxContainer"]
 layout_mode = 2
@@ -256,6 +262,23 @@ grow_vertical = 2
 color = Color(0, 0, 0, 0.7)
 visible = false
 
+
+[node name="LockLabel" type="Label" parent="LevelsContainer/LevelCard1/VBoxContainer/LockedOverlay"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -60.0
+offset_top = -25.0
+offset_right = 60.0
+offset_bottom = 25.0
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 0.90)
+text = "🔒
+未解鎖"
+horizontal_alignment = 1
+vertical_alignment = 1
 [node name="LevelCard2" type="PanelContainer" parent="LevelsContainer"]
 custom_minimum_size = Vector2(200, 270)
 theme_override_styles/panel = SubResource("SBF_card")
@@ -271,10 +294,12 @@ theme_override_colors/font_color = Color(0.97, 0.84, 0.42, 1.0)
 text = "第二關：蜿蜒迷徑"
 horizontal_alignment = 1
 
-[node name="LevelPreview" type="ColorRect" parent="LevelsContainer/LevelCard2/VBoxContainer"]
+[node name="LevelPreview" type="TextureRect" parent="LevelsContainer/LevelCard2/VBoxContainer"]
 layout_mode = 2
 custom_minimum_size = Vector2(200, 110)
-color = Color(0.20, 0.38, 0.18, 1)
+texture = ExtResource("ufo_b")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Description" type="Label" parent="LevelsContainer/LevelCard2/VBoxContainer"]
 layout_mode = 2
@@ -312,6 +337,23 @@ grow_vertical = 2
 color = Color(0, 0, 0, 0.7)
 visible = false
 
+
+[node name="LockLabel" type="Label" parent="LevelsContainer/LevelCard2/VBoxContainer/LockedOverlay"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -60.0
+offset_top = -25.0
+offset_right = 60.0
+offset_bottom = 25.0
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 0.90)
+text = "🔒
+未解鎖"
+horizontal_alignment = 1
+vertical_alignment = 1
 [node name="LevelCard3" type="PanelContainer" parent="LevelsContainer"]
 custom_minimum_size = Vector2(200, 270)
 theme_override_styles/panel = SubResource("SBF_card")
@@ -327,10 +369,12 @@ theme_override_colors/font_color = Color(0.97, 0.84, 0.42, 1.0)
 text = "第三關：鐵壁攻防"
 horizontal_alignment = 1
 
-[node name="LevelPreview" type="ColorRect" parent="LevelsContainer/LevelCard3/VBoxContainer"]
+[node name="LevelPreview" type="TextureRect" parent="LevelsContainer/LevelCard3/VBoxContainer"]
 layout_mode = 2
 custom_minimum_size = Vector2(200, 110)
-color = Color(0.22, 0.36, 0.14, 1)
+texture = ExtResource("ufo_c")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Description" type="Label" parent="LevelsContainer/LevelCard3/VBoxContainer"]
 layout_mode = 2
@@ -368,6 +412,23 @@ grow_vertical = 2
 color = Color(0, 0, 0, 0.7)
 visible = false
 
+
+[node name="LockLabel" type="Label" parent="LevelsContainer/LevelCard3/VBoxContainer/LockedOverlay"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -60.0
+offset_top = -25.0
+offset_right = 60.0
+offset_bottom = 25.0
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 0.90)
+text = "🔒
+未解鎖"
+horizontal_alignment = 1
+vertical_alignment = 1
 [node name="LevelCard4" type="PanelContainer" parent="LevelsContainer"]
 custom_minimum_size = Vector2(200, 270)
 theme_override_styles/panel = SubResource("SBF_card")
@@ -383,10 +444,13 @@ theme_override_colors/font_color = Color(0.97, 0.84, 0.42, 1.0)
 text = "第四關：北側防線"
 horizontal_alignment = 1
 
-[node name="LevelPreview" type="ColorRect" parent="LevelsContainer/LevelCard4/VBoxContainer"]
+[node name="LevelPreview" type="TextureRect" parent="LevelsContainer/LevelCard4/VBoxContainer"]
 layout_mode = 2
 custom_minimum_size = Vector2(200, 110)
-color = Color(0.14, 0.28, 0.34, 1)
+texture = ExtResource("ufo_c")
+expand_mode = 1
+stretch_mode = 5
+modulate = Color(0.85, 0.90, 1.0, 1.0)
 
 [node name="Description" type="Label" parent="LevelsContainer/LevelCard4/VBoxContainer"]
 layout_mode = 2
@@ -424,6 +488,23 @@ grow_vertical = 2
 color = Color(0, 0, 0, 0.7)
 visible = false
 
+
+[node name="LockLabel" type="Label" parent="LevelsContainer/LevelCard4/VBoxContainer/LockedOverlay"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -60.0
+offset_top = -25.0
+offset_right = 60.0
+offset_bottom = 25.0
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 0.90)
+text = "🔒
+未解鎖"
+horizontal_alignment = 1
+vertical_alignment = 1
 [node name="LevelCard5" type="PanelContainer" parent="LevelsContainer"]
 custom_minimum_size = Vector2(200, 270)
 theme_override_styles/panel = SubResource("SBF_card")
@@ -439,10 +520,12 @@ theme_override_colors/font_color = Color(0.97, 0.84, 0.42, 1.0)
 text = "第五關：記憶回廊"
 horizontal_alignment = 1
 
-[node name="LevelPreview" type="ColorRect" parent="LevelsContainer/LevelCard5/VBoxContainer"]
+[node name="LevelPreview" type="TextureRect" parent="LevelsContainer/LevelCard5/VBoxContainer"]
 layout_mode = 2
 custom_minimum_size = Vector2(200, 110)
-color = Color(0.20, 0.12, 0.32, 1)
+texture = ExtResource("ufo_d")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Description" type="Label" parent="LevelsContainer/LevelCard5/VBoxContainer"]
 layout_mode = 2
@@ -480,6 +563,23 @@ grow_vertical = 2
 color = Color(0, 0, 0, 0.7)
 visible = false
 
+
+[node name="LockLabel" type="Label" parent="LevelsContainer/LevelCard5/VBoxContainer/LockedOverlay"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -60.0
+offset_top = -25.0
+offset_right = 60.0
+offset_bottom = 25.0
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 0.90)
+text = "🔒
+未解鎖"
+horizontal_alignment = 1
+vertical_alignment = 1
 [node name="LevelCard6" type="PanelContainer" parent="LevelsContainer"]
 custom_minimum_size = Vector2(200, 270)
 theme_override_styles/panel = SubResource("SBF_card")
@@ -495,10 +595,13 @@ theme_override_colors/font_color = Color(0.97, 0.84, 0.42, 1.0)
 text = "第六關：廢墟之間"
 horizontal_alignment = 1
 
-[node name="LevelPreview" type="ColorRect" parent="LevelsContainer/LevelCard6/VBoxContainer"]
+[node name="LevelPreview" type="TextureRect" parent="LevelsContainer/LevelCard6/VBoxContainer"]
 layout_mode = 2
 custom_minimum_size = Vector2(200, 110)
-color = Color(0.28, 0.22, 0.14, 1)
+texture = ExtResource("ufo_d")
+expand_mode = 1
+stretch_mode = 5
+modulate = Color(1.0, 0.75, 0.60, 1.0)
 
 [node name="Description" type="Label" parent="LevelsContainer/LevelCard6/VBoxContainer"]
 layout_mode = 2
@@ -536,6 +639,23 @@ grow_vertical = 2
 color = Color(0, 0, 0, 0.7)
 visible = false
 
+
+[node name="LockLabel" type="Label" parent="LevelsContainer/LevelCard6/VBoxContainer/LockedOverlay"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -60.0
+offset_top = -25.0
+offset_right = 60.0
+offset_bottom = 25.0
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 0.90)
+text = "🔒
+未解鎖"
+horizontal_alignment = 1
+vertical_alignment = 1
 [node name="LevelCard7" type="PanelContainer" parent="LevelsContainer"]
 custom_minimum_size = Vector2(200, 270)
 theme_override_styles/panel = SubResource("SBF_card")
@@ -551,10 +671,13 @@ theme_override_colors/font_color = Color(0.97, 0.84, 0.42, 1.0)
 text = "第七關：機械迷宮"
 horizontal_alignment = 1
 
-[node name="LevelPreview" type="ColorRect" parent="LevelsContainer/LevelCard7/VBoxContainer"]
+[node name="LevelPreview" type="TextureRect" parent="LevelsContainer/LevelCard7/VBoxContainer"]
 layout_mode = 2
 custom_minimum_size = Vector2(200, 110)
-color = Color(0.15, 0.14, 0.28, 1)
+texture = ExtResource("ufo_d")
+expand_mode = 1
+stretch_mode = 5
+modulate = Color(0.80, 0.65, 1.0, 1.0)
 
 [node name="Description" type="Label" parent="LevelsContainer/LevelCard7/VBoxContainer"]
 layout_mode = 2
@@ -592,6 +715,23 @@ grow_vertical = 2
 color = Color(0, 0, 0, 0.7)
 visible = false
 
+
+[node name="LockLabel" type="Label" parent="LevelsContainer/LevelCard7/VBoxContainer/LockedOverlay"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -60.0
+offset_top = -25.0
+offset_right = 60.0
+offset_bottom = 25.0
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 0.90)
+text = "🔒
+未解鎖"
+horizontal_alignment = 1
+vertical_alignment = 1
 [node name="LevelCard8" type="PanelContainer" parent="LevelsContainer"]
 custom_minimum_size = Vector2(200, 270)
 theme_override_styles/panel = SubResource("SBF_card")
@@ -607,10 +747,13 @@ theme_override_colors/font_color = Color(0.97, 0.84, 0.42, 1.0)
 text = "第八關：最終決戰"
 horizontal_alignment = 1
 
-[node name="LevelPreview" type="ColorRect" parent="LevelsContainer/LevelCard8/VBoxContainer"]
+[node name="LevelPreview" type="TextureRect" parent="LevelsContainer/LevelCard8/VBoxContainer"]
 layout_mode = 2
 custom_minimum_size = Vector2(200, 110)
-color = Color(0.36, 0.07, 0.07, 1)
+texture = ExtResource("ufo_d")
+expand_mode = 1
+stretch_mode = 5
+modulate = Color(1.0, 0.45, 0.40, 1.0)
 
 [node name="Description" type="Label" parent="LevelsContainer/LevelCard8/VBoxContainer"]
 layout_mode = 2
@@ -647,3 +790,20 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.7)
 visible = false
+
+[node name="LockLabel" type="Label" parent="LevelsContainer/LevelCard8/VBoxContainer/LockedOverlay"]
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -60.0
+offset_top = -25.0
+offset_right = 60.0
+offset_bottom = 25.0
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 0.90)
+text = "🔒
+未解鎖"
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -10,6 +10,7 @@
 [sub_resource type="Resource" id="WaveEntry_w1_g1"]
 script = ExtResource("3_waveentry")
 enemy_data = ExtResource("4_basic")
+count = 3
 spawn_interval = 1.5
 
 [sub_resource type="Resource" id="WaveData_w1"]
@@ -57,6 +58,7 @@ count = 10
 [sub_resource type="Resource" id="WaveEntry_w4_g2"]
 script = ExtResource("3_waveentry")
 enemy_data = ExtResource("5_fast")
+count = 5
 
 [sub_resource type="Resource" id="WaveEntry_w4_g3"]
 script = ExtResource("3_waveentry")
