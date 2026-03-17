@@ -26,6 +26,9 @@ const MESSAGE_DURATION := 2.0
 var _wave_banner: Label = null
 var _banner_tween: Tween = null
 
+## Tween for pulsing the next-wave button
+var _wave_btn_tween: Tween = null
+
 ## Red vignette overlay that pulses when lives are critically low
 var _vignette: ColorRect = null
 var _vignette_tween: Tween = null
@@ -57,10 +60,15 @@ func _ready() -> void:
 	_on_score_changed(GameManager.score)
 	_on_speed_changed(GameManager.game_speed)
 
-	# Level name from LevelData resource
+	# Level name + difficulty from LevelData resource
 	var level_res: Resource = load("res://data/levels/level_%d.tres" % GameManager.current_level_id)
 	if level_res != null and level_res.get("level_name") != null:
-		level_name_label.text = str(level_res.get("level_name"))
+		var diff_names := ["簡單", "普通", "困難"]
+		var diff_colors := [Color(0.50, 0.90, 0.50), Color(0.85, 0.80, 0.40), Color(1.0, 0.45, 0.35)]
+		var diff_idx: int = GameManager.current_difficulty
+		var diff_str: String = diff_names[diff_idx]
+		level_name_label.text = "%s  [%s]" % [str(level_res.get("level_name")), diff_str]
+		level_name_label.add_theme_color_override("font_color", diff_colors[diff_idx])
 
 ## Build a centered wave banner label (hidden until a wave starts)
 func _build_wave_banner() -> void:
@@ -90,7 +98,7 @@ func _on_wave_started(wave_number: int, total_waves: int) -> void:
 		_banner_tween.kill()
 	_banner_tween = create_tween()
 	_banner_tween.tween_property(_wave_banner, "modulate:a", 1.0, 0.25)
-	_banner_tween.tween_interval(1.5)
+	_banner_tween.tween_interval(2.5)
 	_banner_tween.tween_property(_wave_banner, "modulate:a", 0.0, 0.5)
 
 	# Also update wave label immediately
@@ -144,6 +152,22 @@ func on_next_wave_ready(wave_number: int, total_waves: int) -> void:
 	wave_label.text = "波次: %d / %d" % [current, total_waves]
 	next_wave_btn.text = "開始波次 %d ▶" % wave_number
 	next_wave_btn.show()
+	_start_wave_btn_pulse()
+
+## Pulse the next-wave button to draw the player's eye
+func _start_wave_btn_pulse() -> void:
+	_stop_wave_btn_pulse()
+	_wave_btn_tween = create_tween().set_loops()
+	_wave_btn_tween.tween_property(next_wave_btn, "modulate", Color(1.3, 1.3, 0.8, 1.0), 0.5) \
+		.set_trans(Tween.TRANS_SINE)
+	_wave_btn_tween.tween_property(next_wave_btn, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.5) \
+		.set_trans(Tween.TRANS_SINE)
+
+func _stop_wave_btn_pulse() -> void:
+	if _wave_btn_tween != null and _wave_btn_tween.is_valid():
+		_wave_btn_tween.kill()
+		_wave_btn_tween = null
+	next_wave_btn.modulate = Color(1.0, 1.0, 1.0, 1.0)
 
 ## Called every frame by WaveManager.next_wave_countdown signal
 func on_wave_countdown(seconds: float) -> void:
@@ -153,6 +177,7 @@ func on_wave_countdown(seconds: float) -> void:
 		next_wave_btn.text = "準備中…"
 
 func on_all_waves_done() -> void:
+	_stop_wave_btn_pulse()
 	next_wave_btn.hide()
 	wave_label.text = "全部波次完成！"
 
@@ -202,6 +227,7 @@ func _on_pause_pressed() -> void:
 
 func _on_next_wave_pressed() -> void:
 	AudioManager.play_ui_click()
+	_stop_wave_btn_pulse()
 	next_wave_btn.hide()
 	# GameWorld owns WaveManager, look it up
 	var wm: Node = get_tree().get_first_node_in_group("wave_manager")

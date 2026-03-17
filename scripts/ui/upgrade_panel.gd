@@ -37,13 +37,23 @@ func populate(tower: Node) -> void:
 	var upgrade_cost: int = tower.get_upgrade_cost() if tower.has_method("get_upgrade_cost") else 0
 	upgrade_button.visible = can_upgrade
 	if can_upgrade:
+		var affordable: bool = GameManager.can_afford(upgrade_cost)
 		upgrade_button.text = "升級\n%d 💰" % upgrade_cost
-		upgrade_button.disabled = not GameManager.can_afford(upgrade_cost)
+		upgrade_button.disabled = not affordable
+		var cost_color := Color(0.45, 0.90, 0.45) if affordable else Color(1.0, 0.40, 0.35)
+		upgrade_button.add_theme_color_override("font_color",          cost_color)
+		upgrade_button.add_theme_color_override("font_disabled_color", cost_color)
 
 	var sell_val: int = tower.get_sell_value() if tower.has_method("get_sell_value") else 0
 	sell_button.text = "出售\n+%d 💰" % sell_val
 
 func _on_upgrade_pressed() -> void:
+	if _current_tower == null:
+		return
+	var upgrade_cost: int = _current_tower.get_upgrade_cost() if _current_tower.has_method("get_upgrade_cost") else 0
+	if not GameManager.can_afford(upgrade_cost):
+		AudioManager.play_invalid_placement()
+		return
 	AudioManager.play_ui_click()
 	var gw: Node = get_tree().get_first_node_in_group("game_world")
 	if gw and gw.has_method("upgrade_selected_tower"):

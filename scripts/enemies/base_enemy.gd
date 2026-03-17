@@ -82,7 +82,7 @@ func apply_slow(factor: float, duration: float) -> void:
     if not _is_slowed:
         _is_slowed = true
         if _visual != null:
-            _visual.modulate = Color(0.55, 0.85, 1.0)
+            _visual.modulate = Color(0.25, 0.65, 1.0)
 
 ## Returns total path progress for targeting priority
 func get_path_progress() -> float:
@@ -118,7 +118,7 @@ func _flash_hit() -> void:
     AudioManager.play_enemy_hit()
     if _visual == null:
         return
-    var base_color := Color(0.55, 0.85, 1.0) if _is_slowed else Color(1, 1, 1)
+    var base_color := Color(0.25, 0.65, 1.0) if _is_slowed else Color(1, 1, 1)
     var tween := create_tween()
     tween.tween_property(_visual, "modulate", Color(2.5, 2.5, 2.5), 0.05)
     tween.tween_property(_visual, "modulate", base_color, 0.12)

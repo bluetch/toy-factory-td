@@ -71,6 +71,14 @@ func upgrade() -> void:
     _apply_stats()
     _update_detection_area()
     attack_timer.wait_time = 1.0 / current_attack_speed
+    range_circle.queue_redraw()
+    _play_upgrade_animation()
+
+## Brief scale-pulse to confirm upgrade was applied
+func _play_upgrade_animation() -> void:
+    var tween := create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+    tween.tween_property(self, "scale", Vector2(1.35, 1.35), 0.1)
+    tween.tween_property(self, "scale", Vector2.ONE, 0.2)
 
 ## Returns upgrade cost for the NEXT level (0 if max)
 func get_upgrade_cost() -> int:
@@ -93,13 +101,18 @@ func show_range(visible_flag: bool) -> void:
     range_circle.visible = visible_flag
     range_circle.queue_redraw()
 
+## Radians per second the turret rotates toward its target (frame-rate independent)
+const TURRET_ROT_SPEED: float = 8.0
+
 ## Smoothly rotate turret toward current target each frame
 func _process(delta: float) -> void:
     if _turret == null:
         return
     if is_instance_valid(_current_target):
         var desired_angle := (_current_target.global_position - global_position).angle()
-        _turret.rotation = lerp_angle(_turret.rotation, desired_angle, delta * 10.0)
+        var max_step := TURRET_ROT_SPEED * delta
+        var diff := wrapf(desired_angle - _turret.rotation, -PI, PI)
+        _turret.rotation += clampf(diff, -max_step, max_step)
 
 func _on_attack_timer() -> void:
     _current_target = _get_best_target()
