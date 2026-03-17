@@ -3,8 +3,8 @@
 class_name GameOverUI
 extends Control
 
-@onready var score_label:      Label  = $PanelContainer/VBox/ScoreLabel
-@onready var enemies_label:    Label  = $PanelContainer/VBox/EnemiesLabel
+@onready var score_label:      Label  = $PanelContainer/VBox/StatBox/StatVBox/ScoreLabel
+@onready var enemies_label:    Label  = $PanelContainer/VBox/StatBox/StatVBox/EnemiesLabel
 @onready var retry_button:     Button = $PanelContainer/VBox/RetryButton
 @onready var main_menu_button: Button = $PanelContainer/VBox/MainMenuButton
 

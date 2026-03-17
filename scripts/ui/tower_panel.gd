@@ -12,13 +12,13 @@ const TOWER_RESOURCES := [
 	"res://data/towers/sniper_tower.tres",
 ]
 
-## Maps scene filename (without extension) to its Kenney base-sprite path
+## Maps scene filename (without extension) to its Kenney weapon/icon sprite
 const TOWER_PREVIEWS: Dictionary = {
-	"ArrowTower":     "res://assets/kenney_tower-defense-kit/Previews/tower-round-base.png",
-	"CannonTower":    "res://assets/kenney_tower-defense-kit/Previews/tower-square-bottom-a.png",
+	"ArrowTower":     "res://assets/kenney_tower-defense-kit/Previews/weapon-ballista.png",
+	"CannonTower":    "res://assets/kenney_tower-defense-kit/Previews/weapon-cannon.png",
 	"IceTower":       "res://assets/kenney_tower-defense-kit/Previews/tower-round-crystals.png",
-	"LightningTower": "res://assets/kenney_tower-defense-kit/Previews/tower-round-top-b.png",
-	"SniperTower":    "res://assets/kenney_tower-defense-kit/Previews/tower-square-bottom-b.png",
+	"LightningTower": "res://assets/kenney_tower-defense-kit/Previews/tower-round-build-d.png",
+	"SniperTower":    "res://assets/kenney_tower-defense-kit/Previews/weapon-turret.png",
 }
 
 @onready var tower_buttons_container: VBoxContainer = $VBoxContainer/TowerButtonsContainer
@@ -41,10 +41,18 @@ func _build_tower_buttons() -> void:
 			push_warning("TowerPanel: Could not load " + path)
 			continue
 
-		# Outer card — PanelContainer gives a recessed look
+		# Outer card — dark navy with gold border
+		var card_style := StyleBoxFlat.new()
+		card_style.bg_color = Color(0.07, 0.12, 0.26, 0.92)
+		card_style.set_border_width_all(2)
+		card_style.border_color = Color(0.55, 0.43, 0.18, 0.80)
+		card_style.set_corner_radius_all(5)
+		card_style.set_content_margin_all(0.0)
 		var card := PanelContainer.new()
 		card.custom_minimum_size = Vector2(148.0, 62.0)
+		card.add_theme_stylebox_override("panel", card_style)
 		card.set_meta("build_cost", data.build_cost)
+		card.set_meta("card_style", card_style)
 
 		var margin := MarginContainer.new()
 		margin.add_theme_constant_override("margin_left",   6)
@@ -73,12 +81,13 @@ func _build_tower_buttons() -> void:
 		var name_label := Label.new()
 		name_label.text = data.tower_name
 		name_label.add_theme_font_size_override("font_size", 13)
+		name_label.add_theme_color_override("font_color", Color(0.90, 0.86, 0.72, 1.0))
 		name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
 		var cost_label := Label.new()
 		cost_label.text = "💰 %d" % data.build_cost
 		cost_label.add_theme_font_size_override("font_size", 12)
-		cost_label.modulate = Color(1.0, 0.88, 0.25)
+		cost_label.add_theme_color_override("font_color", Color(0.97, 0.84, 0.38, 1.0))
 
 		vbox.add_child(name_label)
 		vbox.add_child(cost_label)
@@ -107,9 +116,14 @@ func _on_tower_button_pressed(data: TowerData) -> void:
 	if game_world != null and game_world.has_method("begin_tower_placement"):
 		game_world.begin_tower_placement(data)
 
-## Dim cards the player can't afford
+## Dim cards the player can't afford; brighten border on affordable ones
 func _on_gold_changed(new_gold: int) -> void:
 	for card in tower_buttons_container.get_children():
 		if card is PanelContainer and card.has_meta("build_cost"):
 			var cost: int = card.get_meta("build_cost")
-			card.modulate.a = 1.0 if new_gold >= cost else 0.45
+			var can: bool = new_gold >= cost
+			card.modulate.a = 1.0 if can else 0.42
+			if card.has_meta("card_style"):
+				var st: StyleBoxFlat = card.get_meta("card_style")
+				st.border_color = Color(0.72, 0.58, 0.22, 0.95) if can \
+						else Color(0.35, 0.28, 0.12, 0.55)

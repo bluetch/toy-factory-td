@@ -16,6 +16,7 @@ const BASE := "res://assets/kenney_tower-defense-kit/Previews/"
 ## Tile-type enum stored per cell
 enum TileType {
 	GRASS, GRASS_BUMP, GRASS_TREE, GRASS_ROCK,
+	GRASS_HILL, GRASS_CRYSTAL, GRASS_TREE2,
 	PATH_H, PATH_V,
 	CORNER_SE, CORNER_SW, CORNER_NE, CORNER_NW,
 	SPAWN, GOAL
@@ -48,18 +49,21 @@ func setup(waypoints: Array[Vector2i]) -> void:
 
 func _load_textures() -> void:
 	var names := {
-		TileType.GRASS:      "tile.png",
-		TileType.GRASS_BUMP: "tile-bump.png",
-		TileType.GRASS_TREE: "tile-tree.png",
-		TileType.GRASS_ROCK: "tile-rock.png",
-		TileType.PATH_H:     "tile-straight.png",
-		TileType.PATH_V:     "tile-straight.png",   ## same sprite, rotated 90°
-		TileType.CORNER_SE:  "tile-corner-round.png",
-		TileType.CORNER_SW:  "tile-corner-round.png",
-		TileType.CORNER_NE:  "tile-corner-round.png",
-		TileType.CORNER_NW:  "tile-corner-round.png",
-		TileType.SPAWN:      "tile-spawn.png",
-		TileType.GOAL:       "tile-end.png",
+		TileType.GRASS:         "tile.png",
+		TileType.GRASS_BUMP:    "tile-bump.png",
+		TileType.GRASS_TREE:    "tile-tree.png",
+		TileType.GRASS_ROCK:    "tile-rock.png",
+		TileType.GRASS_HILL:    "tile-hill.png",
+		TileType.GRASS_CRYSTAL: "tile-crystal.png",
+		TileType.GRASS_TREE2:   "tile-tree-double.png",
+		TileType.PATH_H:        "tile-straight.png",
+		TileType.PATH_V:        "tile-straight.png",   ## same sprite, rotated 90°
+		TileType.CORNER_SE:     "tile-corner-round.png",
+		TileType.CORNER_SW:     "tile-corner-round.png",
+		TileType.CORNER_NE:     "tile-corner-round.png",
+		TileType.CORNER_NW:     "tile-corner-round.png",
+		TileType.SPAWN:         "tile-spawn.png",
+		TileType.GOAL:          "tile-end.png",
 	}
 	for k in names:
 		var path: String = BASE + names[k]
@@ -69,7 +73,7 @@ func _load_textures() -> void:
 	var overlay_names := {
 		OverlayType.TREE_LARGE:    "detail-tree-large.png",
 		OverlayType.ROCKS_LARGE:   "detail-rocks-large.png",
-		OverlayType.CRYSTAL:       "detail-crystal.png",
+		OverlayType.CRYSTAL:       "detail-crystal-large.png",
 		OverlayType.SPAWN_MARKER:  "spawn-round.png",
 	}
 	for k in overlay_names:
@@ -154,19 +158,26 @@ func _random_grass(rng: RandomNumberGenerator) -> Dictionary:
 	var tile_type: TileType
 	var overlay: OverlayType = OverlayType.NONE
 
-	if r < 0.55:
+	if r < 0.38:
 		tile_type = TileType.GRASS
-		# Small chance of a detail overlay on plain grass
 		var r2 := rng.randf()
-		if r2 < 0.06:
+		if r2 < 0.07:
 			overlay = OverlayType.CRYSTAL
-	elif r < 0.72:
+	elif r < 0.52:
 		tile_type = TileType.GRASS_BUMP
-	elif r < 0.84:
+	elif r < 0.62:
+		tile_type = TileType.GRASS_HILL
+	elif r < 0.70:
 		tile_type = TileType.GRASS_ROCK
 		overlay = OverlayType.ROCKS_LARGE
-	else:
+	elif r < 0.77:
+		tile_type = TileType.GRASS_CRYSTAL
+		overlay = OverlayType.CRYSTAL
+	elif r < 0.88:
 		tile_type = TileType.GRASS_TREE
+		overlay = OverlayType.TREE_LARGE
+	else:
+		tile_type = TileType.GRASS_TREE2
 		overlay = OverlayType.TREE_LARGE
 
 	return {type = tile_type, rot = 0.0, overlay = overlay}
@@ -187,7 +198,8 @@ func _draw() -> void:
 			# Background fill (covers transparent sprite edges)
 			var is_path := cell_type not in [
 				TileType.GRASS, TileType.GRASS_BUMP,
-				TileType.GRASS_TREE, TileType.GRASS_ROCK
+				TileType.GRASS_TREE, TileType.GRASS_ROCK,
+				TileType.GRASS_HILL, TileType.GRASS_CRYSTAL, TileType.GRASS_TREE2
 			]
 			var bg := BG_PATH if is_path else BG_GRASS
 			draw_rect(Rect2(ox, oy, TILE_SIZE, TILE_SIZE), bg)

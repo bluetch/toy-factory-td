@@ -5,10 +5,10 @@
 class_name VictoryUI
 extends Control
 
-@onready var score_label:       Label  = $PanelContainer/VBox/ScoreLabel
-@onready var high_score_label:  Label  = $PanelContainer/VBox/HighScoreLabel
-@onready var enemies_label:     Label  = $PanelContainer/VBox/EnemiesLabel
-@onready var towers_label:      Label  = $PanelContainer/VBox/TowersLabel
+@onready var score_label:       Label  = $PanelContainer/VBox/StatBox/StatVBox/ScoreLabel
+@onready var high_score_label:  Label  = $PanelContainer/VBox/StatBox/StatVBox/HighScoreLabel
+@onready var enemies_label:     Label  = $PanelContainer/VBox/StatBox/StatVBox/EnemiesLabel
+@onready var towers_label:      Label  = $PanelContainer/VBox/StatBox/StatVBox/TowersLabel
 @onready var next_level_button: Button = $PanelContainer/VBox/NextLevelButton
 @onready var main_menu_button:  Button = $PanelContainer/VBox/MainMenuButton
 
