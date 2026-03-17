@@ -8,7 +8,9 @@ const CHAIN_FALLOFF := 0.6     ## Damage multiplier per jump
 const ARC_LIFETIME  := 0.18    ## Seconds the lightning arc is visible
 
 func _ready() -> void:
-	shoot_sfx = load("res://assets/audio/shoot_arrow.wav")   ## reuse until dedicated sfx added
+	var sfx_path := "res://assets/kenney_interface-sounds/Audio/glitch_001.ogg"
+	if ResourceLoader.exists(sfx_path):
+		shoot_sfx = load(sfx_path)
 
 ## Override: chain lightning hits multiple enemies instantly
 func _on_attack(target: Node2D) -> void:
@@ -50,6 +52,28 @@ func _on_attack(target: Node2D) -> void:
 		damage *= CHAIN_FALLOFF
 
 	_spawn_arc(positions)
+	_spawn_muzzle_flash()
+
+## Brief glow burst at the tower origin when firing.
+func _spawn_muzzle_flash() -> void:
+	if projectile_container == null:
+		return
+	var flash := Node2D.new()
+	flash.global_position = global_position
+	projectile_container.add_child(flash)
+	flash.draw.connect(func() -> void:
+		if flash.has_meta("_a"):
+			var a: float = flash.get_meta("_a")
+			flash.draw_circle(Vector2.ZERO, 18.0, Color(0.55, 0.90, 1.0, a * 0.70))
+			flash.draw_circle(Vector2.ZERO,  9.0, Color(1.0,  1.0,  1.0, a * 0.90))
+	)
+	flash.set_meta("_a", 1.0)
+	var tween := flash.create_tween()
+	tween.tween_method(func(v: float) -> void:
+		flash.set_meta("_a", v)
+		flash.queue_redraw()
+	, 1.0, 0.0, ARC_LIFETIME)
+	tween.tween_callback(flash.queue_free)
 
 ## Draw a multi-segment lightning arc that fades and disappears.
 func _spawn_arc(positions: Array[Vector2]) -> void:

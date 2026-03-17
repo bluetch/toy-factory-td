@@ -15,6 +15,10 @@ var enemy_container: Node2D
 var _waypoints: Array[Vector2] = []
 
 # ── Runtime state ─────────────────────────────────────────────
+## Pre-loaded PackedScene cache: scene_path → PackedScene.
+## Populated in setup() so individual spawns never call load().
+var _scene_cache: Dictionary = {}
+
 var _waves: Array[WaveData] = []
 var _current_wave_index: int = -1
 var _enemies_alive: int = 0
@@ -49,6 +53,14 @@ func setup(waves: Array[WaveData], spawn_pos: Vector2) -> void:
 	_wave_in_progress = false
 	if not _waypoints.is_empty():
 		spawn_pos = _waypoints[0]
+
+	# Pre-load all enemy scenes once so spawning never blocks the main thread.
+	_scene_cache.clear()
+	for wave in _waves:
+		for entry in wave.entries:
+			var path: String = entry.enemy_data.scene_path
+			if not _scene_cache.has(path) and ResourceLoader.exists(path):
+				_scene_cache[path] = load(path)
 
 	# Start preparation countdown → auto-starts wave 1 when it expires.
 	_start_countdown(PREP_TIMES[int(GameManager.current_difficulty)])
@@ -110,7 +122,7 @@ func _spawn_enemy(enemy_data: EnemyData) -> void:
 		_enemies_alive -= 1
 		_check_wave_complete()
 		return
-	var packed: PackedScene = load(enemy_data.scene_path)
+	var packed: PackedScene = _scene_cache.get(enemy_data.scene_path, null) as PackedScene
 	if packed == null:
 		push_error("WaveManager: Cannot load scene: " + enemy_data.scene_path)
 		_enemies_alive -= 1

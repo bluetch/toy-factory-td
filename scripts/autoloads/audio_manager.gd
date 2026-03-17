@@ -96,12 +96,23 @@ func _ready() -> void:
 	_sfx_life_lost      = load("res://assets/audio/sfx_life_lost.ogg")
 	_sfx_game_over      = load("res://assets/audio/sfx_game_over.ogg")
 	_sfx_victory_sting  = load("res://assets/audio/sfx_victory.ogg")
-	## Optional files — silently ignored if not present
+	## Optional dedicated files first; fall back to Kenney packs if present
 	_try_load_sfx("res://assets/audio/sfx_enemy_hit.ogg",         "_sfx_enemy_hit")
 	_try_load_sfx("res://assets/audio/sfx_slow_applied.ogg",      "_sfx_slow_applied")
 	_try_load_sfx("res://assets/audio/sfx_explosion.ogg",         "_sfx_explosion")
 	_try_load_sfx("res://assets/audio/sfx_tower_select.ogg",      "_sfx_tower_select")
 	_try_load_sfx("res://assets/audio/sfx_invalid_placement.ogg", "_sfx_invalid_placement")
+	## Kenney fallbacks (always present)
+	if _sfx_enemy_hit     == null:
+		_try_load_sfx("res://assets/kenney_impact-sounds/Audio/impactGeneric_light_000.ogg", "_sfx_enemy_hit")
+	if _sfx_slow_applied  == null:
+		_try_load_sfx("res://assets/kenney_interface-sounds/Audio/glass_002.ogg",            "_sfx_slow_applied")
+	if _sfx_explosion     == null:
+		_try_load_sfx("res://assets/kenney_impact-sounds/Audio/impactMetal_heavy_000.ogg",   "_sfx_explosion")
+	if _sfx_tower_select  == null:
+		_try_load_sfx("res://assets/kenney_interface-sounds/Audio/select_001.ogg",           "_sfx_tower_select")
+	if _sfx_invalid_placement == null:
+		_try_load_sfx("res://assets/kenney_interface-sounds/Audio/error_001.ogg",            "_sfx_invalid_placement")
 
 
 ## Create and configure both AudioStreamPlayer children.

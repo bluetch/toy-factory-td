@@ -4,8 +4,12 @@
 class_name SniperTower
 extends BaseTower
 
+const FLASH_LIFETIME := 0.10
+
 func _ready() -> void:
-	shoot_sfx = load("res://assets/audio/shoot_arrow.wav")
+	var sfx_path := "res://assets/kenney_interface-sounds/Audio/tick_001.ogg"
+	if ResourceLoader.exists(sfx_path):
+		shoot_sfx = load(sfx_path)
 
 ## Override targeting: pick the lowest-HP enemy (finisher style)
 func _get_best_target() -> Node2D:
@@ -31,6 +35,28 @@ func _on_attack(target: Node2D) -> void:
 	elif target.has_method("take_damage"):
 		target.take_damage(current_damage)
 	_spawn_tracer(target.global_position)
+	_spawn_muzzle_flash()
+
+## Sharp white/yellow flash at turret barrel on fire.
+func _spawn_muzzle_flash() -> void:
+	if projectile_container == null:
+		return
+	var flash := Node2D.new()
+	flash.global_position = global_position
+	projectile_container.add_child(flash)
+	flash.draw.connect(func() -> void:
+		if flash.has_meta("_a"):
+			var a: float = flash.get_meta("_a")
+			flash.draw_circle(Vector2.ZERO, 14.0, Color(1.0, 0.95, 0.70, a * 0.65))
+			flash.draw_circle(Vector2.ZERO,  6.0, Color(1.0, 1.0,  1.0,  a * 0.90))
+	)
+	flash.set_meta("_a", 1.0)
+	var tween := flash.create_tween()
+	tween.tween_method(func(v: float) -> void:
+		flash.set_meta("_a", v)
+		flash.queue_redraw()
+	, 1.0, 0.0, FLASH_LIFETIME)
+	tween.tween_callback(flash.queue_free)
 
 func _spawn_tracer(target_pos: Vector2) -> void:
 	var line := Line2D.new()
