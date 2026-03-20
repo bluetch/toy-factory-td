@@ -16,29 +16,31 @@
 ### A1 · 美術系統替換（Art Overhaul）
 目標：替換所有 ColorRect 占位符為真實 Sprite2D
 
-- [ ] **下載 Kenney Tower Defense Kit**（免費，CC0）
-  - URL：https://kenney.nl/assets/tower-defense-kit
-  - 放置路徑：`assets/sprites/kenney/`
-- [ ] **敵人精靈替換**
-  - [ ] BasicEnemy（小兵）→ `enemy_basic.png`
-  - [ ] FastEnemy（斥候）→ `enemy_fast.png`
-  - [ ] TankEnemy（重甲）→ `enemy_tank.png`
-  - [ ] BossEnemy（渴望）→ 原創或修改 Kenney 大型敵人
-- [ ] **防禦塔精靈替換**
-  - [ ] 弩塔 ArrowTower → base + 砲管 Sprite2D
-  - [ ] 砲台 CannonTower → base + 砲管 Sprite2D
-  - [ ] 冰塔 IceTower → base + Sprite2D
-  - [ ] 雷塔 LightningTower → base + Sprite2D
-  - [ ] 狙擊塔 SniperTower → base + 砲管 Sprite2D
-- [ ] **子彈/投射物精靈替換**
-  - [ ] ArrowProjectile
-  - [ ] CannonProjectile（爆炸 AnimatedSprite）
-  - [ ] IceProjectile
+- [x] **下載 Kenney Tower Defense Kit**（免費，CC0）
+  - 來源：`assets/kenney_tower-defense-kit/Previews/`（64×64 RGBA PNG，已驗證透明背景）
+- [x] **敵人精靈替換**
+  - [x] BasicEnemy（小兵）→ `slime_green.png`（AnimatedSprite2D，已有）
+  - [x] FastEnemy（斥候）→ `enemy-ufo-b.png`
+  - [x] TankEnemy（重甲）→ `enemy-ufo-c.png`
+  - [x] BossEnemy（渴望）→ `enemy-ufo-d.png`（scale 1.2×）
+- [x] **防禦塔精靈替換**
+  - [x] 弩塔 ArrowTower → `tower-round-base` + `weapon-ballista`
+  - [x] 砲台 CannonTower → `tower-square-bottom-a` + `weapon-cannon`
+  - [x] 冰塔 IceTower → `tower-round-crystals` + `tower-round-top-a`
+  - [x] 雷塔 LightningTower → `tower-round-top-b` + `tower-round-build-d`（新增 Turret 旋轉）
+  - [x] 狙擊塔 SniperTower → `tower-square-bottom-b` + `weapon-turret`（新增 Turret 旋轉）
+- [x] **子彈/投射物精靈替換**
+  - [x] ArrowProjectile → `weapon-ammo-arrow.png`
+  - [x] CannonProjectile → `weapon-ammo-cannonball.png`
+  - [x] IceProjectile → `weapon-ammo-bullet.png`（藍色 modulate）
 - [ ] **UI 圖示更新**
   - [ ] 塔選擇面板（TowerPanel）加入塔縮圖
   - [ ] 升級面板圖示
-- [ ] **地形美化**
-  - [ ] 路徑格磚（WorldBackground）使用 Kenney 草地/道路 tileset
+- [x] **TowerPanel 縮圖**（Sprite2D 縮圖卡片，含塔名/費用，不可購買時半透明）
+- [x] **地形美化**
+  - [x] WorldBackground 智能路徑偵測：直路(H/V)、轉角(SE/SW/NE/NW)、出入口各用對應 Kenney tile
+  - [x] 草地隨機混合 tile/tile-bump/tile-rock/tile-tree
+  - [x] 背景色填底避免透明邊緣穿幫
   - [ ] 可建造格子高亮視覺升級
 
 ### A2 · 背景音樂（Background Music）
@@ -59,14 +61,14 @@
   - [x] StoryScreen → "story" 軌道
   - [x] Boss 波次（最終波）→ 自動切換 "boss" 軌道
   - [x] 勝利畫面 → "victory" 軌道
-- [ ] **額外音效補充**
-  - [ ] 敵人死亡音效 `sfx_enemy_die.wav`
-  - [ ] 放置塔音效 `sfx_tower_place.wav`
-  - [ ] 升級音效 `sfx_tower_upgrade.wav`
-  - [ ] 出售塔音效 `sfx_tower_sell.wav`
-  - [ ] 遊戲失敗音效 `sfx_game_over.wav`
-  - [ ] 勝利音效 `sfx_victory.wav`
-  - [ ] 敵人到達終點 `sfx_life_lost.wav`
+- [x] **額外音效補充**（來源：Kenney Interface Sounds，CC0）
+  - [x] 敵人死亡音效 `sfx_enemy_die.ogg` ← `glass_001.ogg`
+  - [x] 放置塔音效 `sfx_tower_place.ogg` ← `drop_002.ogg`
+  - [x] 升級音效 `sfx_tower_upgrade.ogg` ← `maximize_002.ogg`
+  - [x] 出售塔音效 `sfx_tower_sell.ogg` ← `minimize_002.ogg`
+  - [x] 遊戲失敗音效 `sfx_game_over.ogg` ← `error_006.ogg`
+  - [x] 勝利音效 `sfx_victory.ogg` ← `confirmation_004.ogg`
+  - [x] 敵人到達終點 `sfx_life_lost.ogg` ← `error_001.ogg`
 
 ### B1 · 教學系統（Tutorial）
 目標：第一次遊玩 Level 1 自動觸發，引導玩家完成核心操作
@@ -126,8 +128,9 @@
 | 繁體中文 UI | ✅ 完整 | 全部介面已中文化 |
 | 教學系統 | ✅ 完整 | 首次遊玩自動觸發 |
 | 音樂架構 | ✅ 完整 | 各場景掛鉤完成，等待音樂檔案 |
-| 美術 | ⏳ 進行中 | 目前為色塊占位符 |
-| 背景音樂 | ⏳ 等待 | 架構完成，需音樂檔案 |
+| 美術 | ✅ 完整 | Kenney 3D Preview 精靈（64×64 RGBA），塔/敵人/投射物全替換 |
+| 音效 SFX | ✅ 完整 | 放塔/升級/出售/死亡/失血/失敗/勝利 7 個 SFX |
+| 背景音樂 | ⏳ 等待 | 架構完成，需音樂檔案（.ogg 放入 assets/audio/music/） |
 | Steam 商店素材 | ❌ 未開始 | 需美術完成後製作截圖/Trailer |
 
 ### 內容量統計

@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="LevelData" load_steps=22 format=3]
+[gd_resource type="Resource" script_class="LevelData" load_steps=24 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/level_data.gd" id="1_leveldata"]
 [ext_resource type="Script" path="res://scripts/resources/wave_data.gd" id="2_wavedata"]
@@ -6,6 +6,7 @@
 [ext_resource type="Resource" path="res://data/enemies/basic_enemy.tres" id="4_basic"]
 [ext_resource type="Resource" path="res://data/enemies/fast_enemy.tres" id="5_fast"]
 [ext_resource type="Resource" path="res://data/enemies/tank_enemy.tres" id="6_tank"]
+[ext_resource type="Resource" path="res://data/enemies/boss_enemy.tres" id="7_boss"]
 
 [sub_resource type="Resource" id="WaveEntry_w1_g1"]
 script = ExtResource("3_waveentry")
@@ -73,21 +74,21 @@ entries = [SubResource("WaveEntry_w3_g1"), SubResource("WaveEntry_w3_g2")]
 [sub_resource type="Resource" id="WaveEntry_w4_g1"]
 script = ExtResource("3_waveentry")
 enemy_data = ExtResource("4_basic")
-count = 15
-spawn_interval = 0.9
+count = 12
+spawn_interval = 1.0
 
 [sub_resource type="Resource" id="WaveEntry_w4_g2"]
 script = ExtResource("3_waveentry")
 enemy_data = ExtResource("5_fast")
-count = 10
-group_delay = 1.0
-spawn_interval = 0.7
+count = 8
+group_delay = 2.0
+spawn_interval = 0.8
 
 [sub_resource type="Resource" id="WaveEntry_w4_g3"]
 script = ExtResource("3_waveentry")
 enemy_data = ExtResource("6_tank")
-count = 6
-group_delay = 4.0
+count = 4
+group_delay = 5.0
 spawn_interval = 2.5
 
 [sub_resource type="Resource" id="WaveData_w4"]
@@ -99,35 +100,42 @@ entries = [SubResource("WaveEntry_w4_g1"), SubResource("WaveEntry_w4_g2"), SubRe
 [sub_resource type="Resource" id="WaveEntry_w5_g1"]
 script = ExtResource("3_waveentry")
 enemy_data = ExtResource("4_basic")
-count = 18
-spawn_interval = 0.8
+count = 14
+spawn_interval = 0.9
 
 [sub_resource type="Resource" id="WaveEntry_w5_g2"]
 script = ExtResource("3_waveentry")
 enemy_data = ExtResource("5_fast")
-count = 14
+count = 10
 group_delay = 2.0
-spawn_interval = 0.6
+spawn_interval = 0.7
 
 [sub_resource type="Resource" id="WaveEntry_w5_g3"]
 script = ExtResource("3_waveentry")
 enemy_data = ExtResource("6_tank")
-count = 8
+count = 6
 group_delay = 5.0
 spawn_interval = 2.0
+
+[sub_resource type="Resource" id="WaveEntry_w5_g4"]
+script = ExtResource("3_waveentry")
+enemy_data = ExtResource("7_boss")
+count = 1
+group_delay = 20.0
+spawn_interval = 1.0
 
 [sub_resource type="Resource" id="WaveData_w5"]
 script = ExtResource("2_wavedata")
 wave_number = 5
 auto_start_delay = -1.0
-entries = [SubResource("WaveEntry_w5_g1"), SubResource("WaveEntry_w5_g2"), SubResource("WaveEntry_w5_g3")]
+entries = [SubResource("WaveEntry_w5_g1"), SubResource("WaveEntry_w5_g2"), SubResource("WaveEntry_w5_g3"), SubResource("WaveEntry_w5_g4")]
 
 [resource]
 script = ExtResource("1_leveldata")
 level_id = 4
 level_name = "北側防線"
 description = "動盪即將全面展開。它們從四面八方湧來。"
-starting_lives = 15
+starting_lives = 18
 starting_gold = 240
 waypoints = Array[Vector2i]([Vector2i(0, 7), Vector2i(6, 7), Vector2i(6, 2), Vector2i(12, 2), Vector2i(12, 9), Vector2i(17, 9), Vector2i(17, 3), Vector2i(22, 3)])
 waves = Array[ExtResource("2_wavedata")]([SubResource("WaveData_w1"), SubResource("WaveData_w2"), SubResource("WaveData_w3"), SubResource("WaveData_w4"), SubResource("WaveData_w5")])

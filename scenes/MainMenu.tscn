@@ -1,9 +1,8 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/ui/main_menu_bg.gd" id="2"]
 
-## ── Shared StyleBoxFlat resources ──────────────────────────────────────
 
 [sub_resource type="StyleBoxFlat" id="SBF_panel"]
 bg_color = Color(0.04, 0.07, 0.17, 0.92)
@@ -69,23 +68,6 @@ content_margin_right = 14.0
 content_margin_top = 10.0
 content_margin_bottom = 10.0
 
-[sub_resource type="StyleBoxFlat" id="SBF_hs"]
-bg_color = Color(0.04, 0.07, 0.17, 0.95)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.55, 0.43, 0.18, 0.85)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
-content_margin_left = 22.0
-content_margin_right = 22.0
-content_margin_top = 20.0
-content_margin_bottom = 20.0
-
-## ── Scene tree ──────────────────────────────────────────────────────────
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -96,11 +78,9 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
 
-## Animated background (rendered first = behind everything)
 [node name="MainMenuBg" type="Node2D" parent="."]
 script = ExtResource("2")
 
-## Centre card panel
 [node name="CenterPanel" type="PanelContainer" parent="."]
 layout_mode = 0
 anchor_left = 0.5
@@ -108,9 +88,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -180.0
-offset_top = -282.0
+offset_top = -248.0
 offset_right = 180.0
-offset_bottom = 282.0
+offset_bottom = 248.0
 theme_override_styles/panel = SubResource("SBF_panel")
 
 [node name="VBox" type="VBoxContainer" parent="CenterPanel"]
@@ -174,20 +154,6 @@ theme_override_colors/font_focus_color = Color(1.0, 0.95, 0.72, 1.0)
 theme_override_font_sizes/font_size = 18
 text = "🗺  選擇關卡"
 
-[node name="HighScoresButton" type="Button" parent="CenterPanel/VBox/MenuContainer"]
-custom_minimum_size = Vector2(260, 52)
-layout_mode = 2
-theme_override_styles/normal = SubResource("SBF_btn_n")
-theme_override_styles/hover = SubResource("SBF_btn_h")
-theme_override_styles/pressed = SubResource("SBF_btn_p")
-theme_override_styles/focus = SubResource("SBF_btn_h")
-theme_override_colors/font_color = Color(0.92, 0.84, 0.56, 1.0)
-theme_override_colors/font_hover_color = Color(1.0, 0.95, 0.72, 1.0)
-theme_override_colors/font_pressed_color = Color(0.76, 0.68, 0.44, 1.0)
-theme_override_colors/font_focus_color = Color(1.0, 0.95, 0.72, 1.0)
-theme_override_font_sizes/font_size = 18
-text = "🏆  高分榜"
-
 [node name="SettingsButton" type="Button" parent="CenterPanel/VBox/MenuContainer"]
 custom_minimum_size = Vector2(260, 52)
 layout_mode = 2
@@ -216,7 +182,6 @@ theme_override_colors/font_focus_color = Color(1.0, 0.95, 0.72, 1.0)
 theme_override_font_sizes/font_size = 18
 text = "✕  退出遊戲"
 
-## Version label (bottom-right corner)
 [node name="VersionLabel" type="Label" parent="."]
 layout_mode = 0
 anchor_left = 1.0
@@ -229,68 +194,3 @@ theme_override_colors/font_color = Color(0.55, 0.55, 0.60, 0.60)
 theme_override_font_sizes/font_size = 12
 text = "v0.1.0"
 horizontal_alignment = 2
-
-## High Scores overlay panel (hidden until toggled)
-[node name="HighScoresPanel" type="PanelContainer" parent="."]
-visible = false
-layout_mode = 0
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -168.0
-offset_top = -210.0
-offset_right = 168.0
-offset_bottom = 210.0
-theme_override_styles/panel = SubResource("SBF_hs")
-
-[node name="VBoxContainer" type="VBoxContainer" parent="HighScoresPanel"]
-layout_mode = 2
-theme_override_constants/separation = 10
-
-[node name="Title" type="Label" parent="HighScoresPanel/VBoxContainer"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-theme_override_colors/font_color = Color(0.97, 0.84, 0.42, 1.0)
-text = "🏆  高分榜"
-horizontal_alignment = 1
-
-[node name="Level1Score" type="Label" parent="HighScoresPanel/VBoxContainer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.82, 0.76, 0.56, 1.0)
-text = "第 1 關：0 分"
-
-[node name="Level2Score" type="Label" parent="HighScoresPanel/VBoxContainer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.82, 0.76, 0.56, 1.0)
-text = "第 2 關：0 分"
-
-[node name="Level3Score" type="Label" parent="HighScoresPanel/VBoxContainer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.82, 0.76, 0.56, 1.0)
-text = "第 3 關：0 分"
-
-[node name="Level4Score" type="Label" parent="HighScoresPanel/VBoxContainer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.82, 0.76, 0.56, 1.0)
-text = "第 4 關：0 分"
-
-[node name="Level5Score" type="Label" parent="HighScoresPanel/VBoxContainer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.82, 0.76, 0.56, 1.0)
-text = "第 5 關：0 分"
-
-[node name="Level6Score" type="Label" parent="HighScoresPanel/VBoxContainer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.82, 0.76, 0.56, 1.0)
-text = "第 6 關：0 分"
-
-[node name="Level7Score" type="Label" parent="HighScoresPanel/VBoxContainer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.82, 0.76, 0.56, 1.0)
-text = "第 7 關：0 分"
-
-[node name="Level8Score" type="Label" parent="HighScoresPanel/VBoxContainer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.82, 0.76, 0.56, 1.0)
-text = "第 8 關：0 分"

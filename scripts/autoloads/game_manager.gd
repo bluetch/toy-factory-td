@@ -41,6 +41,16 @@ const DIFFICULTY_GOLD_MULT: Array[float] = [1.5, 1.0, 0.7]
 ## Bonus lives added to starting_lives per difficulty (can be negative).
 const DIFFICULTY_LIVES_BONUS: Array[int] = [5, 0, -5]
 
+## Human-readable difficulty names (Traditional Chinese).
+## Indexed by Difficulty enum — use GameManager.current_difficulty as index.
+const DIFFICULTY_NAMES: Array[String] = ["簡單", "普通", "困難"]
+## Display colour for each difficulty name in UI labels.
+const DIFFICULTY_COLORS: Array[Color] = [
+	Color(0.40, 0.90, 0.40),   # EASY  — green
+	Color(0.85, 0.80, 0.40),   # NORMAL — amber
+	Color(1.0,  0.45, 0.35),   # HARD   — red-orange
+]
+
 
 # ── 运行时属性 (Runtime Properties) ──────────────────────────
 
@@ -57,7 +67,7 @@ var gold: int = 0
 ## Accumulated score for the current level run.
 var score: int = 0
 
-## The level ID (1–3) that is currently loaded / being played.
+## The level ID (1–8) that is currently loaded / being played.
 var current_level_id: int = 1
 
 ## Currently selected difficulty. Set from LevelSelect before starting a level.
@@ -85,7 +95,7 @@ func _ready() -> void:
 ## corresponding LevelData resource at
 ##   res://data/levels/level_{level_id}.tres
 ##
-## [param level_id] Integer in the range 1–3.
+## [param level_id] Integer in the range 1–8.
 func start_level(level_id: int) -> void:
 	current_level_id = level_id
 

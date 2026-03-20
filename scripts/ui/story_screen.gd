@@ -30,6 +30,9 @@ var _entry_tween: Tween   = null
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# Ensure skip hint is visible and has the right prompt
+	if skip_label != null:
+		skip_label.text = "ESC 跳過 / 點擊繼續"
 	AudioManager.play_track("story")
 	var story_id := StoryDatabase.current_story_id
 	_entries = StoryDatabase.get_story(story_id)
@@ -40,11 +43,16 @@ func _ready() -> void:
 
 
 func _show_entry(idx: int) -> void:
+	# Guard against missing scene nodes — if any required node is absent, bail gracefully.
+	if dialogue_text == null or continue_label == null or speaker_label == null:
+		push_error("StoryScreen: required dialogue nodes missing. Skipping story.")
+		SceneManager.story_complete()
+		return
 	_current_idx   = idx
 	_visible_chars = 0.0
 	_typing_done   = false
 	_blink_timer   = 0.0
-	continue_label.visible = false
+	continue_label.modulate.a = 0.0   # hide without collapsing layout space
 
 	var entry: Dictionary = _entries[idx]
 	var speaker: String   = entry.get("speaker", "")
@@ -61,22 +69,26 @@ func _show_entry(idx: int) -> void:
 	_entry_tween = create_tween().set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
 	_entry_tween.tween_property(dialogue_vbox, "modulate:a", 1.0, 0.25)
 
-	# Cross-fade portrait
+	# Cross-fade portrait (guard against null portrait node)
 	var new_portrait: String = entry.get("portrait", "narrator")
-	portrait.fade_to(new_portrait)
+	if portrait != null:
+		portrait.fade_to(new_portrait)
 
 	# Progress label
-	progress_label.text = "%d / %d" % [idx + 1, _entries.size()]
+	if progress_label != null:
+		progress_label.text = "%d / %d" % [idx + 1, _entries.size()]
 
 
 func _process(delta: float) -> void:
+	if dialogue_text == null or continue_label == null:
+		return
 	if not _typing_done:
 		var char_count: int = dialogue_text.text.length()
 		_visible_chars = minf(_visible_chars + delta * CHARS_PER_SECOND, float(char_count))
 		dialogue_text.visible_characters = int(_visible_chars)
 		if int(_visible_chars) >= char_count:
 			_typing_done = true
-			continue_label.visible = true
+			_blink_timer = 0.0   # blink loop will drive modulate.a from here
 	else:
 		# Blink continue label
 		_blink_timer += delta
@@ -112,7 +124,7 @@ func _input(event: InputEvent) -> void:
 		_visible_chars = float(dialogue_text.text.length())
 		dialogue_text.visible_characters = dialogue_text.text.length()
 		_typing_done = true
-		continue_label.visible = true
+		_blink_timer = 0.0
 	else:
 		_advance()
 	get_viewport().set_input_as_handled()

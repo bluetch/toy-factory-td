@@ -12,11 +12,18 @@ extends Control
 @onready var next_level_button: Button = $PanelContainer/VBox/NextLevelButton
 @onready var main_menu_button:  Button = $PanelContainer/VBox/MainMenuButton
 
+## Dynamically injected difficulty label
+var _diff_label: Label = null
+
 func _ready() -> void:
 	hide()
 	EventBus.victory_triggered.connect(_on_victory)
 	next_level_button.pressed.connect(_on_next_level_pressed)
 	main_menu_button.pressed.connect(_on_main_menu_pressed)
+	# Inject difficulty label at the bottom of the stat box
+	_diff_label = Label.new()
+	_diff_label.add_theme_font_size_override("font_size", 13)
+	towers_label.get_parent().add_child(_diff_label)
 
 func _on_victory() -> void:
 	AudioManager.play_victory_sting()
@@ -26,6 +33,9 @@ func _on_victory() -> void:
 	high_score_label.text = "最佳：%d" % SaveManager.get_high_score(level_id)
 	enemies_label.text    = "擊殺敵人：%d" % AchievementManager.get_session_enemies()
 	towers_label.text     = "建造防禦塔：%d" % AchievementManager.get_session_towers()
+	var di := GameManager.current_difficulty
+	_diff_label.text = "難度：%s" % GameManager.DIFFICULTY_NAMES[di]
+	_diff_label.add_theme_color_override("font_color", GameManager.DIFFICULTY_COLORS[di])
 
 	var next_level := level_id + 1
 	if next_level <= SaveManager.MAX_LEVEL:
@@ -47,9 +57,11 @@ func _on_next_level_pressed() -> void:
 			SceneManager.goto_level(next_level)
 		)
 	else:
-		# Play epilogue then return to main menu
-		SceneManager.goto_story("epilogue", func() -> void:
-			SceneManager.goto_main_menu()
+		# Play outro_8 first, then epilogue, then return to main menu
+		SceneManager.goto_level_outro(level_id, func() -> void:
+			SceneManager.goto_story("epilogue", func() -> void:
+				SceneManager.goto_main_menu()
+			)
 		)
 
 func _on_main_menu_pressed() -> void:

@@ -20,7 +20,7 @@ func _on_attack(target: Node2D) -> void:
             target,
             current_damage,
             tower_data.projectile_speed,
-            tower_data.splash_radius,
-            tower_data.slow_factor,
-            tower_data.slow_duration
+            tower_data.get_splash_radius(current_level),
+            tower_data.get_slow_factor(current_level),
+            tower_data.get_slow_duration(current_level)
         )

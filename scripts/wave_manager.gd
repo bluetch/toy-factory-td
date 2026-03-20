@@ -1,6 +1,22 @@
 ## WaveManager — controls enemy wave spawning and inter-wave countdown.
 ## Attach as a child Node of GameWorld.
 ## GameWorld calls setup() after connecting all signals.
+##
+## ── State machine ─────────────────────────────────────────────
+##
+##   setup()
+##     └─► _start_countdown(PREP_TIME)   _counting_down=true
+##           │  (timer fires or player presses button)
+##           ▼
+##       start_next_wave()               _wave_in_progress=true
+##           │  (all enemies die/exit)
+##           ▼
+##       _check_wave_complete()
+##           ├─► [more waves] _start_countdown(BETWEEN_TIME)  ← loop
+##           └─► [last wave]  all_waves_done.emit()
+##
+##   _on_game_ended() resets all flags and clears the countdown.
+##
 class_name WaveManager
 extends Node
 
@@ -9,6 +25,10 @@ extends Node
 const PREP_TIMES: Array[float] = [25.0, 20.0, 15.0]
 ## Inter-wave countdown when auto_start_delay == -1, indexed by Difficulty.
 const BETWEEN_WAVE_TIMES: Array[float] = [20.0, 15.0, 10.0]
+## Spawn-interval multiplier per difficulty: EASY enemies spawn slower, HARD faster.
+const SPAWN_INTERVAL_MULT: Array[float] = [1.25, 1.0, 0.75]
+## HP multiplier per difficulty: EASY enemies are weaker, HARD enemies are tougher.
+const DIFFICULTY_HP_MULT: Array[float] = [0.80, 1.0, 1.30]
 
 # ── External references (set by GameWorld) ───────────────────
 var enemy_container: Node2D
@@ -22,6 +42,7 @@ var _scene_cache: Dictionary = {}
 var _waves: Array[WaveData] = []
 var _current_wave_index: int = -1
 var _enemies_alive: int = 0
+var _wave_total_enemies: int = 0  ## total enemies spawned this wave (for HUD counter)
 var _wave_in_progress: bool = false
 
 ## Remaining seconds in the current countdown (-1 = not counting)
@@ -38,10 +59,26 @@ signal next_wave_countdown(seconds: float)
 ## Emitted after the last wave's enemies are all gone.
 signal all_waves_done
 
+## Gold awarded to the player on completing each non-final wave.
+const WAVE_BONUS_GOLD := 25
+
+## Short icon strings used to build wave preview text.
+const ENEMY_ICONS: Dictionary = {
+	"basic_enemy": "👾",
+	"fast_enemy":  "💨",
+	"tank_enemy":  "🛡",
+	"boss_enemy":  "💀",
+}
+
+## Set to true when game ends so pending spawn timers do nothing.
+var _game_ended: bool = false
+
 func _ready() -> void:
 	add_to_group("wave_manager")
 	EventBus.enemy_died.connect(_on_enemy_died)
 	EventBus.enemy_reached_end.connect(_on_enemy_reached_end)
+	EventBus.game_over_triggered.connect(_on_game_ended)
+	EventBus.victory_triggered.connect(_on_game_ended)
 
 # ── Setup ─────────────────────────────────────────────────────
 
@@ -107,16 +144,48 @@ func start_next_wave() -> void:
 # ── Spawning ──────────────────────────────────────────────────
 
 func _spawn_wave(wave_data: WaveData) -> void:
+	_wave_total_enemies = 0
+	var interval_mult := SPAWN_INTERVAL_MULT[int(GameManager.current_difficulty)]
 	for entry in wave_data.entries:
+		_wave_total_enemies += entry.count
 		_enemies_alive += entry.count
 		for i in range(entry.count):
-			var delay := entry.group_delay + i * entry.spawn_interval
+			var delay := entry.group_delay + i * entry.spawn_interval * interval_mult
 			# create_timer respects Engine.time_scale automatically — no manual division needed.
 			get_tree().create_timer(delay).timeout.connect(
 				func() -> void: _spawn_enemy(entry.enemy_data)
 			)
+	EventBus.enemy_count_changed.emit(_enemies_alive, _wave_total_enemies)
+
+## Returns a compact enemy-composition string for the given wave (0-based index).
+## Example: "👾×12  💨×8  🛡×4"
+func get_wave_preview_string(wave_index: int) -> String:
+	if wave_index < 0 or wave_index >= _waves.size():
+		return ""
+	var wave: WaveData = _waves[wave_index]
+	var counts: Dictionary = {}
+	var order: Array[String] = []
+	for entry in wave.entries:
+		var eid: String = str(entry.enemy_data.enemy_id)
+		if not counts.has(eid):
+			counts[eid] = 0
+			order.append(eid)
+		counts[eid] += entry.count
+	var parts: PackedStringArray = PackedStringArray()
+	for eid in order:
+		parts.append("%s×%d" % [ENEMY_ICONS.get(eid, "?"), counts[eid]])
+	return "  ".join(parts)
+
+## Stop all wave activity when the game ends (prevents late timer callbacks).
+func _on_game_ended() -> void:
+	_game_ended = true
+	_wave_in_progress = false
+	_counting_down = false
+	_countdown = -1.0
 
 func _spawn_enemy(enemy_data: EnemyData) -> void:
+	if _game_ended:
+		return
 	if enemy_data == null or enemy_data.scene_path.is_empty():
 		push_warning("WaveManager: Invalid enemy_data.")
 		_enemies_alive -= 1
@@ -131,20 +200,25 @@ func _spawn_enemy(enemy_data: EnemyData) -> void:
 	var enemy: Node = packed.instantiate()
 	enemy_container.add_child(enemy)
 	if enemy.has_method("setup"):
-		enemy.setup(enemy_data, _waypoints)
+		var hp_mult: float = DIFFICULTY_HP_MULT[int(GameManager.current_difficulty)]
+		enemy.setup(enemy_data, _waypoints, hp_mult)
 
 # ── Wave completion ───────────────────────────────────────────
 
 func _on_enemy_died(_gold: int, _score: int) -> void:
-	_enemies_alive -= 1
+	_enemies_alive = maxi(_enemies_alive - 1, 0)
+	if _wave_in_progress:
+		EventBus.enemy_count_changed.emit(_enemies_alive, _wave_total_enemies)
 	_check_wave_complete()
 
 func _on_enemy_reached_end() -> void:
-	_enemies_alive -= 1
+	_enemies_alive = maxi(_enemies_alive - 1, 0)
+	if _wave_in_progress:
+		EventBus.enemy_count_changed.emit(_enemies_alive, _wave_total_enemies)
 	_check_wave_complete()
 
 func _check_wave_complete() -> void:
-	if _enemies_alive > 0 or not _wave_in_progress:
+	if _game_ended or _enemies_alive > 0 or not _wave_in_progress:
 		return
 	_wave_in_progress = false
 	EventBus.wave_completed.emit(_current_wave_index + 1)
@@ -154,10 +228,14 @@ func _check_wave_complete() -> void:
 		EventBus.all_waves_completed.emit()
 		all_waves_done.emit()
 	else:
+		# Award wave-completion gold bonus and notify HUD
+		GameManager.add_gold(WAVE_BONUS_GOLD)
+		EventBus.wave_bonus_awarded.emit(WAVE_BONUS_GOLD)
 		# Start countdown to next wave
 		var next_wave: WaveData = _waves[_current_wave_index + 1]
 		var between_time: float = BETWEEN_WAVE_TIMES[int(GameManager.current_difficulty)]
 		var wait_time := next_wave.auto_start_delay if next_wave.auto_start_delay >= 0.0 \
 						else between_time
 		_start_countdown(wait_time)
+		# Show "Start Wave N" button so player can skip the countdown
 		next_wave_ready.emit(_current_wave_index + 2, _waves.size())

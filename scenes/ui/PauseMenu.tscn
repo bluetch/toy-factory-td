@@ -142,7 +142,7 @@ theme_override_styles/focus = SubResource("SBF_btn_h")
 theme_override_colors/font_color = Color(0.92, 0.84, 0.56, 1.0)
 theme_override_colors/font_hover_color = Color(1.0, 0.95, 0.72, 1.0)
 theme_override_font_sizes/font_size = 15
-text = "⚙  設定"
+text = "設定"
 
 [node name="MainMenuButton" type="Button" parent="PanelContainer/VBox"]
 custom_minimum_size = Vector2(216, 46)
@@ -154,7 +154,7 @@ theme_override_styles/focus = SubResource("SBF_btn_h")
 theme_override_colors/font_color = Color(0.92, 0.84, 0.56, 1.0)
 theme_override_colors/font_hover_color = Color(1.0, 0.95, 0.72, 1.0)
 theme_override_font_sizes/font_size = 15
-text = "🗺  主選單"
+text = "主選單"
 
 [node name="QuitButton" type="Button" parent="PanelContainer/VBox"]
 custom_minimum_size = Vector2(216, 46)
@@ -166,4 +166,4 @@ theme_override_styles/focus = SubResource("SBF_btn_h")
 theme_override_colors/font_color = Color(0.92, 0.84, 0.56, 1.0)
 theme_override_colors/font_hover_color = Color(1.0, 0.95, 0.72, 1.0)
 theme_override_font_sizes/font_size = 15
-text = "✕  退出遊戲"
+text = "退出遊戲"

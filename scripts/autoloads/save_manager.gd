@@ -37,6 +37,10 @@ const MAX_LEVEL: int = 8
 ## Always access through the public methods below.
 var _data: Dictionary = {}
 
+## Deferred-save state — prevents multiple disk writes per frame when
+## stats are updated rapidly (e.g. 100+ enemy kills in a single wave).
+var _save_pending: bool = false
+
 
 # ── 生命周期 (Lifecycle) ──────────────────────────────────────
 
@@ -66,7 +70,8 @@ func _default_data() -> Dictionary:
 		"stats": {
 			"enemies_killed": 0,
 			"towers_placed":  0,
-			"games_won":      0
+			"games_won":      0,
+			"waves_cleared":  0
 		}
 	}
 
@@ -74,8 +79,15 @@ func _default_data() -> Dictionary:
 # ── 文件 I/O (File I/O) ───────────────────────────────────────
 
 ## Write the current in-memory data to disk as formatted JSON.
-## Silently fails and logs an error if the file cannot be opened.
+## Keeps a .bak copy of the previous save so a mid-write failure never
+## destroys all progress — the player can recover from the backup.
 func save() -> void:
+	# Back up the existing save file before overwriting.
+	if FileAccess.file_exists(SAVE_PATH):
+		var dir := DirAccess.open("user://")
+		if dir != null:
+			dir.copy(SAVE_PATH, SAVE_PATH + ".bak")
+
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file == null:
 		push_error("SaveManager: Cannot open '%s' for writing (error %d)."
@@ -106,7 +118,21 @@ func load_data() -> void:
 
 	var parsed: Variant = JSON.parse_string(raw_text)
 	if parsed == null or not parsed is Dictionary:
-		push_error("SaveManager: Save file at '%s' is malformed. Resetting to defaults." % SAVE_PATH)
+		push_error("SaveManager: Save file at '%s' is malformed." % SAVE_PATH)
+		# Attempt to recover from the backup before resetting to defaults.
+		var bak_path := SAVE_PATH + ".bak"
+		if FileAccess.file_exists(bak_path):
+			var bak_file := FileAccess.open(bak_path, FileAccess.READ)
+			if bak_file != null:
+				var bak_text := bak_file.get_as_text()
+				bak_file.close()
+				var bak_parsed: Variant = JSON.parse_string(bak_text)
+				if bak_parsed != null and bak_parsed is Dictionary:
+					push_warning("SaveManager: Recovered from backup save.")
+					_data = bak_parsed
+					_migrate_data()
+					return
+		push_error("SaveManager: No valid backup found. Resetting to defaults.")
 		_data = _default_data()
 		save()
 		return
@@ -260,11 +286,25 @@ func get_stat_int(key: String) -> int:
 	return 0
 
 
-## Set an integer gameplay stat and save.
+## Set an integer gameplay stat and schedule a deferred save.
+## Uses call_deferred so that many rapid stat changes in the same frame
+## (e.g. 100 enemy kills) collapse into a single disk write.
 func set_stat_int(key: String, value: int) -> void:
 	if not _data.has("stats"):
 		_data["stats"] = {}
 	_data["stats"][key] = value
+	_schedule_save()
+
+
+## Schedule one deferred save per frame (idempotent).
+func _schedule_save() -> void:
+	if not _save_pending:
+		_save_pending = true
+		call_deferred("_do_deferred_save")
+
+
+func _do_deferred_save() -> void:
+	_save_pending = false
 	save()
 
 
@@ -273,5 +313,5 @@ func set_stat_int(key: String, value: int) -> void:
 func apply_display_settings() -> void:
 	if get_setting_bool("fullscreen", false):
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
-	else:
-		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+	## When not fullscreen, leave the window mode alone — project.godot sets it to
+	## MAXIMIZED at startup and we don't want to shrink it back to viewport size.

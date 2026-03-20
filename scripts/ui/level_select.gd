@@ -38,7 +38,7 @@ func _ready() -> void:
 				var best := SaveManager.get_high_score(i)
 				score_label.text = "最佳：%d" % best if best > 0 else "未遊玩"
 			else:
-				score_label.text = "🔒 未解鎖"
+				score_label.text = "未解鎖"
 
 		# Play button
 		var play_btn := card.get_node_or_null("VBoxContainer/PlayButton") as Button
@@ -56,10 +56,13 @@ func _set_difficulty(diff: GameManager.Difficulty) -> void:
 	_refresh_difficulty_buttons()
 
 func _refresh_difficulty_buttons() -> void:
-	var diff: GameManager.Difficulty = GameManager.current_difficulty
-	_easy_btn.modulate   = Color(1.0, 1.0, 1.0, 1.0) if diff == GameManager.Difficulty.EASY   else Color(0.6, 0.6, 0.6, 1.0)
-	_normal_btn.modulate = Color(1.0, 1.0, 1.0, 1.0) if diff == GameManager.Difficulty.NORMAL else Color(0.6, 0.6, 0.6, 1.0)
-	_hard_btn.modulate   = Color(1.0, 1.0, 1.0, 1.0) if diff == GameManager.Difficulty.HARD   else Color(0.6, 0.6, 0.6, 1.0)
+	var diff: int = int(GameManager.current_difficulty)
+	var btns: Array[Button] = [_easy_btn, _normal_btn, _hard_btn]
+	# Selected: full brightness + scale up slightly. Unselected: dimmed.
+	for i in range(btns.size()):
+		var selected := (i == diff)
+		btns[i].modulate = Color(1.0, 1.0, 1.0, 1.0) if selected else Color(0.55, 0.55, 0.55, 1.0)
+		btns[i].scale    = Vector2(1.08, 1.08) if selected else Vector2(1.0, 1.0)
 
 func _on_back_pressed() -> void:
 	AudioManager.play_ui_click()

@@ -42,7 +42,10 @@ func initialize(data: TowerData, proj_container: Node2D) -> void:
     detection_area.body_exited.connect(_on_body_exited)
     attack_timer.timeout.connect(_on_attack_timer)
     attack_timer.wait_time = 1.0 / current_attack_speed
-    attack_timer.start()
+    attack_timer.start(attack_timer.wait_time)
+
+    # _process() is only needed for turret rotation — skip it for turret-less towers
+    set_process(_turret != null)
 
     # Spawn-in animation: pop from small to full size
     scale = Vector2(0.3, 0.3)
@@ -126,13 +129,17 @@ func _on_attack(_target: Node2D) -> void:
 
 ## Targeting: pick the enemy furthest along the path (highest waypoint index + progress)
 func _get_best_target() -> Node2D:
-    # Purge stale references (enemies that died without triggering body_exited)
-    _enemies_in_range = _enemies_in_range.filter(
-        func(e: Node2D) -> bool: return is_instance_valid(e)
-    )
+    # Purge stale references in-place (avoids creating a new Array each tick)
+    var i := _enemies_in_range.size() - 1
+    while i >= 0:
+        if not is_instance_valid(_enemies_in_range[i]):
+            _enemies_in_range.remove_at(i)
+        i -= 1
     var best: Node2D = null
     var best_progress: float = -1.0
     for enemy in _enemies_in_range:
+        if enemy.get("_is_dead") == true:
+            continue
         if enemy.has_method("get_path_progress"):
             var progress: float = enemy.get_path_progress()
             if progress > best_progress:

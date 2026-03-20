@@ -18,7 +18,8 @@ func set_radius(radius: float) -> void:
     queue_redraw()
 
 
-## Draw a wobbly hand-drawn circle outline between consecutive sample points.
+## Draw a wobbly hand-drawn circle outline using a single draw_polyline call
+## (1 draw call vs. 64 draw_line calls — ~64× fewer GPU state changes).
 ## Each point's radius is perturbed by two sine waves with incommensurate frequencies
 ## so the outline never looks perfectly round.
 func _draw_wobbly_outline(center: Vector2, base_radius: float, color: Color, width: float) -> void:
@@ -30,11 +31,8 @@ func _draw_wobbly_outline(center: Vector2, base_radius: float, color: Color, wid
             + sin(angle * 7.3)  * 2.5 \
             + sin(angle * 11.7) * 1.2
         points[i] = center + Vector2(cos(angle) * r, sin(angle) * r)
-    # Close the loop
-    points[OUTLINE_POINTS] = points[0]
-    # Draw each segment individually so line_width applies correctly
-    for i in range(OUTLINE_POINTS):
-        draw_line(points[i], points[i + 1], color, width)
+    points[OUTLINE_POINTS] = points[0]  # Close the loop
+    draw_polyline(points, color, width, true)
 
 
 func _draw() -> void:

@@ -16,4 +16,4 @@ func _on_attack(target: Node2D) -> void:
     projectile_container.add_child(ball)
     ball.global_position = global_position
     if ball.has_method("launch_aoe"):
-        ball.launch_aoe(target, current_damage, tower_data.projectile_speed, tower_data.splash_radius)
+        ball.launch_aoe(target, current_damage, tower_data.projectile_speed, tower_data.get_splash_radius(current_level))

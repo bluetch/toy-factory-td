@@ -35,12 +35,12 @@ const SETTING_MUSIC_VOLUME: String = "music_volume"
 ## 這樣可以讓高品質 Sonniss 檔案自動覆蓋佔位 .ogg。
 const MUSIC_TRACKS: Dictionary = {
 	"menu":     ["res://assets/audio/music/music_menu_box.wav",
-	             "res://assets/audio/music/music_menu.ogg"],
+				 "res://assets/audio/music/music_menu.ogg"],
 	"gameplay": ["res://assets/audio/music/music_gameplay.ogg"],
 	"boss":     ["res://assets/audio/music/music_boss.ogg"],
 	"victory":  ["res://assets/audio/music/music_victory.ogg"],
 	"story":    ["res://assets/audio/music/music_story.wav",
-	             "res://assets/audio/music/music_story.ogg"],
+				 "res://assets/audio/music/music_story.ogg"],
 }
 
 ## 目前正在播放的軌道名稱（空字串 = 無音樂）
@@ -94,36 +94,44 @@ func _ready() -> void:
 	_load_volumes_from_save()
 	ui_click_sfx        = load("res://assets/audio/ui_click.wav")
 	_sfx_tower_place    = _load_first(["res://assets/audio/sfx_tower_place_hq.wav",
-	                                   "res://assets/audio/sfx_tower_place.ogg"])
+									   "res://assets/audio/sfx_tower_place.ogg"])
 	_sfx_tower_upgrade  = load("res://assets/audio/sfx_tower_upgrade.ogg")
 	_sfx_tower_sell     = load("res://assets/audio/sfx_tower_sell.ogg")
 	_sfx_enemy_die      = load("res://assets/audio/sfx_enemy_die.ogg")
 	_sfx_life_lost      = load("res://assets/audio/sfx_life_lost.ogg")
 	_sfx_game_over      = load("res://assets/audio/sfx_game_over.ogg")
 	_sfx_victory_sting  = load("res://assets/audio/sfx_victory.ogg")
-	## Sonniss high-quality SFX (tower-defense specific, best quality)
-	_try_load_sfx("res://assets/audio/sfx_enemy_hit.wav",         "_sfx_enemy_hit")
-	_try_load_sfx("res://assets/audio/sfx_slow_applied.wav",      "_sfx_slow_applied")
-	_try_load_sfx("res://assets/audio/sfx_explosion.wav",         "_sfx_explosion")
-	_try_load_sfx("res://assets/audio/sfx_tower_select.wav",      "_sfx_tower_select")
-	_try_load_sfx("res://assets/audio/sfx_invalid_placement.wav", "_sfx_invalid_placement")
-	## .ogg custom files (second priority)
-	if _sfx_enemy_hit     == null: _try_load_sfx("res://assets/audio/sfx_enemy_hit.ogg",         "_sfx_enemy_hit")
-	if _sfx_slow_applied  == null: _try_load_sfx("res://assets/audio/sfx_slow_applied.ogg",      "_sfx_slow_applied")
-	if _sfx_explosion     == null: _try_load_sfx("res://assets/audio/sfx_explosion.ogg",         "_sfx_explosion")
-	if _sfx_tower_select  == null: _try_load_sfx("res://assets/audio/sfx_tower_select.ogg",      "_sfx_tower_select")
-	if _sfx_invalid_placement == null: _try_load_sfx("res://assets/audio/sfx_invalid_placement.ogg", "_sfx_invalid_placement")
-	## Kenney fallbacks (last resort)
-	if _sfx_enemy_hit     == null:
-		_try_load_sfx("res://assets/kenney_impact-sounds/Audio/impactGeneric_light_000.ogg", "_sfx_enemy_hit")
-	if _sfx_slow_applied  == null:
-		_try_load_sfx("res://assets/kenney_interface-sounds/Audio/glass_002.ogg",            "_sfx_slow_applied")
-	if _sfx_explosion     == null:
-		_try_load_sfx("res://assets/kenney_impact-sounds/Audio/impactMetal_heavy_000.ogg",   "_sfx_explosion")
-	if _sfx_tower_select  == null:
-		_try_load_sfx("res://assets/kenney_interface-sounds/Audio/select_001.ogg",           "_sfx_tower_select")
-	if _sfx_invalid_placement == null:
-		_try_load_sfx("res://assets/kenney_interface-sounds/Audio/error_001.ogg",            "_sfx_invalid_placement")
+	## Fallback SFX — each property tries candidate paths in order (HQ → .ogg → Kenney).
+	## Uses the same _load_first() pattern as MUSIC_TRACKS for consistency.
+	const FALLBACK_SFX: Dictionary = {
+		"_sfx_enemy_hit": [
+			"res://assets/audio/sfx_enemy_hit.wav",
+			"res://assets/audio/sfx_enemy_hit.ogg",
+			"res://assets/kenney_impact-sounds/Audio/impactGeneric_light_000.ogg",
+		],
+		"_sfx_slow_applied": [
+			"res://assets/audio/sfx_slow_applied.wav",
+			"res://assets/audio/sfx_slow_applied.ogg",
+			"res://assets/kenney_interface-sounds/Audio/glass_002.ogg",
+		],
+		"_sfx_explosion": [
+			"res://assets/audio/sfx_explosion.wav",
+			"res://assets/audio/sfx_explosion.ogg",
+			"res://assets/kenney_impact-sounds/Audio/impactMetal_heavy_000.ogg",
+		],
+		"_sfx_tower_select": [
+			"res://assets/audio/sfx_tower_select.wav",
+			"res://assets/audio/sfx_tower_select.ogg",
+			"res://assets/kenney_interface-sounds/Audio/select_001.ogg",
+		],
+		"_sfx_invalid_placement": [
+			"res://assets/audio/sfx_invalid_placement.wav",
+			"res://assets/audio/sfx_invalid_placement.ogg",
+			"res://assets/kenney_interface-sounds/Audio/error_001.ogg",
+		],
+	}
+	for prop: String in FALLBACK_SFX:
+		set(prop, _load_first(FALLBACK_SFX[prop]))
 
 
 ## Create and configure both AudioStreamPlayer children.

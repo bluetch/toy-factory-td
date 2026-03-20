@@ -11,6 +11,24 @@ const CHARGE_MULTIPLIER: float = 2.8  ## speed × this during charge
 
 var _charge_timer: float = CHARGE_INTERVAL
 var _is_charging: bool = false
+## Speed multiplier saved just before a charge, restored after (preserves slow effects).
+var _pre_charge_speed: float = 1.0
+
+## Override setup() so we can emit boss_spawned after health is initialized.
+func setup(data: EnemyData, waypoints: Array[Vector2], health_mult: float = 1.0) -> void:
+	super.setup(data, waypoints, health_mult)
+	EventBus.boss_spawned.emit(self)
+
+## Emit boss_health_changed after each damage hit so the HUD bar updates.
+func take_damage(damage: float) -> void:
+	super.take_damage(damage)
+	if is_instance_valid(self) and _max_health > 0.0:
+		EventBus.boss_health_changed.emit(maxf(current_health, 0.0), _max_health)
+
+func take_damage_piercing(damage: float) -> void:
+	super.take_damage_piercing(damage)
+	if is_instance_valid(self) and _max_health > 0.0:
+		EventBus.boss_health_changed.emit(maxf(current_health, 0.0), _max_health)
 
 func _ready() -> void:
 	# Pulsing scale on the sprite for a "breathing" boss effect
@@ -28,6 +46,7 @@ func _physics_process(delta: float) -> void:
 
 func _start_charge() -> void:
 	_is_charging = true
+	_pre_charge_speed = _speed_multiplier
 	_speed_multiplier = CHARGE_MULTIPLIER
 	_spawn_float_text("⚡ 衝刺！", Color(1.0, 0.8, 0.1))
 	# Flash red to warn player
@@ -39,7 +58,7 @@ func _start_charge() -> void:
 	# End charge after duration
 	await get_tree().create_timer(CHARGE_DURATION).timeout
 	if is_instance_valid(self):
-		_speed_multiplier = 1.0
+		_speed_multiplier = _pre_charge_speed  # restore slow effect if active
 		_is_charging = false
 		_charge_timer = CHARGE_INTERVAL
 

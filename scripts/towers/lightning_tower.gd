@@ -3,7 +3,6 @@
 class_name LightningTower
 extends BaseTower
 
-const CHAIN_COUNT   := 3       ## Maximum enemies hit per strike
 const CHAIN_FALLOFF := 0.6     ## Damage multiplier per jump
 const ARC_LIFETIME  := 0.18    ## Seconds the lightning arc is visible
 
@@ -11,6 +10,8 @@ func _ready() -> void:
 	var sfx_path := "res://assets/kenney_interface-sounds/Audio/glitch_001.ogg"
 	if ResourceLoader.exists(sfx_path):
 		shoot_sfx = load(sfx_path)
+	else:
+		push_warning("LightningTower: SFX not found at '%s'" % sfx_path)
 
 ## Override: chain lightning hits multiple enemies instantly
 func _on_attack(target: Node2D) -> void:
@@ -24,8 +25,9 @@ func _on_attack(target: Node2D) -> void:
 		if is_instance_valid(e) and e != target:
 			remaining_candidates.append(e)
 
+	var chain_count: int = tower_data.get_chain_count(current_level) if tower_data != null else 3
 	var last_hit: Node2D = target
-	while hit_chain.size() < CHAIN_COUNT and not remaining_candidates.is_empty():
+	while hit_chain.size() < chain_count and not remaining_candidates.is_empty():
 		# Jump to the enemy closest to the last hit position
 		var closest: Node2D = null
 		var closest_dist := INF
@@ -46,7 +48,7 @@ func _on_attack(target: Node2D) -> void:
 	var damage := current_damage
 	var positions: Array[Vector2] = [global_position]
 	for hit_node in hit_chain:
-		if hit_node.has_method("take_damage"):
+		if is_instance_valid(hit_node) and hit_node.has_method("take_damage"):
 			hit_node.take_damage(damage)
 		positions.append(hit_node.global_position)
 		damage *= CHAIN_FALLOFF

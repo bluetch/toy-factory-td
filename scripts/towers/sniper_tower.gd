@@ -10,20 +10,28 @@ func _ready() -> void:
 	var sfx_path := "res://assets/kenney_interface-sounds/Audio/tick_001.ogg"
 	if ResourceLoader.exists(sfx_path):
 		shoot_sfx = load(sfx_path)
+	else:
+		push_warning("SniperTower: SFX not found at '%s'" % sfx_path)
 
-## Override targeting: pick the lowest-HP enemy (finisher style)
+## Override targeting: pick the lowest-HP enemy (finisher style).
+## Uses in-place backward purge (no allocation) consistent with BaseTower.
 func _get_best_target() -> Node2D:
-	_enemies_in_range = _enemies_in_range.filter(
-		func(e: Node2D) -> bool: return is_instance_valid(e)
-	)
+	var i := _enemies_in_range.size() - 1
+	while i >= 0:
+		if not is_instance_valid(_enemies_in_range[i]):
+			_enemies_in_range.remove_at(i)
+		i -= 1
 	var best: Node2D = null
 	var lowest_hp: float = INF
-	for enemy in _enemies_in_range:
-		if enemy.has_method("get_path_progress"):
-			var hp: float = enemy.get("current_health") if enemy.get("current_health") != null else INF
-			if hp < lowest_hp:
-				lowest_hp = hp
-				best = enemy
+	for enemy: Node2D in _enemies_in_range:
+		# Skip enemies already in death sequence (_is_dead set by BaseEnemy._die())
+		if enemy.get("_is_dead") == true:
+			continue
+		var hp: Variant = enemy.get("current_health")
+		var hp_f: float = float(hp) if hp != null else INF
+		if hp_f < lowest_hp:
+			lowest_hp = hp_f
+			best = enemy
 	return best
 
 ## Override: armor-piercing attack — bypass enemy armor entirely, instant hit

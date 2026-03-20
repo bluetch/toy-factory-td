@@ -10,6 +10,7 @@ var _waypoints: Array[Vector2] = []
 
 ## Runtime state
 var current_health: float = 0.0
+var _max_health: float = 0.0
 var _current_waypoint_index: int = 0
 ## Accumulated linear distance travelled (used for targeting priority)
 var _path_progress: float = 0.0
@@ -18,6 +19,9 @@ var _path_progress: float = 0.0
 var _speed_multiplier: float = 1.0
 var _slow_timer: float = 0.0
 var _is_slowed: bool = false
+## Set to true the moment _die() is first called; prevents double-death from
+## multiple towers firing on the same enemy during its death animation.
+var _is_dead: bool = false
 
 @onready var health_bar_bg: ColorRect  = $HealthBar/Background
 @onready var health_bar_fill: ColorRect = $HealthBar/Fill
@@ -28,15 +32,23 @@ var _is_slowed: bool = false
 
 const HEALTH_BAR_WIDTH := 40.0
 
-func setup(data: EnemyData, waypoints: Array[Vector2]) -> void:
+## Cached FloatingText scene — loaded once, reused for all instances.
+static var _float_text_scene: PackedScene = null
+
+func setup(data: EnemyData, waypoints: Array[Vector2], health_mult: float = 1.0) -> void:
     enemy_data = data
     _waypoints = waypoints
-    current_health = data.max_health
+    _max_health = data.max_health * health_mult
+    current_health = _max_health
     global_position = waypoints[0] if not waypoints.is_empty() else Vector2.ZERO
     _current_waypoint_index = 1
     _update_health_bar()
+    _setup_armor_indicator()
     add_to_group("enemies")
     _play_anim("walk")
+    # Prime the static FloatingText scene cache on first use
+    if _float_text_scene == null:
+        _float_text_scene = load("res://scenes/ui/FloatingText.tscn")
 
 func _physics_process(delta: float) -> void:
     if enemy_data == null or _waypoints.is_empty():
@@ -81,8 +93,10 @@ func apply_slow(factor: float, duration: float) -> void:
     _slow_timer = maxf(_slow_timer, duration)
     if not _is_slowed:
         _is_slowed = true
+        AudioManager.play_slow_applied()
         if _visual != null:
             _visual.modulate = Color(0.25, 0.65, 1.0)
+        _spawn_float_text("❄", Color(0.55, 0.85, 1.0))
 
 ## Returns total path progress for targeting priority
 func get_path_progress() -> float:
@@ -90,7 +104,7 @@ func get_path_progress() -> float:
 
 ## Apply damage that bypasses all armor (used by armor-piercing towers).
 func take_damage_piercing(damage: float) -> void:
-    if enemy_data == null:
+    if _is_dead or enemy_data == null:
         return
     current_health -= damage
     _update_health_bar()
@@ -102,7 +116,7 @@ func take_damage_piercing(damage: float) -> void:
 
 ## Apply damage (armor reduces incoming damage)
 func take_damage(damage: float) -> void:
-    if enemy_data == null:
+    if _is_dead or enemy_data == null:
         return
     var effective_damage := damage * (1.0 - enemy_data.armor)
     current_health -= effective_damage
@@ -124,6 +138,9 @@ func _flash_hit() -> void:
     tween.tween_property(_visual, "modulate", base_color, 0.12)
 
 func _die() -> void:
+    if _is_dead:
+        return
+    _is_dead = true
     # Remove from group immediately so towers stop targeting this enemy
     remove_from_group("enemies")
     set_physics_process(false)
@@ -133,26 +150,27 @@ func _die() -> void:
     GameManager.add_score(enemy_data.score_reward)
     _spawn_float_text("+%d 💰" % enemy_data.gold_reward, Color(1.0, 0.88, 0.25))
     _on_death()
-    # Play death animation and wait for it to finish before removing
+    await _play_death_animation()
+    queue_free()
+
+## Plays the death animation (sprite or tween) and awaits its completion.
+func _play_death_animation() -> void:
     if _anim != null and _anim.sprite_frames != null \
             and _anim.sprite_frames.has_animation("death"):
         _play_anim("death")
         await _anim.animation_finished
     elif _visual != null:
-        # Sprite2D enemies: scale-up + fade out
         var tween := create_tween()
         tween.set_parallel(true)
         tween.tween_property(_visual, "scale", _visual.scale * 1.6, 0.25)
         tween.tween_property(_visual, "modulate:a", 0.0, 0.25)
         await tween.finished
-    queue_free()
 
 ## Spawn a red damage number slightly to the side of the enemy.
 func _spawn_damage_text(amount: int) -> void:
-    var packed: PackedScene = load("res://scenes/ui/FloatingText.tscn")
-    if packed == null or get_parent() == null:
+    if _float_text_scene == null or get_parent() == null:
         return
-    var ft: FloatingText = packed.instantiate() as FloatingText
+    var ft: FloatingText = _float_text_scene.instantiate() as FloatingText
     get_parent().add_child(ft)
     var x_offset := randf_range(-16.0, 16.0)
     ft.global_position = global_position + Vector2(x_offset, -18)
@@ -160,10 +178,9 @@ func _spawn_damage_text(amount: int) -> void:
 
 ## Spawn a floating gold label above the enemy's death position.
 func _spawn_float_text(text: String, color: Color) -> void:
-    var packed: PackedScene = load("res://scenes/ui/FloatingText.tscn")
-    if packed == null or get_parent() == null:
+    if _float_text_scene == null or get_parent() == null:
         return
-    var ft: FloatingText = packed.instantiate() as FloatingText
+    var ft: FloatingText = _float_text_scene.instantiate() as FloatingText
     get_parent().add_child(ft)
     ft.global_position = global_position + Vector2(0, -24)
     ft.setup(text, color)
@@ -184,6 +201,20 @@ func _on_death() -> void:
 func _update_health_bar() -> void:
     if enemy_data == null or health_bar_fill == null:
         return
-    var ratio := clampf(current_health / enemy_data.max_health, 0.0, 1.0)
+    var ratio := clampf(current_health / maxf(_max_health, 1.0), 0.0, 1.0)
     health_bar_fill.size.x = HEALTH_BAR_WIDTH * ratio
     health_bar_fill.modulate = Color(1.0 - ratio, ratio, 0.0)  ## red -> green
+
+## Add a small shield badge to the health bar for armored enemies.
+## Called once from setup() — no-op if armor == 0.
+func _setup_armor_indicator() -> void:
+    if enemy_data == null or enemy_data.armor <= 0.0 or health_bar_bg == null:
+        return
+    # Tint background to blue-grey so armored enemies are visually distinct
+    health_bar_bg.color = Color(0.18, 0.22, 0.48, 0.90)
+    # Small shield label to the right of the bar
+    var badge := Label.new()
+    badge.text = "🛡"
+    badge.add_theme_font_size_override("font_size", 9)
+    badge.position = Vector2(HEALTH_BAR_WIDTH + 2.0, -3.0)
+    health_bar_bg.get_parent().add_child(badge)

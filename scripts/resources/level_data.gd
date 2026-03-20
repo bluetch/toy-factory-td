@@ -9,6 +9,10 @@ extends Resource
 @export var starting_lives: int = 20
 @export var starting_gold: int = 300
 
+## Music track to play during this level (matches a key in AudioManager.MUSIC_TRACKS).
+## Defaults to "gameplay". Set to "boss" for high-intensity levels.
+@export var music_track_id: String = "gameplay"
+
 ## Ordered waypoints in TILE coordinates (Vector2i).
 ## The path goes in straight horizontal/vertical segments between waypoints.
 ## First waypoint = enemy spawn, last waypoint = base (exit).

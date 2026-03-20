@@ -99,3 +99,21 @@ signal victory_triggered
 ## [param achievement_id]   Internal identifier string.
 ## [param achievement_name] Localised display name (with icon prefix).
 signal achievement_unlocked(achievement_id: String, achievement_name: String)
+
+## Emitted when the alive enemy count changes during a wave.
+## [param alive] Enemies still on the field or yet to spawn in this wave.
+## [param total] Total enemies in this wave (constant once wave starts).
+signal enemy_count_changed(alive: int, total: int)
+
+## Emitted when the player earns a wave-completion gold bonus.
+## [param amount] Gold awarded (constant across waves).
+signal wave_bonus_awarded(amount: int)
+
+## Emitted when a boss enemy spawns onto the field.
+## [param boss] The BossEnemyScene node that just appeared.
+signal boss_spawned(boss: Node)
+
+## Emitted whenever the boss takes damage or dies.
+## [param current_hp] Boss's remaining health.
+## [param max_hp]     Boss's max health (set at spawn time).
+signal boss_health_changed(current_hp: float, max_hp: float)

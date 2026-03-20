@@ -2,13 +2,11 @@
 class_name MainMenuUI
 extends Control
 
-@onready var play_button:         Button  = $CenterPanel/VBox/MenuContainer/PlayButton
-@onready var level_select_button: Button  = $CenterPanel/VBox/MenuContainer/LevelSelectButton
-@onready var high_scores_button:  Button  = $CenterPanel/VBox/MenuContainer/HighScoresButton
-@onready var settings_button:     Button  = $CenterPanel/VBox/MenuContainer/SettingsButton
-@onready var quit_button:         Button  = $CenterPanel/VBox/MenuContainer/QuitButton
-@onready var version_label:       Label   = $VersionLabel
-@onready var high_scores_panel:   Control = $HighScoresPanel
+@onready var play_button:         Button = $CenterPanel/VBox/MenuContainer/PlayButton
+@onready var level_select_button: Button = $CenterPanel/VBox/MenuContainer/LevelSelectButton
+@onready var settings_button:     Button = $CenterPanel/VBox/MenuContainer/SettingsButton
+@onready var quit_button:         Button = $CenterPanel/VBox/MenuContainer/QuitButton
+@onready var version_label:       Label  = $VersionLabel
 
 
 func _ready() -> void:
@@ -16,15 +14,12 @@ func _ready() -> void:
 	version_label.text = "v" + ProjectSettings.get_setting("application/config/version", "0.1.0")
 	play_button.pressed.connect(_on_play_pressed)
 	level_select_button.pressed.connect(_on_level_select_pressed)
-	high_scores_button.pressed.connect(_on_high_scores_pressed)
 	settings_button.pressed.connect(_on_settings_pressed)
 	quit_button.pressed.connect(_on_quit_pressed)
-	high_scores_panel.hide()
 
 
 func _on_play_pressed() -> void:
 	AudioManager.play_ui_click()
-	# Start from the highest unlocked level
 	var start_level := 1
 	for id in range(SaveManager.MAX_LEVEL, 0, -1):
 		if SaveManager.is_level_unlocked(id):
@@ -36,20 +31,6 @@ func _on_play_pressed() -> void:
 func _on_level_select_pressed() -> void:
 	AudioManager.play_ui_click()
 	SceneManager.goto_level_select()
-
-
-func _on_high_scores_pressed() -> void:
-	AudioManager.play_ui_click()
-	high_scores_panel.visible = not high_scores_panel.visible
-	if high_scores_panel.visible:
-		_populate_high_scores()
-
-
-func _populate_high_scores() -> void:
-	for i in range(1, SaveManager.MAX_LEVEL + 1):
-		var label := high_scores_panel.get_node_or_null("VBoxContainer/Level%dScore" % i) as Label
-		if label:
-			label.text = "第 %d 關：%d 分" % [i, SaveManager.get_high_score(i)]
 
 
 func _on_settings_pressed() -> void:

@@ -83,6 +83,7 @@ func goto_level(level_id: int) -> void:
 	if StoryDatabase.has_story(story_id):
 		goto_story(story_id, func() -> void: goto_scene(GAME_WORLD_SCENE))
 	else:
+		push_warning("SceneManager: No intro story found for level %d — skipping cutscene." % level_id)
 		goto_scene(GAME_WORLD_SCENE)
 
 ## Show a story sequence then call after_callable when done.

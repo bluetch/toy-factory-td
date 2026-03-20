@@ -17,6 +17,8 @@ extends Node2D
 
 const SHAKE_DURATION  := 0.35
 const SHAKE_MAGNITUDE := 10.0
+## Radius (px) within which a left-click selects a placed tower.
+const TOWER_SELECT_RADIUS := 48.0
 var _shake_timer: float = 0.0
 var _shake_magnitude_override: float = 0.0
 var _shake_override_timer:     float = 0.0
@@ -25,6 +27,10 @@ var _shake_override_timer:     float = 0.0
 var _selected_tower_data: TowerData = null
 ## The tower node currently selected for upgrade/sell
 var _selected_tower_node: Node = null
+## Placement range-preview circle (follows cursor, destroyed on cancel/place)
+var _range_preview: Node2D = null
+## Tracks whether the current hover tile accepts a tower (used for preview tint).
+var _range_preview_valid: bool = true
 
 ## Converted world-space waypoints for this level
 var _world_waypoints: Array[Vector2] = []
@@ -36,8 +42,8 @@ func _ready() -> void:
 	var level_id := GameManager.current_level_id
 	var level_res_path := "res://data/levels/level_%d.tres" % level_id
 	var level_data: LevelData = load(level_res_path)
-	if level_data == null:
-		push_error("GameWorld: Could not load level data: " + level_res_path)
+	if level_data == null or not level_data is LevelData:
+		push_error("GameWorld: '%s' is not a valid LevelData resource." % level_res_path)
 		return
 
 	# Convert tile waypoints to world positions
@@ -63,6 +69,11 @@ func _ready() -> void:
 	EventBus.tower_placed.connect(func(_t, _tile): AudioManager.play_tower_place())
 	EventBus.tower_upgraded.connect(func(_t, _lvl): AudioManager.play_tower_upgrade())
 	EventBus.tower_sold.connect(func(_tile, _val): AudioManager.play_tower_sell())
+	# Track total waves cleared across all play sessions.
+	EventBus.wave_completed.connect(func(_n: int):
+		SaveManager.set_stat_int("waves_cleared",
+			SaveManager.get_stat_int("waves_cleared") + 1)
+	)
 
 	# Give HUD and TowerPanel a reference to this GameWorld node
 	hud.set_game_world(self)
@@ -82,21 +93,34 @@ func _ready() -> void:
 	# Notify achievement tracker of level start
 	AchievementManager.start_level(level_id, GameManager.lives)
 
-	# 播放遊戲音樂
-	AudioManager.play_track("gameplay")
+	# 播放遊戲音樂（由關卡資料決定軌道）
+	AudioManager.play_track(level_data.music_track_id)
 
 	# Apply initial game speed
 	Engine.time_scale = GameManager.game_speed
+
+## Tower type hotkeys: key 1-5 maps to TowerPanel.TOWER_RESOURCES index
+const HOTKEY_CODES: Array[int] = [KEY_1, KEY_2, KEY_3, KEY_4, KEY_5]
 
 func _input(event: InputEvent) -> void:
 	# ESC: cancel tower placement first, then pause
 	if event is InputEventKey:
 		var key_event := event as InputEventKey
-		if key_event.pressed and not key_event.echo and key_event.keycode == KEY_ESCAPE:
-			if _selected_tower_data != null:
-				cancel_tower_placement()
-				get_viewport().set_input_as_handled()
-				return
+		if key_event.pressed and not key_event.echo:
+			if key_event.keycode == KEY_ESCAPE:
+				if _selected_tower_data != null:
+					cancel_tower_placement()
+					get_viewport().set_input_as_handled()
+					return
+			# Hotkeys 1-5: select tower type
+			var hk_index := HOTKEY_CODES.find(key_event.keycode)
+			if hk_index >= 0 and hk_index < TowerPanel.TOWER_RESOURCES.size():
+				if GameManager.state == GameManager.GameState.PLAYING:
+					var data: TowerData = load(TowerPanel.TOWER_RESOURCES[hk_index])
+					if data != null:
+						begin_tower_placement(data)
+						get_viewport().set_input_as_handled()
+						return
 
 	# Pause toggle
 	if event.is_action_pressed("pause_game"):
@@ -127,7 +151,14 @@ func _process(delta: float) -> void:
 	# Update hover tile when in placement mode
 	if _selected_tower_data != null:
 		var tile := grid_manager.world_to_tile(get_global_mouse_position())
-		grid_manager.set_hover(tile, grid_manager.can_build(tile))
+		var can_build: bool = grid_manager.can_build(tile)
+		grid_manager.set_hover(tile, can_build)
+		# Snap range-preview circle to tile centre; tint red when invalid.
+		if _range_preview != null and is_instance_valid(_range_preview):
+			_range_preview.global_position = grid_manager.tile_to_world(tile)
+			if can_build != _range_preview_valid:
+				_range_preview_valid = can_build
+			_range_preview.queue_redraw()
 
 	# Screen shake (enemy reached end, or boss death)
 	if _shake_timer > 0.0:
@@ -155,11 +186,40 @@ func begin_tower_placement(tower_data: TowerData) -> void:
 		return
 	_selected_tower_data = tower_data
 	EventBus.tower_deselected.emit()
+	_create_range_preview(tower_data.get_range(0))
 
 ## Cancel current tower placement
 func cancel_tower_placement() -> void:
 	_selected_tower_data = null
 	grid_manager.clear_hover()
+	_destroy_range_preview()
+
+## Draw a translucent range circle following the cursor during placement mode.
+## Circle is green when the hovered tile is buildable, red-orange when blocked.
+func _create_range_preview(radius: float) -> void:
+	_destroy_range_preview()
+	_range_preview_valid = true   # reset to valid each time placement begins
+	_range_preview = Node2D.new()
+	_range_preview.z_index = 3
+	var r := radius
+	_range_preview.draw.connect(func() -> void:
+		var ring_col: Color
+		var fill_col: Color
+		if _range_preview_valid:
+			ring_col = Color(0.55, 1.0, 0.55, 0.65)
+			fill_col = Color(0.55, 1.0, 0.55, 0.07)
+		else:
+			ring_col = Color(1.0, 0.35, 0.20, 0.75)
+			fill_col = Color(1.0, 0.35, 0.20, 0.10)
+		_range_preview.draw_arc(Vector2.ZERO, r, 0.0, TAU, 72, ring_col, 2.0, true)
+		_range_preview.draw_circle(Vector2.ZERO, r, fill_col)
+	)
+	add_child(_range_preview)
+
+func _destroy_range_preview() -> void:
+	if _range_preview != null and is_instance_valid(_range_preview):
+		_range_preview.queue_free()
+	_range_preview = null
 
 ## Attempt to place the selected tower at the given world position
 func _try_place_tower(world_pos: Vector2) -> void:
@@ -187,16 +247,16 @@ func _try_place_tower(world_pos: Vector2) -> void:
 	grid_manager.place_tower(tile)
 	EventBus.tower_placed.emit(tower, tile)
 
-	# Stay in placement mode so player can place multiple towers
-	# Press RMB or press Escape to exit
-	# grid_manager hover stays active
+	# Stay in placement mode — rebuild preview for the same tower type
+	# Press RMB or Escape to exit placement mode
+	_create_range_preview(_selected_tower_data.get_range(0))
 
 ## Try to select an already-placed tower
 func _try_select_tower(world_pos: Vector2) -> void:
 	for tower in tower_container.get_children():
 		if tower is Node2D:
 			var dist := (tower as Node2D).global_position.distance_to(world_pos)
-			if dist < 40.0:
+			if dist < TOWER_SELECT_RADIUS:
 				EventBus.tower_selected.emit(tower)
 				return
 	EventBus.tower_deselected.emit()
@@ -246,6 +306,30 @@ func _on_enemy_reached_end() -> void:
 	GameManager.lose_life()
 	AudioManager.play_life_lost()
 	_shake_timer = SHAKE_DURATION
+	_spawn_base_hit_flash()
+
+## Brief red pulse at the factory base entrance to sell the life-lost moment.
+func _spawn_base_hit_flash() -> void:
+	var flash := Node2D.new()
+	flash.z_index = 5
+	flash.global_position = factory_base.global_position
+	add_child(flash)
+	flash.draw.connect(func() -> void:
+		if flash.has_meta("_r"):
+			var r: float = flash.get_meta("_r")
+			var a: float = flash.get_meta("_a")
+			flash.draw_circle(Vector2.ZERO, r, Color(1.0, 0.10, 0.10, a * 0.55))
+			flash.draw_circle(Vector2.ZERO, r * 0.45, Color(1.0, 0.55, 0.0, a * 0.80))
+	)
+	flash.set_meta("_r", 8.0)
+	flash.set_meta("_a", 1.0)
+	var tween := flash.create_tween()
+	tween.tween_method(func(v: float) -> void:
+		flash.set_meta("_r", lerpf(8.0, 72.0, v))
+		flash.set_meta("_a", 1.0 - v)
+		flash.queue_redraw()
+	, 0.0, 1.0, 0.45)
+	tween.tween_callback(flash.queue_free)
 
 func _on_all_waves_completed() -> void:
 	# Short delay before showing victory screen

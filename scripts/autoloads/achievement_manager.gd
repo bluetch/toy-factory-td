@@ -13,17 +13,20 @@ const ACHIEVEMENTS: Dictionary = {
 	"enemy_100":    {"name": "百戰老兵",   "desc": "累計擊殺 100 個敵人",        "icon": "⚔"},
 	"enemy_500":    {"name": "千敵斬",     "desc": "累計擊殺 500 個敵人",        "icon": "💀"},
 	"builder":      {"name": "建築師",     "desc": "累計建造 20 座防禦塔",       "icon": "🔧"},
-	"completionist":{"name": "全通關",     "desc": "完成所有五個關卡",           "icon": "🌟"},
+	"completionist":{"name": "全通關",     "desc": "完成全部八個關卡",           "icon": "🌟"},
 	"speedrunner":  {"name": "速攻者",     "desc": "以 2 倍速完成任意關卡",     "icon": "⚡"},
 	"minimalist":   {"name": "極簡主義",   "desc": "使用 5 座以下防禦塔通關",   "icon": "✨"},
 	"flawless_5":   {"name": "無懈可擊",   "desc": "全命通過最終關卡",           "icon": "👑"},
 	"veteran":      {"name": "老兵",       "desc": "贏得 10 場戰鬥",             "icon": "🎖"},
+	"hard_victor":  {"name": "鋼鐵意志",   "desc": "在困難難度下完成任意關卡",  "icon": "🔥"},
 }
 
 ## ── Per-level session state ──────────────────────────────────
 var _session_towers: int = 0
 var _session_enemies: int = 0
 var _session_max_lives: int = 0
+## Counts lives lost this session — immune to restart exploits
+var _session_lives_lost: int = 0
 
 ## ── Internal CanvasLayer for toast display ───────────────────
 var _toast_canvas: CanvasLayer = null
@@ -44,12 +47,14 @@ func _ready() -> void:
 	EventBus.enemy_died.connect(_on_enemy_died)
 	EventBus.tower_placed.connect(_on_tower_placed)
 	EventBus.victory_triggered.connect(_on_victory)
+	EventBus.enemy_reached_end.connect(_on_enemy_reached_end)
 
 ## Call from GameWorld._ready() to reset per-level counters.
 func start_level(_level_id: int, initial_lives: int) -> void:
 	_session_towers = 0
 	_session_enemies = 0
 	_session_max_lives = initial_lives
+	_session_lives_lost = 0
 
 ## Return enemies killed this session (for end-screen display).
 func get_session_enemies() -> int:
@@ -60,6 +65,9 @@ func get_session_towers() -> int:
 	return _session_towers
 
 # ── EventBus listeners ───────────────────────────────────────
+
+func _on_enemy_reached_end() -> void:
+	_session_lives_lost += 1
 
 func _on_enemy_died(_gold: int, _score: int) -> void:
 	_session_enemies += 1
@@ -90,7 +98,8 @@ func _on_victory() -> void:
 			and GameManager.current_level_id == SaveManager.MAX_LEVEL:
 		_try_unlock("completionist")
 
-	if GameManager.lives == _session_max_lives:
+	# iron_defense: zero lives lost this session (restart-exploit-proof)
+	if _session_lives_lost == 0:
 		_try_unlock("iron_defense")
 		if GameManager.current_level_id == SaveManager.MAX_LEVEL:
 			_try_unlock("flawless_5")
@@ -100,6 +109,9 @@ func _on_victory() -> void:
 
 	if _session_towers <= 5:
 		_try_unlock("minimalist")
+
+	if GameManager.current_difficulty == GameManager.Difficulty.HARD:
+		_try_unlock("hard_victor")
 
 # ── Public helpers ───────────────────────────────────────────
 

@@ -22,6 +22,8 @@ extends Resource
 @export var splash_radius: float = 0.0        # 0 = no splash
 @export var slow_factor: float = 1.0          # 1.0 = no slow, 0.5 = 50% speed
 @export var slow_duration: float = 0.0
+## Base number of chain-lightning jumps (lightning tower only; 0 = unused)
+@export var base_chain_count: int = 0
 
 ## --- Upgrade levels ---
 ## Each UpgradeData contains cost + multipliers applied on top of current stats
@@ -62,3 +64,35 @@ func get_attack_speed(level: int) -> float:
 		if i < upgrades.size():
 			spd *= upgrades[i].speed_multiplier
 	return spd
+
+## Returns slow_factor for a given level (each upgrade multiplies the factor, making slow stronger)
+func get_slow_factor(level: int) -> float:
+	var sf := slow_factor
+	for i in range(level):
+		if i < upgrades.size():
+			sf *= upgrades[i].slow_factor_mult
+	return sf
+
+## Returns slow_duration for a given level (each upgrade adds a bonus in seconds)
+func get_slow_duration(level: int) -> float:
+	var sd := slow_duration
+	for i in range(level):
+		if i < upgrades.size():
+			sd += upgrades[i].slow_duration_bonus
+	return sd
+
+## Returns chain count for a given level (lightning tower; each upgrade may add jumps)
+func get_chain_count(level: int) -> int:
+	var count := base_chain_count
+	for i in range(level):
+		if i < upgrades.size():
+			count += upgrades[i].chain_bonus
+	return count
+
+## Returns splash radius for a given level (cannon tower; each upgrade may add radius)
+func get_splash_radius(level: int) -> float:
+	var r := splash_radius
+	for i in range(level):
+		if i < upgrades.size():
+			r += upgrades[i].splash_radius_bonus
+	return r

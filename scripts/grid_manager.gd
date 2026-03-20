@@ -197,16 +197,37 @@ func _draw() -> void:
 		var ox := GRID_OFFSET.x + _hover_tile.x * TILE_SIZE
 		var oy := GRID_OFFSET.y + _hover_tile.y * TILE_SIZE
 		rect.position = Vector2(ox, oy)
+		var is_path_cell: bool = _grid[_hover_tile.x][_hover_tile.y] == CellType.PATH
 		if _tex_sel_a:
-			var tint := Color(0.40, 1.0, 0.40, 0.90) if _hover_valid \
-					else Color(1.0, 0.30, 0.30, 0.90)
+			var tint: Color
+			if _hover_valid:
+				tint = Color(0.40, 1.0, 0.40, 0.90)
+			elif is_path_cell:
+				tint = Color(1.0, 0.55, 0.05, 0.85)  # amber = "this is a path"
+			else:
+				tint = Color(1.0, 0.30, 0.30, 0.90)   # red = "occupied"
 			draw_texture_rect(_tex_sel_a, rect, false, tint)
 		else:
-			var fb := Color(0.35, 0.95, 0.35, 0.45) if _hover_valid \
-					else Color(0.88, 0.10, 0.10, 0.50)
+			var fb: Color
+			if _hover_valid:
+				fb = Color(0.35, 0.95, 0.35, 0.45)
+			elif is_path_cell:
+				fb = Color(1.0, 0.55, 0.05, 0.50)
+			else:
+				fb = Color(0.88, 0.10, 0.10, 0.50)
 			draw_rect(rect, fb)
+		# Draw X on invalid cells so the reason is unmistakable
+		if not _hover_valid:
+			var cx := ox + TILE_SIZE * 0.5
+			var cy := oy + TILE_SIZE * 0.5
+			var half := TILE_SIZE * 0.28
+			var x_col := Color(1.0, 1.0, 1.0, 0.75)
+			draw_line(Vector2(cx - half, cy - half), Vector2(cx + half, cy + half), x_col, 3.0)
+			draw_line(Vector2(cx + half, cy - half), Vector2(cx - half, cy + half), x_col, 3.0)
 
-	# ── 3. Subtle wobbly grid lines (very faint, skipped on PATH cells) ──────
+	# ── 3. Grid lines — only shown in placement mode so terrain looks continuous ──
+	if not _placement_mode:
+		return
 	for col in range(GRID_COLS + 1):
 		for row in range(GRID_ROWS):
 			var cell_type: CellType = _grid[mini(col, GRID_COLS - 1)][row]
