@@ -19,6 +19,17 @@ var _sell_confirm: bool = false
 var _sell_confirm_timer: float = 0.0
 const SELL_CONFIRM_TIMEOUT := 2.5
 
+## Spring scale-in whenever the panel becomes visible.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_VISIBILITY_CHANGED and visible:
+		scale      = Vector2(0.88, 0.88)
+		modulate.a = 0.0
+		var tw := create_tween()
+		tw.set_parallel(true)
+		tw.tween_property(self, "scale", Vector2.ONE, 0.20) \
+			.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tw.tween_property(self, "modulate:a", 1.0, 0.16)
+
 func _ready() -> void:
 	upgrade_button.pressed.connect(_on_upgrade_pressed)
 	sell_button.pressed.connect(_on_sell_pressed)
@@ -75,7 +86,11 @@ func populate(tower: Node) -> void:
 	tower_name_label.text = data.tower_name
 	var lvl: int = tower.current_level if "current_level" in tower else 0
 	var max_lvl: int = data.upgrades.size()
-	level_label.text = "等級：%d / %d" % [lvl + 1, max_lvl + 1]
+	# Level pips: filled dot per earned level, hollow per remaining
+	var pips := ""
+	for i in range(max_lvl + 1):
+		pips += ("● " if i <= lvl else "○ ")
+	level_label.text = pips.strip_edges()
 
 	var cur_dmg  := data.get_damage(lvl)
 	var cur_spd  := data.get_attack_speed(lvl)
@@ -144,9 +159,13 @@ func _on_upgrade_pressed() -> void:
 	var gw: Node = get_tree().get_first_node_in_group("game_world")
 	if gw and gw.has_method("upgrade_selected_tower"):
 		gw.upgrade_selected_tower()
-	# Refresh display
+	# Refresh display + success bounce
 	if _current_tower and is_instance_valid(_current_tower):
 		populate(_current_tower)
+		var tw := create_tween()
+		tw.tween_property(self, "scale", Vector2(1.06, 1.06), 0.08) \
+			.set_trans(Tween.TRANS_BACK)
+		tw.tween_property(self, "scale", Vector2.ONE, 0.14)
 	else:
 		hide()
 

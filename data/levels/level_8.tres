@@ -269,6 +269,6 @@ level_id = 8
 level_name = "最終決戰"
 description = "工廠的心臟。Coco的最後一戰。守住它。"
 starting_lives = 12
-starting_gold = 200
+starting_gold = 230
 waypoints = Array[Vector2i]([Vector2i(0, 6), Vector2i(5, 6), Vector2i(5, 1), Vector2i(17, 1), Vector2i(17, 11), Vector2i(9, 11), Vector2i(9, 4), Vector2i(22, 4)])
 waves = Array[ExtResource("2_wavedata")]([SubResource("WaveData_w1"), SubResource("WaveData_w2"), SubResource("WaveData_w3"), SubResource("WaveData_w4"), SubResource("WaveData_w5"), SubResource("WaveData_w6"), SubResource("WaveData_w7"), SubResource("WaveData_w8"), SubResource("WaveData_w9")])

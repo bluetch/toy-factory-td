@@ -3,7 +3,11 @@
 class_name StoryScreen
 extends Control
 
-const CHARS_PER_SECOND := 38.0
+const CHARS_PER_SECOND := 42.0
+## Characters that cause a brief typewriter pause for emotional weight.
+const PAUSE_CHARS := ["。", "！", "？", "…", ".", "!", "?"]
+const PAUSE_DURATION := 0.18   ## seconds to freeze after a pause character
+var _pause_timer: float = 0.0
 const SPEAKER_COLORS: Dictionary = {
 	"COCO":     Color(0.95, 0.72, 0.20),
 	"齒輪爺爺": Color(0.72, 0.85, 0.55),
@@ -26,10 +30,30 @@ var _visible_chars: float = 0.0
 var _typing_done: bool    = false
 var _blink_timer: float   = 0.0
 var _entry_tween: Tween   = null
+## Raw unformatted text — used for char counting and typewriter logic.
+var _raw_text: String = ""
 
+
+## Format raw dialogue: stage directions in （）get dimmed italic BBCode styling.
+func _format_dialogue(raw: String) -> String:
+	var result := ""
+	var i := 0
+	while i < raw.length():
+		if raw[i] == "（":
+			var close := raw.find("）", i + 1)
+			if close >= 0:
+				var direction := raw.substr(i, close - i + 1)
+				result += "[color=#7a8eaa][i]" + direction + "[/i][/color]"
+				i = close + 1
+				continue
+		result += raw[i]
+		i += 1
+	return result
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	if dialogue_text != null:
+		dialogue_text.bbcode_enabled = true
 	# Ensure skip hint is visible and has the right prompt
 	if skip_label != null:
 		skip_label.text = "ESC 跳過 / 點擊繼續"
@@ -59,15 +83,21 @@ func _show_entry(idx: int) -> void:
 	speaker_label.text    = speaker
 	speaker_label.modulate = SPEAKER_COLORS.get(speaker, DEFAULT_SPEAKER_COLOR)
 
-	dialogue_text.text = entry.get("text", "")
+	_raw_text = entry.get("text", "")
+	dialogue_text.text = _format_dialogue(_raw_text)
 	dialogue_text.visible_characters = 0
 
-	# Animate dialogue panel: slide in from the right + fade
+	_pause_timer = 0.0
+	# Animate dialogue panel: slide in from right + fade simultaneously
 	dialogue_vbox.modulate.a = 0.0
+	var start_x: float = dialogue_vbox.position.x + 28.0
+	dialogue_vbox.position.x = start_x
 	if _entry_tween:
 		_entry_tween.kill()
 	_entry_tween = create_tween().set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
-	_entry_tween.tween_property(dialogue_vbox, "modulate:a", 1.0, 0.25)
+	_entry_tween.set_parallel(true)
+	_entry_tween.tween_property(dialogue_vbox, "modulate:a", 1.0, 0.22)
+	_entry_tween.tween_property(dialogue_vbox, "position:x", start_x - 28.0, 0.22)
 
 	# Cross-fade portrait (guard against null portrait node)
 	var new_portrait: String = entry.get("portrait", "narrator")
@@ -83,12 +113,23 @@ func _process(delta: float) -> void:
 	if dialogue_text == null or continue_label == null:
 		return
 	if not _typing_done:
-		var char_count: int = dialogue_text.text.length()
-		_visible_chars = minf(_visible_chars + delta * CHARS_PER_SECOND, float(char_count))
-		dialogue_text.visible_characters = int(_visible_chars)
-		if int(_visible_chars) >= char_count:
-			_typing_done = true
-			_blink_timer = 0.0   # blink loop will drive modulate.a from here
+		## Punctuation pause: freeze typing briefly for emotional weight
+		if _pause_timer > 0.0:
+			_pause_timer -= delta
+		else:
+			var char_count: int = _raw_text.length()
+			var prev_idx := int(_visible_chars)
+			_visible_chars = minf(_visible_chars + delta * CHARS_PER_SECOND, float(char_count))
+			dialogue_text.visible_characters = int(_visible_chars)
+			## Check if the newly revealed char is a pause char
+			var new_idx := int(_visible_chars)
+			if new_idx > prev_idx and new_idx < char_count:
+				var ch := _raw_text[new_idx - 1]
+				if ch in PAUSE_CHARS:
+					_pause_timer = PAUSE_DURATION
+			if new_idx >= char_count:
+				_typing_done = true
+				_blink_timer = 0.0
 	else:
 		# Blink continue label
 		_blink_timer += delta
@@ -121,8 +162,8 @@ func _input(event: InputEvent) -> void:
 
 	if not _typing_done:
 		# Complete current line instantly
-		_visible_chars = float(dialogue_text.text.length())
-		dialogue_text.visible_characters = dialogue_text.text.length()
+		_visible_chars = float(_raw_text.length())
+		dialogue_text.visible_characters = _raw_text.length()
 		_typing_done = true
 		_blink_timer = 0.0
 	else:

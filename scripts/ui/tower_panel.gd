@@ -14,14 +14,40 @@ const TOWER_RESOURCES := [
 
 const _K := "res://assets/kenney_tower-defense-kit/Previews/"
 
-## One pre-assembled image per tower — already a complete, unified tower silhouette.
-## Chosen to be visually distinct (round vs square, different heights/shapes).
-const TOWER_ICON: Dictionary = {
-	"ArrowTower":     _K + "tower-round-build-b.png",   ## round, mid-height, red base
-	"CannonTower":    _K + "tower-square-build-d.png",   ## square, pointed purple roof
-	"IceTower":       _K + "tower-round-build-c.png",    ## round, wide dark base
-	"LightningTower": _K + "tower-round-build-d.png",    ## round, flame on top
-	"SniperTower":    _K + "tower-square-build-e.png",   ## square, tall blue/purple
+## Base platform sprite per tower — matches the in-game Body sprite.
+const TOWER_BASE_ICON: Dictionary = {
+	"ArrowTower":     _K + "tower-round-base.png",
+	"CannonTower":    _K + "tower-square-bottom-a.png",
+	"IceTower":       _K + "tower-round-base.png",
+	"LightningTower": _K + "tower-round-base.png",
+	"SniperTower":    _K + "tower-square-bottom-a.png",
+}
+
+## Weapon overlay sprite per tower — matches the Turret/Weapon sprite.
+const TOWER_WEAPON_ICON: Dictionary = {
+	"ArrowTower":     _K + "weapon-ballista.png",
+	"CannonTower":    _K + "weapon-cannon.png",
+	"IceTower":       _K + "tower-round-crystals.png",
+	"LightningTower": _K + "tower-round-crystals.png",
+	"SniperTower":    _K + "weapon-turret.png",
+}
+
+## Role tag shown on each card (short Traditional Chinese label).
+const TOWER_ROLE: Dictionary = {
+	"ArrowTower":     "高速",
+	"CannonTower":    "範圍",
+	"IceTower":       "減速",
+	"LightningTower": "鏈電",
+	"SniperTower":    "穿甲",
+}
+
+## Accent colour per tower type — used for card border and icon tint.
+const TOWER_ACCENT: Dictionary = {
+	"ArrowTower":     Color(0.30, 0.90, 0.42, 1.0),  ## forest green
+	"CannonTower":    Color(1.00, 0.52, 0.18, 1.0),  ## fire orange
+	"IceTower":       Color(0.28, 0.82, 1.00, 1.0),  ## ice cyan
+	"LightningTower": Color(1.00, 0.92, 0.18, 1.0),  ## electric yellow
+	"SniperTower":    Color(0.72, 0.44, 1.00, 1.0),  ## sniper purple
 }
 
 const ICON_SIZE : int = 64   ## display size for the tower icon
@@ -44,24 +70,43 @@ func _build_tower_buttons() -> void:
 			continue
 
 		var scene_key: String = data.scene_path.get_file().get_basename()
-		var icon_path: String = TOWER_ICON.get(scene_key, "")
-		var icon_tex: Texture2D = null
-		if icon_path != "" and ResourceLoader.exists(icon_path):
-			icon_tex = load(icon_path) as Texture2D
+		var base_tex: Texture2D  = null
+		var weap_tex: Texture2D  = null
+		var base_path: String = TOWER_BASE_ICON.get(scene_key, "")
+		var weap_path: String = TOWER_WEAPON_ICON.get(scene_key, "")
+		if base_path != "" and ResourceLoader.exists(base_path):
+			base_tex = load(base_path) as Texture2D
+		if weap_path != "" and ResourceLoader.exists(weap_path):
+			weap_tex = load(weap_path) as Texture2D
+		var accent: Color = TOWER_ACCENT.get(scene_key, Color(0.55, 0.43, 0.18, 1.0))
 
 		# --- Card ---
 		var card_style := StyleBoxFlat.new()
-		card_style.bg_color = Color(0.07, 0.12, 0.26, 0.92)
+		card_style.bg_color = Color(0.06, 0.10, 0.22, 0.95)
 		card_style.set_border_width_all(2)
-		card_style.border_color = Color(0.55, 0.43, 0.18, 0.80)
-		card_style.set_corner_radius_all(5)
+		card_style.border_color = accent
+		card_style.set_corner_radius_all(6)
 		card_style.set_content_margin_all(0.0)
 		var card := PanelContainer.new()
-		card.custom_minimum_size = Vector2(148.0, float(ICON_SIZE) + 10.0)
+		card.custom_minimum_size = Vector2(148.0, float(ICON_SIZE) + 16.0)
+		card.pivot_offset = Vector2(74.0, (float(ICON_SIZE) + 16.0) * 0.5)
 		card.add_theme_stylebox_override("panel", card_style)
-		card.set_meta("build_cost", data.build_cost)
+		var _eff := SkillManager.effective_build_cost(data.build_cost)
+		card.set_meta("build_cost", _eff)
 		card.set_meta("card_style", card_style)
-		card.set_meta("base_cost_text", "%d 金" % data.build_cost)
+		card.set_meta("base_cost_text", "%d 金" % _eff)
+		card.set_meta("accent", accent)
+
+		# Thin accent stripe at top of card
+		var stripe := ColorRect.new()
+		stripe.color = Color(accent.r, accent.g, accent.b, 0.55)
+		stripe.custom_minimum_size = Vector2(0, 3)
+		stripe.anchor_right = 1.0
+		stripe.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+		var vbox_outer := VBoxContainer.new()
+		vbox_outer.add_theme_constant_override("separation", 0)
+		vbox_outer.add_child(stripe)
 
 		var margin := MarginContainer.new()
 		margin.add_theme_constant_override("margin_left",   6)
@@ -72,37 +117,96 @@ func _build_tower_buttons() -> void:
 		var hbox := HBoxContainer.new()
 		hbox.add_theme_constant_override("separation", 8)
 
-		# --- Icon ---
-		var thumb := TextureRect.new()
-		thumb.custom_minimum_size = Vector2(float(ICON_SIZE), float(ICON_SIZE))
-		thumb.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		thumb.expand_mode  = TextureRect.EXPAND_IGNORE_SIZE
-		thumb.texture = icon_tex
-		hbox.add_child(thumb)
+		# --- Icon: tinted bg + composite base + weapon overlay ---
+		var icon_bg_style := StyleBoxFlat.new()
+		icon_bg_style.bg_color = Color(accent.r * 0.16, accent.g * 0.16, accent.b * 0.16, 0.92)
+		icon_bg_style.set_corner_radius_all(5)
+		icon_bg_style.set_border_width_all(1)
+		icon_bg_style.border_color = Color(accent.r, accent.g, accent.b, 0.35)
+		var icon_bg := PanelContainer.new()
+		icon_bg.custom_minimum_size = Vector2(float(ICON_SIZE), float(ICON_SIZE))
+		icon_bg.add_theme_stylebox_override("panel", icon_bg_style)
+
+		## Base layer — clean platform matching in-game Body sprite
+		var thumb_base := TextureRect.new()
+		thumb_base.set_anchors_preset(Control.PRESET_FULL_RECT)
+		thumb_base.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		thumb_base.expand_mode  = TextureRect.EXPAND_IGNORE_SIZE
+		thumb_base.texture  = base_tex
+		thumb_base.modulate = accent.darkened(0.12)
+		icon_bg.add_child(thumb_base)
+
+		## Weapon overlay — slightly smaller, centred in upper half
+		var thumb_weap := TextureRect.new()
+		thumb_weap.anchor_left   = 0.10
+		thumb_weap.anchor_right  = 0.90
+		thumb_weap.anchor_top    = 0.0
+		thumb_weap.anchor_bottom = 0.72
+		thumb_weap.grow_horizontal = Control.GROW_DIRECTION_BOTH
+		thumb_weap.grow_vertical   = Control.GROW_DIRECTION_BOTH
+		thumb_weap.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		thumb_weap.expand_mode  = TextureRect.EXPAND_IGNORE_SIZE
+		thumb_weap.texture  = weap_tex
+		thumb_weap.modulate = accent.lightened(0.30)
+		icon_bg.add_child(thumb_weap)
+
+		hbox.add_child(icon_bg)
 
 		# --- Labels ---
 		var vbox := VBoxContainer.new()
 		vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 
+		## Top row: tower name + role tag
+		var top_row := HBoxContainer.new()
+		top_row.add_theme_constant_override("separation", 4)
+
 		var name_label := Label.new()
 		name_label.text = data.tower_name
-		name_label.add_theme_font_size_override("font_size", 13)
-		name_label.add_theme_color_override("font_color", Color(0.90, 0.86, 0.72, 1.0))
+		name_label.add_theme_font_size_override("font_size", 12)
+		name_label.add_theme_color_override("font_color", accent.lightened(0.35))
+		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 
+		## Role tag pill (e.g. "範圍", "減速")
+		var role_style := StyleBoxFlat.new()
+		role_style.bg_color = Color(accent.r * 0.30, accent.g * 0.30, accent.b * 0.30, 0.90)
+		role_style.set_corner_radius_all(3)
+		role_style.set_content_margin_all(2.0)
+		var role_panel := PanelContainer.new()
+		role_panel.add_theme_stylebox_override("panel", role_style)
+		var role_lbl := Label.new()
+		role_lbl.text = TOWER_ROLE.get(scene_key, "")
+		role_lbl.add_theme_font_size_override("font_size", 9)
+		role_lbl.add_theme_color_override("font_color", accent.lightened(0.50))
+		role_panel.add_child(role_lbl)
+
+		top_row.add_child(name_label)
+		top_row.add_child(role_panel)
+
 		var cost_label := Label.new()
-		cost_label.text = "%d 金" % data.build_cost
+		cost_label.text = card.get_meta("base_cost_text")
 		cost_label.add_theme_font_size_override("font_size", 12)
 		cost_label.add_theme_color_override("font_color", Color(0.97, 0.84, 0.38, 1.0))
 
-		vbox.add_child(name_label)
+		var tid := scene_key
+		var eff_dps := data.base_damage * SkillManager.get_damage_mult(tid) \
+					* data.base_attack_speed * SkillManager.get_speed_mult(tid)
+		var dps_label := Label.new()
+		dps_label.text = "%.0f DPS" % eff_dps
+		dps_label.add_theme_font_size_override("font_size", 10)
+		dps_label.add_theme_color_override("font_color", Color(0.52, 0.60, 0.70, 0.80))
+
+		vbox.add_child(top_row)
 		vbox.add_child(cost_label)
+		vbox.add_child(dps_label)
 		hbox.add_child(vbox)
 		card.set_meta("cost_label", cost_label)
+		card.set_meta("icon_bg_style", icon_bg_style)
 
 		margin.add_child(hbox)
-		card.add_child(margin)
+		vbox_outer.add_child(margin)
+		card.add_child(vbox_outer)
 
 		# --- Hotkey badge ---
 		var hotkey_idx := TOWER_RESOURCES.find(path)
@@ -125,6 +229,28 @@ func _build_tower_buttons() -> void:
 
 		tower_buttons_container.add_child(card)
 
+		# Staggered fade-in entrance
+		var card_idx := TOWER_RESOURCES.find(path)
+		card.modulate.a = 0.0
+		var entrance_tw := card.create_tween()
+		entrance_tw.tween_interval(0.12 + float(card_idx) * 0.09)
+		entrance_tw.tween_property(card, "modulate:a", 1.0, 0.28).set_trans(Tween.TRANS_SINE)
+
+		# Hover: scale up card + thicken border for a 3A "lift" effect
+		var captured_card := card
+		btn.mouse_entered.connect(func() -> void:
+			var tw := create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			tw.tween_property(captured_card, "scale", Vector2(1.055, 1.055), 0.12)
+			if captured_card.has_meta("card_style"):
+				(captured_card.get_meta("card_style") as StyleBoxFlat).set_border_width_all(3)
+		)
+		btn.mouse_exited.connect(func() -> void:
+			var tw := create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+			tw.tween_property(captured_card, "scale", Vector2.ONE, 0.15)
+			if captured_card.has_meta("card_style"):
+				(captured_card.get_meta("card_style") as StyleBoxFlat).set_border_width_all(2)
+		)
+
 		var captured_data := data
 		btn.pressed.connect(func() -> void: _on_tower_button_pressed(captured_data))
 
@@ -141,11 +267,13 @@ func _on_gold_changed(new_gold: int) -> void:
 		if card is PanelContainer and card.has_meta("build_cost"):
 			var cost: int = card.get_meta("build_cost")
 			var can: bool = new_gold >= cost
-			card.modulate.a = 1.0 if can else 0.55
+			var accent: Color = card.get_meta("accent") if card.has_meta("accent") \
+					else Color(0.55, 0.43, 0.18, 1.0)
+			card.modulate.a = 1.0 if can else 0.50
 			if card.has_meta("card_style"):
 				var st: StyleBoxFlat = card.get_meta("card_style")
-				st.border_color = Color(0.72, 0.58, 0.22, 0.95) if can \
-						else Color(0.35, 0.28, 0.12, 0.55)
+				st.border_color = accent if can \
+						else Color(accent.r * 0.45, accent.g * 0.45, accent.b * 0.45, 0.55)
 			if card.has_meta("cost_label"):
 				var lbl: Label = card.get_meta("cost_label")
 				if can:

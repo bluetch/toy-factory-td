@@ -179,8 +179,8 @@ func _process(delta: float) -> void:
 
 ## Called by TowerPanel when player selects a tower to build
 func begin_tower_placement(tower_data: TowerData) -> void:
-	# Check if player can afford it
-	if not GameManager.can_afford(tower_data.build_cost):
+	# Check if player can afford it (apply skill build-cost discount)
+	if not GameManager.can_afford(SkillManager.effective_build_cost(tower_data.build_cost)):
 		AudioManager.play_invalid_placement()
 		hud.show_message("金幣不足！")
 		return
@@ -228,7 +228,8 @@ func _try_place_tower(world_pos: Vector2) -> void:
 		AudioManager.play_invalid_placement()
 		hud.show_message("此處無法建造！")
 		return
-	if not GameManager.spend_gold(_selected_tower_data.build_cost):
+	var effective_cost := SkillManager.effective_build_cost(_selected_tower_data.build_cost)
+	if not GameManager.spend_gold(effective_cost):
 		AudioManager.play_invalid_placement()
 		hud.show_message("金幣不足！")
 		return

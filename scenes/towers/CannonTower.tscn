@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/towers/cannon_tower.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/kenney_tower-defense-kit/Previews/tower-square-build-d.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/kenney_tower-defense-kit/Previews/tower-square-bottom-a.png" id="2"]
 [ext_resource type="Texture2D" path="res://assets/kenney_tower-defense-kit/Previews/weapon-cannon.png" id="3"]
 [ext_resource type="Script" path="res://scripts/towers/range_circle.gd" id="4"]
 
@@ -14,13 +14,16 @@ script = ExtResource("1")
 [node name="Body" type="Sprite2D" parent="."]
 position = Vector2(0, -8)
 scale = Vector2(0.80, 0.80)
+modulate = Color(1.0, 0.72, 0.42, 1.0)
 texture = ExtResource("2")
 
 [node name="Turret" type="Node2D" parent="."]
 position = Vector2(0, -22)
 
 [node name="Weapon" type="Sprite2D" parent="Turret"]
-scale = Vector2(0.42, 0.42)
+rotation_degrees = 90.0
+scale = Vector2(0.48, 0.48)
+modulate = Color(1.0, 0.60, 0.25, 1.0)
 texture = ExtResource("3")
 
 [node name="RangeCircle" type="Node2D" parent="."]

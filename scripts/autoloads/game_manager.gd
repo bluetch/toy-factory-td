@@ -31,7 +31,7 @@ enum Difficulty { EASY, NORMAL, HARD }
 # ── 常量 (Constants) ──────────────────────────────────────────
 
 ## Available time-scale multipliers cycled by toggle_speed().
-const GAME_SPEEDS: Array[float] = [1.0, 2.0]
+const GAME_SPEEDS: Array[float] = [1.0, 2.0, 3.0]
 
 ## Upper bound for the player's life counter.
 const MAX_LIVES: int = 20
@@ -79,6 +79,10 @@ var game_speed: float = 1.0
 ## Internal index into GAME_SPEEDS used by toggle_speed().
 var _speed_index: int = 0
 
+## Gold to carry into the next level (-1 = no carry, use level default).
+## Set via prepare_carry_gold() before calling SceneManager.goto_level().
+var _carry_gold: int = -1
+
 
 # ── 生命周期 (Lifecycle) ──────────────────────────────────────
 
@@ -114,8 +118,15 @@ func start_level(level_id: int) -> void:
 		var base_gold: int  = int(level_data.get("starting_gold")  if level_data.get("starting_gold")  != null else 150)
 		# Apply difficulty modifiers.
 		var diff: int = int(current_difficulty)
-		lives = clampi(base_lives + DIFFICULTY_LIVES_BONUS[diff], 1, MAX_LIVES)
-		gold  = int(base_gold * DIFFICULTY_GOLD_MULT[diff])
+		lives = clampi(base_lives + DIFFICULTY_LIVES_BONUS[diff] + SkillManager.get_lives_bonus(), 1, MAX_LIVES)
+		var computed_gold := int(base_gold * DIFFICULTY_GOLD_MULT[diff])
+		if _carry_gold >= 0:
+			# Player carried gold from the previous level — use whichever is more generous.
+			gold = maxi(computed_gold, _carry_gold)
+		else:
+			gold = computed_gold
+		_carry_gold = -1   ## consume the carry
+		gold += SkillManager.get_start_gold_bonus()   ## Roguelike skill bonus
 
 	# ── Reset per-run counters ────────────────────────────────
 	score       = 0
@@ -137,6 +148,12 @@ func start_level(level_id: int) -> void:
 
 
 # ── 金币操作 (Gold Operations) ────────────────────────────────
+
+## Call this just before SceneManager.goto_level() when transitioning via
+## victory — saves current gold so the next level inherits it.
+func prepare_carry_gold() -> void:
+	_carry_gold = gold
+
 
 ## Add [param amount] gold to the player's pool and emit the
 ## gold_changed signal.

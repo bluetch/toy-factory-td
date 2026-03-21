@@ -50,6 +50,17 @@ func _ready() -> void:
 				SceneManager.goto_level(level_id)
 			)
 
+		# Staggered slide-up entrance animation
+		if card is Control:
+			var c := card as Control
+			c.modulate.a    = 0.0
+			c.position.y   += 32.0
+			var delay := 0.06 * float(i - 1)
+			var card_tw := c.create_tween().set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+			card_tw.set_parallel(true)
+			card_tw.tween_property(c, "modulate:a",  1.0,              0.30).set_delay(delay)
+			card_tw.tween_property(c, "position:y",  c.position.y - 32.0, 0.30).set_delay(delay)
+
 func _set_difficulty(diff: GameManager.Difficulty) -> void:
 	AudioManager.play_ui_click()
 	GameManager.current_difficulty = diff

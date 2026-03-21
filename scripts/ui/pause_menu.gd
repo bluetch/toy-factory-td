@@ -24,9 +24,28 @@ func _ready() -> void:
 		vbox.add_child(restart_btn)
 		vbox.move_child(restart_btn, resume_button.get_index() + 1)
 
-	EventBus.game_paused.connect(show)
-	EventBus.game_resumed.connect(hide)
+	EventBus.game_paused.connect(_on_pause_show)
+	EventBus.game_resumed.connect(_on_pause_hide)
 	hide()
+
+func _on_pause_show() -> void:
+	var panel: Control = $PanelContainer
+	panel.scale      = Vector2(0.82, 0.82)
+	panel.modulate.a = 0.0
+	show()
+	var tw := create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(panel, "scale", Vector2.ONE, 0.22) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(panel, "modulate:a", 1.0, 0.18)
+
+func _on_pause_hide() -> void:
+	var panel: Control = $PanelContainer
+	var tw := create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(panel, "scale", Vector2(0.88, 0.88), 0.14)
+	tw.tween_property(panel, "modulate:a", 0.0, 0.14)
+	tw.chain().tween_callback(hide)
 
 func _input(event: InputEvent) -> void:
 	if visible and event.is_action_pressed("pause_game"):

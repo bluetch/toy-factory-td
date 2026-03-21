@@ -19,6 +19,9 @@ const ACHIEVEMENTS: Dictionary = {
 	"flawless_5":   {"name": "無懈可擊",   "desc": "全命通過最終關卡",           "icon": "👑"},
 	"veteran":      {"name": "老兵",       "desc": "贏得 10 場戰鬥",             "icon": "🎖"},
 	"hard_victor":  {"name": "鋼鐵意志",   "desc": "在困難難度下完成任意關卡",  "icon": "🔥"},
+	"skill_master": {"name": "技能大師",   "desc": "單局累積 8 個技能疊層",     "icon": "✨"},
+	"rich_victory": {"name": "金庫大王",   "desc": "關卡結束時持有 500 金以上", "icon": "💎"},
+	"enemy_1000":   {"name": "萬敵剋星",   "desc": "累計擊殺 1000 個敵人",      "icon": "💀"},
 }
 
 ## ── Per-level session state ──────────────────────────────────
@@ -77,6 +80,8 @@ func _on_enemy_died(_gold: int, _score: int) -> void:
 		_try_unlock("enemy_100")
 	if total >= 500:
 		_try_unlock("enemy_500")
+	if total >= 1000:
+		_try_unlock("enemy_1000")
 
 func _on_tower_placed(_tower: Node, _tile: Vector2i) -> void:
 	_session_towers += 1
@@ -112,6 +117,17 @@ func _on_victory() -> void:
 
 	if GameManager.current_difficulty == GameManager.Difficulty.HARD:
 		_try_unlock("hard_victor")
+
+	# skill_master: 8+ total skill stacks in one run
+	var total_stacks := 0
+	for s: SkillData in SkillManager._pool:
+		total_stacks += SkillManager.get_skill_stack(s.skill_id)
+	if total_stacks >= 8:
+		_try_unlock("skill_master")
+
+	# rich_victory: end a level with 500+ gold
+	if GameManager.gold >= 500:
+		_try_unlock("rich_victory")
 
 # ── Public helpers ───────────────────────────────────────────
 

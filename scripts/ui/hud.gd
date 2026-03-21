@@ -23,12 +23,13 @@ var _message_timer: float = 0.0
 const MESSAGE_DURATION := 2.0
 ## Queue of pending messages so rapid events don't stomp each other.
 var _message_queue: Array[String] = []
+var _msg_tween: Tween = null
 
 ## Dynamically-created wave announcement banner
 var _wave_banner: Label = null
 var _banner_tween: Tween = null
-## Wave composition preview label (shown between waves)
-var _wave_preview_label: Label = null
+## Wave composition preview container (shown between waves) — holds sprite chips.
+var _wave_preview_container: Control = null
 
 ## Tween for pulsing the next-wave button
 var _wave_btn_tween: Tween = null
@@ -64,11 +65,13 @@ func _ready() -> void:
 	EventBus.wave_started.connect(_on_wave_started)
 	EventBus.enemy_count_changed.connect(_on_enemy_count_changed)
 	EventBus.wave_bonus_awarded.connect(_on_wave_bonus_awarded)
+	EventBus.kill_combo_awarded.connect(_on_kill_combo_awarded)
 
 	_build_wave_banner()
 	_build_wave_preview()
 	_build_vignette()
 	_build_boss_bar()
+	_build_skill_button()
 
 	speed_button.pressed.connect(_on_speed_pressed)
 	pause_button.pressed.connect(_on_pause_pressed)
@@ -125,17 +128,32 @@ func _on_wave_started(wave_number: int, total_waves: int) -> void:
 	_stop_wave_btn_pulse()
 	next_wave_btn.hide()
 	# Hide wave preview
-	if _wave_preview_label != null:
-		_wave_preview_label.modulate.a = 0.0
+	if _wave_preview_container != null:
+		_wave_preview_container.modulate.a = 0.0
 	if _wave_banner == null:
 		return
-	_wave_banner.text = "— 波次 %d / %d —" % [wave_number, total_waves]
+	var is_final := (wave_number == total_waves)
+	if is_final:
+		_wave_banner.text = "⚠ 最終波次 %d / %d ⚠" % [wave_number, total_waves]
+		_wave_banner.add_theme_color_override("font_color", Color(1.0, 0.40, 0.25))
+	else:
+		_wave_banner.text = "— 波次 %d / %d —" % [wave_number, total_waves]
+		_wave_banner.add_theme_color_override("font_color", Color(1.0, 0.88, 0.35))
+	_wave_banner.pivot_offset = Vector2(200.0, 23.0)
+	_wave_banner.scale = Vector2(0.6, 0.6)
+	_wave_banner.modulate.a = 0.0
 	if _banner_tween:
 		_banner_tween.kill()
 	_banner_tween = create_tween()
-	_banner_tween.tween_property(_wave_banner, "modulate:a", 1.0, 0.25)
-	_banner_tween.tween_interval(2.5)
-	_banner_tween.tween_property(_wave_banner, "modulate:a", 0.0, 0.5)
+	_banner_tween.set_parallel(true)
+	_banner_tween.tween_property(_wave_banner, "modulate:a", 1.0, 0.22) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_banner_tween.tween_property(_wave_banner, "scale", Vector2.ONE, 0.22) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_banner_tween.chain().tween_interval(2.2)
+	_banner_tween.chain().set_parallel(true)
+	_banner_tween.tween_property(_wave_banner, "modulate:a", 0.0, 0.40)
+	_banner_tween.tween_property(_wave_banner, "scale", Vector2(1.1, 1.1), 0.40)
 
 	# Also update wave label immediately
 	wave_label.text = "波次: %d / %d" % [wave_number, total_waves]
@@ -153,23 +171,82 @@ func _refresh_wave_label() -> void:
 	else:
 		wave_label.text = "波次: %d / %d" % [_wave_num, _wave_total]
 
-## Build a small enemy-composition preview label shown between waves
+## Build the enemy-composition preview bar shown between waves.
+## Displays actual enemy sprite thumbnails + counts instead of emoji text.
 func _build_wave_preview() -> void:
-	_wave_preview_label = Label.new()
-	_wave_preview_label.name = "WavePreviewLabel"
-	_wave_preview_label.anchor_left   = 0.5
-	_wave_preview_label.anchor_right  = 0.5
-	_wave_preview_label.anchor_top    = 0.0
-	_wave_preview_label.anchor_bottom = 0.0
-	_wave_preview_label.offset_left   = -220.0
-	_wave_preview_label.offset_right  = 220.0
-	_wave_preview_label.offset_top    = 114.0
-	_wave_preview_label.offset_bottom = 136.0
-	_wave_preview_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_wave_preview_label.add_theme_font_size_override("font_size", 13)
-	_wave_preview_label.add_theme_color_override("font_color", Color(0.75, 0.90, 1.00))
-	_wave_preview_label.modulate.a = 0.0
-	add_child(_wave_preview_label)
+	## Outer container anchored to top-center
+	_wave_preview_container = Control.new()
+	_wave_preview_container.name = "WavePreviewContainer"
+	_wave_preview_container.anchor_left   = 0.5
+	_wave_preview_container.anchor_right  = 0.5
+	_wave_preview_container.anchor_top    = 0.0
+	_wave_preview_container.anchor_bottom = 0.0
+	_wave_preview_container.offset_left   = -260.0
+	_wave_preview_container.offset_right  = 260.0
+	_wave_preview_container.offset_top    = 108.0
+	_wave_preview_container.offset_bottom = 142.0
+	_wave_preview_container.mouse_filter  = Control.MOUSE_FILTER_IGNORE
+	_wave_preview_container.modulate.a    = 0.0
+	add_child(_wave_preview_container)
+
+## Populate the wave-preview container with sprite chips for each enemy type.
+## chips = [{ enemy_id, count, sprite_path, color }, ...]
+func _build_wave_preview_chips(chips: Array) -> void:
+	if _wave_preview_container == null or chips.is_empty():
+		return
+	# Clear previous chips
+	for ch in _wave_preview_container.get_children():
+		ch.queue_free()
+
+	## Inner HBox — centred inside the Control via anchors
+	var hbox := HBoxContainer.new()
+	hbox.anchor_left   = 0.5
+	hbox.anchor_right  = 0.5
+	hbox.anchor_top    = 0.5
+	hbox.anchor_bottom = 0.5
+	hbox.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	hbox.grow_vertical   = Control.GROW_DIRECTION_BOTH
+	hbox.add_theme_constant_override("separation", 12)
+	_wave_preview_container.add_child(hbox)
+
+	## "下一波：" prefix
+	var prefix := Label.new()
+	prefix.text = "下一波："
+	prefix.add_theme_font_size_override("font_size", 12)
+	prefix.add_theme_color_override("font_color", Color(0.68, 0.82, 1.00, 0.90))
+	prefix.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	hbox.add_child(prefix)
+
+	for entry in chips:
+		var chip := HBoxContainer.new()
+		chip.add_theme_constant_override("separation", 4)
+
+		## Enemy sprite thumbnail (28×28)
+		var sp: String = entry.get("sprite_path", "")
+		if sp != "" and ResourceLoader.exists(sp):
+			var img := TextureRect.new()
+			img.texture = load(sp)
+			img.custom_minimum_size = Vector2(28, 28)
+			img.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			img.expand_mode  = TextureRect.EXPAND_IGNORE_SIZE
+			img.modulate     = entry.get("color", Color.WHITE)
+			chip.add_child(img)
+
+		## ×N count label, tinted to match the enemy
+		var cnt := Label.new()
+		cnt.text = "×%d" % entry.get("count", 0)
+		cnt.add_theme_font_size_override("font_size", 13)
+		cnt.add_theme_color_override("font_color", entry.get("color", Color(0.9, 0.9, 0.9)))
+		cnt.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		chip.add_child(cnt)
+
+		hbox.add_child(chip)
+
+	_wave_preview_container.modulate.a = 0.0
+	var tw := create_tween()
+	tw.tween_property(_wave_preview_container, "modulate:a", 0.92, 0.35) \
+		.set_trans(Tween.TRANS_SINE)
+
 
 ## Build the Boss HP bar panel (hidden until a boss spawns).
 func _build_boss_bar() -> void:
@@ -221,7 +298,11 @@ func _on_boss_spawned(boss: Node) -> void:
 		_boss_bar_fill.size.x = BOSS_BAR_W - 4.0
 	if _boss_bar_label != null:
 		_boss_bar_label.text = "BOSS"
+	_boss_bar_root.modulate.a = 0.0
 	_boss_bar_root.show()
+	var tw := create_tween()
+	tw.tween_property(_boss_bar_root, "modulate:a", 1.0, 0.35) \
+		.set_trans(Tween.TRANS_SINE)
 
 func _on_boss_health_changed(current_hp: float, max_hp: float) -> void:
 	if _boss_bar_fill == null or _boss_bar_root == null:
@@ -283,14 +364,16 @@ func _process(delta: float) -> void:
 	if _message_timer > 0.0:
 		_message_timer -= delta
 		if _message_timer <= 0.0:
-			message_label.hide()
-			# Show next queued message if any.
-			if not _message_queue.is_empty():
-				_show_message_now(_message_queue.pop_front())
+			_message_timer = 0.0
+			_fadeout_message()
 
 ## Wave completion gold bonus notification.
 func _on_wave_bonus_awarded(amount: int) -> void:
 	show_message("波次完成！ +%d 金" % amount)
+
+## Kill-streak combo bonus notification.
+func _on_kill_combo_awarded(amount: int) -> void:
+	show_message("⚡ 連擊！ +%d 金" % amount)
 
 ## Show a brief floating message (e.g. "Not enough gold!").
 ## If a message is already displaying, the new one is queued instead of
@@ -305,8 +388,24 @@ func show_message(text: String) -> void:
 
 func _show_message_now(text: String) -> void:
 	message_label.text = text
+	message_label.modulate.a = 0.0
 	message_label.show()
+	if _msg_tween != null and _msg_tween.is_valid():
+		_msg_tween.kill()
+	_msg_tween = create_tween()
+	_msg_tween.tween_property(message_label, "modulate:a", 1.0, 0.18)
 	_message_timer = MESSAGE_DURATION
+
+func _fadeout_message() -> void:
+	if _msg_tween != null and _msg_tween.is_valid():
+		_msg_tween.kill()
+	_msg_tween = create_tween()
+	_msg_tween.tween_property(message_label, "modulate:a", 0.0, 0.25)
+	_msg_tween.tween_callback(func() -> void:
+		message_label.hide()
+		if not _message_queue.is_empty():
+			_show_message_now(_message_queue.pop_front())
+	)
 
 ## Called by WaveManager.next_wave_ready signal
 func on_next_wave_ready(wave_number: int, total_waves: int) -> void:
@@ -318,13 +417,10 @@ func on_next_wave_ready(wave_number: int, total_waves: int) -> void:
 	next_wave_btn.text = "開始波次 %d ▶" % wave_number
 	next_wave_btn.show()
 	_start_wave_btn_pulse()
-	# Show enemy composition preview for the upcoming wave
+	# Rebuild the visual wave preview with actual enemy sprite thumbnails
 	var wm: Node = get_tree().get_first_node_in_group("wave_manager")
-	if wm != null and wm.has_method("get_wave_preview_string") and _wave_preview_label != null:
-		var preview: String = wm.get_wave_preview_string(wave_number - 1)
-		if preview.length() > 0:
-			_wave_preview_label.text = "下一波：" + preview
-			_wave_preview_label.modulate.a = 0.85
+	if wm != null and wm.has_method("get_wave_preview_entries") and _wave_preview_container != null:
+		_build_wave_preview_chips(wm.get_wave_preview_entries(wave_number - 1))
 
 ## Pulse the next-wave button to draw the player's eye
 func _start_wave_btn_pulse() -> void:
@@ -364,8 +460,29 @@ func hide_upgrade_panel() -> void:
 
 # ---- EventBus callbacks ----
 
+var _prev_lives: int = -1
+var _lives_tween: Tween = null
 func _on_lives_changed(new_lives: int) -> void:
-	lives_label.text = "命 %d" % new_lives
+	lives_label.text = "❤ %d" % new_lives
+	## Shake + red flash when a life is lost
+	if _prev_lives > 0 and new_lives < _prev_lives:
+		if _lives_tween != null and _lives_tween.is_valid():
+			_lives_tween.kill()
+		lives_label.add_theme_color_override("font_color", Color(1.0, 0.25, 0.25))
+		_lives_tween = create_tween()
+		## Quick lateral shake: left-right-left-center
+		var orig_x := lives_label.position.x
+		_lives_tween.tween_property(lives_label, "position:x", orig_x - 5.0, 0.04)
+		_lives_tween.tween_property(lives_label, "position:x", orig_x + 5.0, 0.05)
+		_lives_tween.tween_property(lives_label, "position:x", orig_x - 3.0, 0.04)
+		_lives_tween.tween_property(lives_label, "position:x", orig_x,       0.04)
+		_lives_tween.tween_property(lives_label, "scale", Vector2(1.3, 1.3), 0.06) \
+			.set_trans(Tween.TRANS_BACK)
+		_lives_tween.tween_property(lives_label, "scale", Vector2.ONE, 0.14)
+		_lives_tween.tween_callback(func() -> void:
+			lives_label.add_theme_color_override("font_color", Color(0.95, 0.95, 0.95))
+		)
+	_prev_lives = new_lives
 	if new_lives <= DANGER_LIVES and new_lives > 0:
 		_start_vignette_pulse()
 	else:
@@ -374,22 +491,56 @@ func _on_lives_changed(new_lives: int) -> void:
 var _prev_gold: int = -1
 var _gold_tween: Tween = null
 func _on_gold_changed(new_gold: int) -> void:
-	gold_label.text = "金 %d" % new_gold
-	# Brief scale-pulse when gold is spent (decreases)
-	if _prev_gold > 0 and new_gold < _prev_gold:
+	gold_label.text = "💰 %d" % new_gold
+	if _prev_gold >= 0 and new_gold != _prev_gold:
 		if _gold_tween != null and _gold_tween.is_valid():
 			_gold_tween.kill()
-			gold_label.scale = Vector2(1.0, 1.0)
+			gold_label.scale = Vector2.ONE
 		_gold_tween = create_tween()
-		_gold_tween.tween_property(gold_label, "scale", Vector2(1.25, 1.25), 0.08).set_trans(Tween.TRANS_BACK)
-		_gold_tween.tween_property(gold_label, "scale", Vector2(1.0,  1.0),  0.12).set_trans(Tween.TRANS_BACK)
+		if new_gold < _prev_gold:
+			## Spend: orange pulse
+			gold_label.add_theme_color_override("font_color", Color(1.0, 0.55, 0.15))
+			_gold_tween.tween_property(gold_label, "scale", Vector2(1.22, 1.22), 0.07) \
+				.set_trans(Tween.TRANS_BACK)
+			_gold_tween.tween_property(gold_label, "scale", Vector2.ONE, 0.12)
+		else:
+			## Gain: green flash
+			gold_label.add_theme_color_override("font_color", Color(0.45, 1.0, 0.45))
+			_gold_tween.tween_property(gold_label, "scale", Vector2(1.15, 1.15), 0.06) \
+				.set_trans(Tween.TRANS_BACK)
+			_gold_tween.tween_property(gold_label, "scale", Vector2.ONE, 0.10)
+		_gold_tween.tween_callback(func() -> void:
+			gold_label.add_theme_color_override("font_color", Color(0.97, 0.84, 0.38))
+		)
 	_prev_gold = new_gold
 
+var _prev_score: int  = -1
+var _score_tween: Tween = null
 func _on_score_changed(new_score: int) -> void:
-	score_label.text = "分 %d" % new_score
+	score_label.text = "⭐ %d" % new_score
+	if _prev_score >= 0 and new_score > _prev_score:
+		if _score_tween != null and _score_tween.is_valid():
+			_score_tween.kill()
+			score_label.scale = Vector2.ONE
+		_score_tween = create_tween()
+		score_label.add_theme_color_override("font_color", Color(0.60, 1.00, 0.70))
+		_score_tween.tween_property(score_label, "scale", Vector2(1.20, 1.20), 0.07) \
+			.set_trans(Tween.TRANS_BACK)
+		_score_tween.tween_property(score_label, "scale", Vector2.ONE, 0.12)
+		_score_tween.tween_callback(func() -> void:
+			score_label.add_theme_color_override("font_color", Color(0.78, 0.90, 1.00))
+		)
+	_prev_score = new_score
 
 func _on_speed_changed(new_speed: float) -> void:
-	speed_button.text = "%.0fx" % new_speed
+	speed_button.text = "%.0f×" % new_speed
+	## Tint: white=1×, amber=2×, hot-orange=3×
+	if new_speed >= 3.0:
+		speed_button.add_theme_color_override("font_color", Color(1.0, 0.50, 0.18))
+	elif new_speed >= 2.0:
+		speed_button.add_theme_color_override("font_color", Color(1.0, 0.88, 0.35))
+	else:
+		speed_button.remove_theme_color_override("font_color")
 
 func _on_game_paused() -> void:
 	pause_button.text = "▶ 繼續"
@@ -416,3 +567,113 @@ func _on_next_wave_pressed() -> void:
 	var wm: Node = get_tree().get_first_node_in_group("wave_manager")
 	if wm and wm.has_method("start_next_wave"):
 		wm.start_next_wave()
+
+
+## ── Skill button (bottom-left of screen) ────────────────────────────────────
+
+var _skill_panel: PanelContainer = null
+
+func _build_skill_button() -> void:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.06, 0.08, 0.18, 0.90)
+	style.set_border_width_all(1)
+	style.border_color = Color(0.55, 0.40, 0.85, 0.75)
+	style.set_corner_radius_all(6)
+
+	var btn := Button.new()
+	btn.text = "⚡ 技能"
+	btn.flat = false
+	btn.add_theme_stylebox_override("normal", style)
+	btn.add_theme_font_size_override("font_size", 12)
+	btn.add_theme_color_override("font_color", Color(0.80, 0.70, 1.0, 0.90))
+	btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	btn.anchor_left   = 0.0;  btn.anchor_right  = 0.0
+	btn.anchor_top    = 1.0;  btn.anchor_bottom = 1.0
+	btn.offset_left   = 54.0;  btn.offset_right  = 130.0
+	btn.offset_top    = -38.0; btn.offset_bottom = -10.0
+	add_child(btn)
+	btn.pressed.connect(_on_skill_btn_pressed)
+
+
+func _on_skill_btn_pressed() -> void:
+	AudioManager.play_ui_click()
+	if is_instance_valid(_skill_panel):
+		_skill_panel.queue_free()
+		_skill_panel = null
+		return
+	_build_skill_panel()
+
+
+func _build_skill_panel() -> void:
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.05, 0.06, 0.16, 0.96)
+	style.set_border_width_all(1)
+	style.border_color = Color(0.55, 0.40, 0.85, 0.80)
+	style.set_corner_radius_all(8)
+	style.shadow_color = Color(0.0, 0.0, 0.0, 0.50)
+	style.shadow_size  = 6
+
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", style)
+	panel.anchor_left   = 0.0;  panel.anchor_right  = 0.0
+	panel.anchor_top    = 1.0;  panel.anchor_bottom = 1.0
+	panel.offset_left   = 54.0;  panel.offset_right  = 310.0
+	panel.offset_top    = -220.0; panel.offset_bottom = -44.0
+	panel.modulate.a = 0.0
+	panel.offset_top += 18.0
+	add_child(panel)
+	_skill_panel = panel
+	var _enter_tw := panel.create_tween()
+	_enter_tw.set_parallel(true)
+	_enter_tw.tween_property(panel, "modulate:a", 1.0, 0.18)
+	_enter_tw.tween_property(panel, "offset_top", panel.offset_top - 18.0, 0.22) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 4)
+	panel.add_child(vbox)
+
+	var title := Label.new()
+	title.text = "當前技能"
+	title.add_theme_font_size_override("font_size", 13)
+	title.add_theme_color_override("font_color", Color(1.0, 0.92, 0.60, 1.0))
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(title)
+
+	var sep := HSeparator.new()
+	sep.add_theme_color_override("separator_color", Color(0.55, 0.40, 0.85, 0.40))
+	vbox.add_child(sep)
+
+	var RARITY_COLORS_LOCAL: Array[Color] = [
+		Color(0.62, 0.65, 0.70, 1.0),
+		Color(0.28, 0.55, 1.00, 1.0),
+		Color(0.80, 0.35, 1.00, 1.0),
+	]
+	var has_any := false
+	for s: SkillData in SkillManager._pool:
+		var n := SkillManager.get_skill_stack(s.skill_id)
+		if n == 0:
+			continue
+		has_any = true
+		var rc := RARITY_COLORS_LOCAL[s.rarity]
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 6)
+		var icon_l := Label.new()
+		icon_l.text = s.icon
+		icon_l.add_theme_font_size_override("font_size", 16)
+		row.add_child(icon_l)
+		var info_l := Label.new()
+		info_l.text = "%s ×%d" % [s.skill_name, n]
+		info_l.add_theme_font_size_override("font_size", 12)
+		info_l.add_theme_color_override("font_color", rc)
+		info_l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(info_l)
+		vbox.add_child(row)
+
+	if not has_any:
+		var empty := Label.new()
+		empty.text = "尚未選擇任何技能"
+		empty.add_theme_font_size_override("font_size", 11)
+		empty.add_theme_color_override("font_color", Color(0.55, 0.55, 0.55, 0.75))
+		empty.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		vbox.add_child(empty)

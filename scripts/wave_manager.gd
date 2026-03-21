@@ -62,16 +62,39 @@ signal all_waves_done
 ## Gold awarded to the player on completing each non-final wave.
 const WAVE_BONUS_GOLD := 25
 
-## Short icon strings used to build wave preview text.
+## Short icon strings used to build wave preview text (fallback).
 const ENEMY_ICONS: Dictionary = {
-	"basic_enemy": "👾",
-	"fast_enemy":  "💨",
-	"tank_enemy":  "🛡",
-	"boss_enemy":  "💀",
+	"basic_enemy": "普通",
+	"fast_enemy":  "快速",
+	"tank_enemy":  "坦克",
+	"boss_enemy":  "頭目",
+}
+
+## Actual in-game sprite paths, matching the Kenney UFO sprites used by each enemy scene.
+const ENEMY_SPRITES: Dictionary = {
+	"basic_enemy": "res://assets/kenney_tower-defense-kit/Previews/enemy-ufo-a.png",
+	"fast_enemy":  "res://assets/kenney_tower-defense-kit/Previews/enemy-ufo-b.png",
+	"tank_enemy":  "res://assets/kenney_tower-defense-kit/Previews/enemy-ufo-c.png",
+	"boss_enemy":  "res://assets/kenney_tower-defense-kit/Previews/enemy-ufo-d.png",
+}
+
+## Enemy accent colours — same tints used on the in-game sprites.
+const ENEMY_COLORS: Dictionary = {
+	"basic_enemy": Color(0.72, 1.00, 0.60),
+	"fast_enemy":  Color(0.55, 0.88, 1.00),
+	"tank_enemy":  Color(1.00, 0.72, 0.35),
+	"boss_enemy":  Color(1.00, 0.38, 0.38),
 }
 
 ## Set to true when game ends so pending spawn timers do nothing.
 var _game_ended: bool = false
+
+## Kill-streak combo: rapid kills within STREAK_WINDOW seconds reward bonus gold.
+const STREAK_WINDOW  := 2.8   ## seconds between kills to maintain streak
+const STREAK_THRESH  := 5     ## kills needed to trigger a combo bonus
+const STREAK_GOLD    := 8     ## bonus gold per combo trigger
+var _streak_count: int   = 0
+var _streak_timer: float = 0.0
 
 func _ready() -> void:
 	add_to_group("wave_manager")
@@ -117,6 +140,12 @@ func _stop_countdown() -> void:
 	_counting_down = false
 
 func _process(delta: float) -> void:
+	# ── Kill-streak timer decay ────────────────────────────────
+	if _streak_timer > 0.0:
+		_streak_timer -= delta
+		if _streak_timer <= 0.0:
+			_streak_count = 0
+
 	if not _counting_down:
 		return
 	# 暫停時不倒數（Engine.time_scale=0 所以 delta=0，但明確檢查更安全）
@@ -158,7 +187,6 @@ func _spawn_wave(wave_data: WaveData) -> void:
 	EventBus.enemy_count_changed.emit(_enemies_alive, _wave_total_enemies)
 
 ## Returns a compact enemy-composition string for the given wave (0-based index).
-## Example: "👾×12  💨×8  🛡×4"
 func get_wave_preview_string(wave_index: int) -> String:
 	if wave_index < 0 or wave_index >= _waves.size():
 		return ""
@@ -175,6 +203,30 @@ func get_wave_preview_string(wave_index: int) -> String:
 	for eid in order:
 		parts.append("%s×%d" % [ENEMY_ICONS.get(eid, "?"), counts[eid]])
 	return "  ".join(parts)
+
+## Returns structured preview entries for the given wave (0-based index).
+## Each entry: { "enemy_id": String, "count": int, "sprite_path": String, "color": Color }
+func get_wave_preview_entries(wave_index: int) -> Array:
+	if wave_index < 0 or wave_index >= _waves.size():
+		return []
+	var wave: WaveData = _waves[wave_index]
+	var counts: Dictionary = {}
+	var order: Array[String] = []
+	for entry in wave.entries:
+		var eid: String = str(entry.enemy_data.enemy_id)
+		if not counts.has(eid):
+			counts[eid] = 0
+			order.append(eid)
+		counts[eid] += entry.count
+	var result: Array = []
+	for eid in order:
+		result.append({
+			"enemy_id":    eid,
+			"count":       counts[eid],
+			"sprite_path": ENEMY_SPRITES.get(eid, ""),
+			"color":       ENEMY_COLORS.get(eid, Color(0.8, 0.9, 1.0)),
+		})
+	return result
 
 ## Stop all wave activity when the game ends (prevents late timer callbacks).
 func _on_game_ended() -> void:
@@ -210,12 +262,22 @@ func _on_enemy_died(_gold: int, _score: int) -> void:
 	if _wave_in_progress:
 		EventBus.enemy_count_changed.emit(_enemies_alive, _wave_total_enemies)
 	_check_wave_complete()
+	## Kill-streak combo tracking
+	if _wave_in_progress:
+		_streak_timer = STREAK_WINDOW
+		_streak_count += 1
+		if _streak_count >= STREAK_THRESH and _streak_count % STREAK_THRESH == 0:
+			GameManager.add_gold(STREAK_GOLD)
+			EventBus.kill_combo_awarded.emit(STREAK_GOLD)
 
 func _on_enemy_reached_end() -> void:
 	_enemies_alive = maxi(_enemies_alive - 1, 0)
 	if _wave_in_progress:
 		EventBus.enemy_count_changed.emit(_enemies_alive, _wave_total_enemies)
 	_check_wave_complete()
+	## A leak breaks the streak
+	_streak_count = 0
+	_streak_timer = 0.0
 
 func _check_wave_complete() -> void:
 	if _game_ended or _enemies_alive > 0 or not _wave_in_progress:
@@ -228,9 +290,10 @@ func _check_wave_complete() -> void:
 		EventBus.all_waves_completed.emit()
 		all_waves_done.emit()
 	else:
-		# Award wave-completion gold bonus and notify HUD
-		GameManager.add_gold(WAVE_BONUS_GOLD)
-		EventBus.wave_bonus_awarded.emit(WAVE_BONUS_GOLD)
+		# Award wave-completion gold bonus (base + skill bonus) and notify HUD
+		var total_wave_gold := WAVE_BONUS_GOLD + SkillManager.get_wave_gold_bonus()
+		GameManager.add_gold(total_wave_gold)
+		EventBus.wave_bonus_awarded.emit(total_wave_gold)
 		# Start countdown to next wave
 		var next_wave: WaveData = _waves[_current_wave_index + 1]
 		var between_time: float = BETWEEN_WAVE_TIMES[int(GameManager.current_difficulty)]

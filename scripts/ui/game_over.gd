@@ -38,12 +38,25 @@ func _on_game_over() -> void:
 		var di := GameManager.current_difficulty
 		_diff_label.text = "難度：%s" % GameManager.DIFFICULTY_NAMES[di]
 		_diff_label.add_theme_color_override("font_color", GameManager.DIFFICULTY_COLORS[di])
+	# Entrance: panel drops from above with bounce, screen flashes red
+	var panel: Control = $PanelContainer
+	panel.position.y -= 90.0
+	panel.modulate.a  = 0.0
+	modulate = Color(1.6, 0.15, 0.15, 1.0)
 	show()
+	var tw := create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(panel, "position:y", panel.position.y + 90.0, 0.42) \
+		.set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+	tw.tween_property(panel, "modulate:a", 1.0, 0.22)
+	tw.tween_property(self, "modulate", Color(1, 1, 1, 1), 0.40)
 
 func _on_retry() -> void:
 	AudioManager.play_ui_click()
+	SkillManager.reset()   ## start fresh on retry
 	SceneManager.goto_level(GameManager.current_level_id)
 
 func _on_main_menu_pressed() -> void:
 	AudioManager.play_ui_click()
+	SkillManager.reset()
 	SceneManager.goto_main_menu()

@@ -109,6 +109,10 @@ signal enemy_count_changed(alive: int, total: int)
 ## [param amount] Gold awarded (constant across waves).
 signal wave_bonus_awarded(amount: int)
 
+## Emitted when a rapid kill-streak triggers a combo gold reward.
+## [param amount] Bonus gold awarded for the combo.
+signal kill_combo_awarded(amount: int)
+
 ## Emitted when a boss enemy spawns onto the field.
 ## [param boss] The BossEnemyScene node that just appeared.
 signal boss_spawned(boss: Node)

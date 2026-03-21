@@ -6,12 +6,34 @@ extends BaseTower
 const CHAIN_FALLOFF := 0.6     ## Damage multiplier per jump
 const ARC_LIFETIME  := 0.18    ## Seconds the lightning arc is visible
 
+const BARREL_LEN := 14.0
+
 func _ready() -> void:
+	glow_color = Color(1.00, 0.92, 0.18, 1.0)
 	var sfx_path := "res://assets/kenney_interface-sounds/Audio/glitch_001.ogg"
 	if ResourceLoader.exists(sfx_path):
 		shoot_sfx = load(sfx_path)
 	else:
 		push_warning("LightningTower: SFX not found at '%s'" % sfx_path)
+
+## Lightning emitter — drawn in Turret-local space, +X = toward target.
+func _draw_weapon(node: Node2D) -> void:
+	var base_col  := Color(0.88, 0.80, 0.14, 1.0)
+	var prong_col := Color(1.00, 0.97, 0.42, 1.0)
+	var glow_c    := Color(1.0, 0.95, 0.18, 0.20)
+	## Glow halo at pivot
+	node.draw_circle(Vector2.ZERO, 6.0, glow_c)
+	## Base barrel
+	node.draw_line(Vector2(-1.5, 0), Vector2(10, 0), base_col, 5.5, true)
+	## Barrel highlight
+	node.draw_line(Vector2(0, 0), Vector2(9, 0), Color(1.0, 1.0, 0.7, 0.30), 2.0, true)
+	## Fork prongs (fork_base=(9,0), tips=(17,±5))
+	node.draw_line(Vector2(9, 0), Vector2(17,  5), prong_col, 2.5, true)
+	node.draw_line(Vector2(9, 0), Vector2(17, -5), prong_col, 2.5, true)
+	## Spark dots at prong tips
+	node.draw_circle(Vector2(17,  5), 2.0, prong_col)
+	node.draw_circle(Vector2(17, -5), 2.0, prong_col)
+
 
 ## Override: chain lightning hits multiple enemies instantly
 func _on_attack(target: Node2D) -> void:
@@ -25,7 +47,8 @@ func _on_attack(target: Node2D) -> void:
 		if is_instance_valid(e) and e != target:
 			remaining_candidates.append(e)
 
-	var chain_count: int = tower_data.get_chain_count(current_level) if tower_data != null else 3
+	var chain_count: int = (tower_data.get_chain_count(current_level) if tower_data != null else 3) \
+			+ SkillManager.get_chain_bonus()
 	var last_hit: Node2D = target
 	while hit_chain.size() < chain_count and not remaining_candidates.is_empty():
 		# Jump to the enemy closest to the last hit position
@@ -44,9 +67,10 @@ func _on_attack(target: Node2D) -> void:
 		remaining_candidates.erase(closest)
 		last_hit = closest
 
-	# Apply damage and spawn arc visuals
+	# Apply damage and spawn arc visuals (arc starts from barrel tip)
 	var damage := current_damage
-	var positions: Array[Vector2] = [global_position]
+	var muzzle := _turret.global_position + Vector2(BARREL_LEN, 0.0).rotated(_turret.global_rotation)
+	var positions: Array[Vector2] = [muzzle]
 	for hit_node in hit_chain:
 		if is_instance_valid(hit_node) and hit_node.has_method("take_damage"):
 			hit_node.take_damage(damage)
@@ -54,14 +78,14 @@ func _on_attack(target: Node2D) -> void:
 		damage *= CHAIN_FALLOFF
 
 	_spawn_arc(positions)
-	_spawn_muzzle_flash()
+	_spawn_muzzle_flash(muzzle)
 
-## Brief glow burst at the tower origin when firing.
-func _spawn_muzzle_flash() -> void:
+## Brief glow burst at barrel tip when firing.
+func _spawn_muzzle_flash(world_pos: Vector2) -> void:
 	if projectile_container == null:
 		return
 	var flash := Node2D.new()
-	flash.global_position = global_position
+	flash.global_position = world_pos
 	projectile_container.add_child(flash)
 	flash.draw.connect(func() -> void:
 		if flash.has_meta("_a"):

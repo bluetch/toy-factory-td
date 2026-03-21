@@ -6,6 +6,7 @@ extends Node2D
 
 var _character: String = "narrator"
 var _tween: Tween = null
+var _time: float = 0.0
 
 func set_character(character_id: String) -> void:
 	_character = character_id
@@ -21,6 +22,10 @@ func fade_to(new_character: String) -> void:
 		queue_redraw()
 	)
 	_tween.tween_property(self, "modulate:a", 1.0, 0.22)
+
+func _process(delta: float) -> void:
+	_time += delta
+	queue_redraw()
 
 func _draw() -> void:
 	match _character:
@@ -64,16 +69,16 @@ func _grad_poly(pts: PackedVector2Array, col_top: Color, col_bot: Color) -> void
 		cols.append(col_top.lerp(col_bot, (p.y - min_y) / span))
 	draw_polygon(pts, cols)
 
-## Gear shape (teeth + hub).
+## Gear shape (teeth + hub). rot: optional rotation offset in radians.
 func _gear(center: Vector2, inner_r: float, outer_r: float,
-		   teeth: int, col: Color, col_dark: Color) -> void:
+		   teeth: int, col: Color, col_dark: Color, rot: float = 0.0) -> void:
 	var step := TAU / float(teeth)
 	var pts  := PackedVector2Array()
 	for i in range(teeth):
-		var a0 := step * i - step * 0.22
-		var a1 := step * i - step * 0.10
-		var a2 := step * i + step * 0.10
-		var a3 := step * i + step * 0.22
+		var a0 := step * i - step * 0.22 + rot
+		var a1 := step * i - step * 0.10 + rot
+		var a2 := step * i + step * 0.10 + rot
+		var a3 := step * i + step * 0.22 + rot
 		pts.append(Vector2(cos(a0) * inner_r, sin(a0) * inner_r) + center)
 		pts.append(Vector2(cos(a1) * outer_r, sin(a1) * outer_r) + center)
 		pts.append(Vector2(cos(a2) * outer_r, sin(a2) * outer_r) + center)
@@ -172,7 +177,7 @@ func _draw_coco() -> void:
 	draw_line(Vector2(-68, -20), Vector2(68, -20), copper_sh, 1.0)
 
 	# ── Chest gear-locket ──
-	_gear(Vector2(0, 0), 28, 36, 8, copper_mid, copper_sh)
+	_gear(Vector2(0, 0), 28, 36, 8, copper_mid, copper_sh, _time * 0.40)
 	draw_circle(Vector2(0, 0), 22, Color(0.10, 0.08, 0.05))
 	draw_circle(Vector2(0, 0), 15, amber * Color(1, 1, 1, 0.85))
 	draw_circle(Vector2(0, 0), 8,  Color(1.0, 0.95, 0.60))
@@ -221,9 +226,15 @@ func _draw_coco() -> void:
 	# Iris gradient (inner bright)
 	_glow_oval(eye_l, 17, 17, Color(1.0, 0.95, 0.55), amber * Color(1,1,1,0), 24)
 	_glow_oval(eye_r, 17, 17, Color(1.0, 0.95, 0.55), amber * Color(1,1,1,0), 24)
-	# Pupil
-	draw_circle(eye_l, 10, Color(0.04, 0.03, 0.02))
-	draw_circle(eye_r, 10, Color(0.04, 0.03, 0.02))
+	# Pupil (blink animation: closes ~every 4 seconds)
+	var blink_t := fmod(_time, 4.0)
+	var blink_ry := 10.0
+	if blink_t > 3.90:
+		blink_ry = 10.0 * (blink_t - 3.90) / 0.10
+	elif blink_t > 3.80:
+		blink_ry = 10.0 * (1.0 - (blink_t - 3.80) / 0.10)
+	_oval(eye_l, 10, blink_ry, Color(0.04, 0.03, 0.02))
+	_oval(eye_r, 10, blink_ry, Color(0.04, 0.03, 0.02))
 	# Specular highlight (upper-left)
 	draw_circle(eye_l + Vector2(-5, -5), 5, Color(1.0, 0.98, 0.90, 0.95))
 	draw_circle(eye_r + Vector2(-5, -5), 5, Color(1.0, 0.98, 0.90, 0.95))
@@ -236,10 +247,11 @@ func _draw_coco() -> void:
 	draw_line(Vector2(18, -310),  Vector2(30, -270),  copper_mid, 3.0)
 	draw_circle(Vector2(-18, -312), 7, amber)
 	draw_circle(Vector2( 18, -312), 7, amber)
+	var antenna_a := 0.35 + 0.25 * sin(_time * TAU * 0.55)
 	_glow_oval(Vector2(-18, -312), 10, 10,
-		Color(1.0, 0.90, 0.30, 0.50), Color(1.0, 0.90, 0.30, 0.0), 16)
+		Color(1.0, 0.90, 0.30, antenna_a), Color(1.0, 0.90, 0.30, 0.0), 16)
 	_glow_oval(Vector2( 18, -312), 10, 10,
-		Color(1.0, 0.90, 0.30, 0.50), Color(1.0, 0.90, 0.30, 0.0), 16)
+		Color(1.0, 0.90, 0.30, antenna_a), Color(1.0, 0.90, 0.30, 0.0), 16)
 
 	# ── Mouth ──
 	draw_rect(Rect2(-20, -192, 40, 7), copper_sh)
@@ -287,12 +299,13 @@ func _draw_gear_grandpa() -> void:
 	# Pipe caps
 	draw_rect(Rect2(-82, -282, 28, 10), bronze_sh)
 	draw_rect(Rect2( 54, -282, 28, 10), bronze_sh)
-	# Steam puffs
+	# Steam puffs (bob up/down with slight offset per puff)
 	for i in range(3):
 		var off := float(i)
-		_oval(Vector2(-68, -285 - off * 18), 12 - off * 2.5, 12 - off * 2.5,
+		var steam_bob := sin(_time * 1.6 + off * 1.2) * 4.0
+		_oval(Vector2(-68, -285 - off * 18 + steam_bob), 12 - off * 2.5, 12 - off * 2.5,
 			Color(steam_col.r, steam_col.g, steam_col.b, steam_col.a * (1.0 - off * 0.3)))
-		_oval(Vector2( 68, -285 - off * 18), 12 - off * 2.5, 12 - off * 2.5,
+		_oval(Vector2( 68, -285 - off * 18 + steam_bob), 12 - off * 2.5, 12 - off * 2.5,
 			Color(steam_col.r, steam_col.g, steam_col.b, steam_col.a * (1.0 - off * 0.3)))
 
 	# ── Arms (wide short arms) ──
@@ -305,8 +318,8 @@ func _draw_gear_grandpa() -> void:
 	_grad_poly(arm_r, bronze, bronze_sh)
 	draw_polyline(arm_r, bronze_sh, 1.5, true)
 	# Cog wrist bands
-	_gear(Vector2(-128, 55), 16, 22, 6, bronze_mid, bronze_sh)
-	_gear(Vector2( 128, 55), 16, 22, 6, bronze_mid, bronze_sh)
+	_gear(Vector2(-128, 55), 16, 22, 6, bronze_mid, bronze_sh,  _time * 0.50)
+	_gear(Vector2( 128, 55), 16, 22, 6, bronze_mid, bronze_sh, -_time * 0.50)
 
 	# ── Main body (large round) ──
 	_glow_oval(Vector2(0, 0), 108, 108, bronze, bronze_sh, 40)
@@ -320,8 +333,8 @@ func _draw_gear_grandpa() -> void:
 	_glow_oval(Vector2(0, 30), 65, 52,
 		Color(bronze_hi.r, bronze_hi.g, bronze_hi.b, 0.45),
 		Color(bronze_hi.r, bronze_hi.g, bronze_hi.b, 0.0), 32)
-	# Central big gear
-	_gear(Vector2(0, 28), 30, 40, 10, bronze_mid, bronze_sh)
+	# Central big gear (rotates clockwise)
+	_gear(Vector2(0, 28), 30, 40, 10, bronze_mid, bronze_sh, _time * 0.30)
 	draw_circle(Vector2(0, 28), 24, Color(0.12, 0.08, 0.04))
 	draw_circle(Vector2(0, 28), 16, bronze_hi)
 	draw_circle(Vector2(0, 28),  8, Color(0.92, 0.75, 0.18))
@@ -369,11 +382,11 @@ func _draw_gear_grandpa() -> void:
 		var my := -14.0 + sin(t * PI) * 14.0
 		draw_circle(Vector2(mx, my), 4.0 + sin(t * PI) * 2.0, bronze_sh)
 
-	# Beard gears (arc of 4)
+	# Beard gears (arc of 4) — counter-rotate to mesh with central gear
 	for g in range(4):
 		var a := PI * 0.18 + float(g) * PI * 0.22
 		var gp := Vector2(cos(a) * 68, sin(a) * 68) + Vector2(0, 20)
-		_gear(gp, 12, 17, 6, bronze_mid, bronze_sh)
+		_gear(gp, 12, 17, 6, bronze_mid, bronze_sh, -_time * 0.50 + float(g) * 0.4)
 
 	# ── Hat ──
 	# Brim
@@ -389,7 +402,7 @@ func _draw_gear_grandpa() -> void:
 	# Hat band
 	draw_rect(Rect2(-60, -128, 120, 10), eye_gold * Color(1,1,1,0.70))
 	# Hat gear emblem
-	_gear(Vector2(0, -178), 14, 20, 7, bronze_mid, bronze_sh)
+	_gear(Vector2(0, -178), 14, 20, 7, bronze_mid, bronze_sh, _time * 0.45)
 	draw_circle(Vector2(0, -178), 9, Color(0.10, 0.07, 0.03))
 	draw_circle(Vector2(0, -178), 5, eye_gold)
 
@@ -428,14 +441,19 @@ func _draw_longing() -> void:
 		cols.fill(Color(shadow.r, shadow.g, shadow.b, alpha))
 		draw_polygon(pts, cols)
 
-	# ── Wispy tendrils ──
-	var tendril_pts := [
+	# ── Wispy tendrils (sway with sine wave) ──
+	var tendril_defs: Array = [
 		[Vector2(-90, 120), Vector2(-140, 180), Vector2(-160, 260), Vector2(-120, 330)],
 		[Vector2( 90, 120), Vector2( 140, 200), Vector2( 130, 290), Vector2(  90, 340)],
 		[Vector2(-50, 140), Vector2(-80,  230), Vector2(-60,  310)],
 		[Vector2( 50, 140), Vector2( 90,  250), Vector2( 70,  320)],
 	]
-	for tendril in tendril_pts:
+	for ti in range(tendril_defs.size()):
+		var base: Array = tendril_defs[ti]
+		var tendril: Array = []
+		for pi in range(base.size()):
+			var sway := sin(_time * 1.1 + float(ti) * 1.5 + float(pi) * 0.7) * 9.0
+			tendril.append((base[pi] as Vector2) + Vector2(sway, 0.0))
 		for i in range(tendril.size() - 1):
 			var t_frac := float(i) / float(tendril.size())
 			var w: float = 14.0 * (1.0 - t_frac)
@@ -451,8 +469,9 @@ func _draw_longing() -> void:
 		Color(violet.r, violet.g, violet.b, 0.0), 32)
 
 	# ── Core bright pulse ──
+	var core_a := 0.72 + 0.22 * sin(_time * TAU * 0.40)
 	_glow_oval(Vector2(0, -60), 15, 15,
-		Color(white_core.r, white_core.g, white_core.b, 0.90),
+		Color(white_core.r, white_core.g, white_core.b, core_a),
 		Color(white_core.r, white_core.g, white_core.b, 0.0), 24)
 
 	# ── Floating eyes (three pairs at different heights) ──
@@ -478,12 +497,15 @@ func _draw_longing() -> void:
 					  ep + Vector2(0,  r_outer * 0.55),
 					  Color(0.04, 0.02, 0.08), 3.0)
 
-	# ── Particle wisps ──
+	# ── Particle wisps (float in gentle figure-8 patterns) ──
 	var wisp_offsets := [
 		Vector2(-130, -200), Vector2(120, -220), Vector2(-160, -80),
 		Vector2(150, -40),   Vector2(-100, 200), Vector2(110, 220),
 	]
-	for wp in wisp_offsets:
+	for wi in range(wisp_offsets.size()):
+		var wp: Vector2 = wisp_offsets[wi] + Vector2(
+			sin(_time * 0.70 + float(wi) * 1.10) * 6.0,
+			cos(_time * 0.50 + float(wi) * 0.85) * 9.0)
 		_glow_oval(wp, 8, 8,
 			Color(violet.r, violet.g, violet.b, 0.38),
 			Color(violet.r, violet.g, violet.b, 0.0), 12)
@@ -523,33 +545,33 @@ func _draw_narrator() -> void:
 	draw_circle(Vector2.ZERO, 175, Color(silver.r, silver.g, silver.b, 0.12), false, 1.5)
 	draw_circle(Vector2.ZERO, 172, Color(silver.r, silver.g, silver.b, 0.08), false, 1.0)
 
-	# ── 8 outer spoke medallions ──
+	# ── 8 outer spoke medallions (orbit slowly) ──
 	for i in range(8):
-		var a := TAU * float(i) / 8.0
+		var a := TAU * float(i) / 8.0 + _time * 0.15
 		var mp := Vector2(cos(a) * 175, sin(a) * 175)
 		_glow_oval(mp, 14, 14,
 			Color(gold.r, gold.g, gold.b, 0.60), Color(gold.r, gold.g, gold.b, 0.0), 16)
 		draw_circle(mp, 8, navy)
 		draw_circle(mp, 5, gold)
 
-	# ── Spoke lines ──
+	# ── Spoke lines (rotate with medallions) ──
 	for i in range(8):
-		var a := TAU * float(i) / 8.0
+		var a := TAU * float(i) / 8.0 + _time * 0.15
 		var d1 := Vector2(cos(a) * 80, sin(a) * 80)
 		var d2 := Vector2(cos(a) * 160, sin(a) * 160)
 		draw_line(d1, d2, Color(silver.r, silver.g, silver.b, 0.22), 2.0)
 
-	# ── Outer large gear ring ──
+	# ── Outer large gear ring (slow clockwise) ──
 	_gear(Vector2.ZERO, 108, 124, 16, Color(navy.r, navy.g, navy.b, 0.80),
-		Color(silver.r, silver.g, silver.b, 0.30))
+		Color(silver.r, silver.g, silver.b, 0.30), _time * 0.15)
 
-	# ── Mid gear ──
+	# ── Mid gear (counter-clockwise, meshes with outer) ──
 	_gear(Vector2.ZERO, 74, 90, 12, Color(0.14, 0.20, 0.42, 0.90),
-		Color(silver.r, silver.g, silver.b, 0.35))
+		Color(silver.r, silver.g, silver.b, 0.35), -_time * 0.22)
 
-	# ── Cardinal direction markers (N/S/E/W spear tips) ──
+	# ── Cardinal direction markers (rotate with outer gear) ──
 	for i in range(4):
-		var a := TAU * float(i) / 4.0 - TAU * 0.25
+		var a := TAU * float(i) / 4.0 - TAU * 0.25 + _time * 0.15
 		var tip  := Vector2(cos(a) * 108, sin(a) * 108)
 		var base1 := Vector2(cos(a + 0.18) * 74, sin(a + 0.18) * 74)
 		var base2 := Vector2(cos(a - 0.18) * 74, sin(a - 0.18) * 74)

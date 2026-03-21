@@ -141,14 +141,14 @@ func _die() -> void:
     if _is_dead:
         return
     _is_dead = true
-    # Remove from group immediately so towers stop targeting this enemy
     remove_from_group("enemies")
     set_physics_process(false)
     AudioManager.play_enemy_die()
     EventBus.enemy_died.emit(enemy_data.gold_reward, enemy_data.score_reward)
     GameManager.add_gold(enemy_data.gold_reward)
     GameManager.add_score(enemy_data.score_reward)
-    _spawn_float_text("+%d 💰" % enemy_data.gold_reward, Color(1.0, 0.88, 0.25))
+    _spawn_gold_text("+%d 💰" % enemy_data.gold_reward)
+    _spawn_death_burst()
     _on_death()
     await _play_death_animation()
     queue_free()
@@ -176,14 +176,59 @@ func _spawn_damage_text(amount: int) -> void:
     ft.global_position = global_position + Vector2(x_offset, -18)
     ft.setup("-%d" % amount, Color(1.0, 0.35, 0.35))
 
-## Spawn a floating gold label above the enemy's death position.
+## Gold reward float using the styled gold variant.
+func _spawn_gold_text(text: String) -> void:
+    if _float_text_scene == null or get_parent() == null:
+        return
+    var ft: FloatingText = _float_text_scene.instantiate() as FloatingText
+    get_parent().add_child(ft)
+    ft.global_position = global_position + Vector2(0, -24)
+    ft.setup_gold(text)
+
+## Status/misc float (slow snowflake, etc.)
 func _spawn_float_text(text: String, color: Color) -> void:
     if _float_text_scene == null or get_parent() == null:
         return
     var ft: FloatingText = _float_text_scene.instantiate() as FloatingText
     get_parent().add_child(ft)
     ft.global_position = global_position + Vector2(0, -24)
-    ft.setup(text, color)
+    ft.setup_status(text, color)
+
+## Colored particle burst at death position — 6 small squares scatter outward.
+func _spawn_death_burst() -> void:
+    if get_parent() == null or enemy_data == null:
+        return
+    ## Pick burst colour from enemy type
+    var burst_col := Color(1.0, 0.50, 0.20)   ## default orange
+    if enemy_data.armor > 0.0:
+        burst_col = Color(0.40, 0.55, 1.0)    ## tank: blue
+    elif enemy_data.move_speed > 110.0:
+        burst_col = Color(0.60, 1.0, 0.50)    ## fast: green
+    var container := get_parent()
+    for i in range(7):
+        var angle := TAU * i / 7.0 + randf_range(-0.3, 0.3)
+        var speed := randf_range(55.0, 130.0)
+        var dot   := Node2D.new()
+        dot.global_position = global_position
+        container.add_child(dot)
+        var sz    := randf_range(3.0, 6.5)
+        dot.draw.connect(func() -> void:
+            if dot.has_meta("_a"):
+                dot.draw_rect(
+                    Rect2(-sz * 0.5, -sz * 0.5, sz, sz),
+                    Color(burst_col.r, burst_col.g, burst_col.b, dot.get_meta("_a")))
+        )
+        dot.set_meta("_a", 1.0)
+        var vel := Vector2(cos(angle), sin(angle)) * speed
+        var tween := dot.create_tween().set_parallel(true)
+        tween.tween_method(func(v: Vector2) -> void:
+            dot.global_position = v
+            dot.queue_redraw()
+        , dot.global_position, dot.global_position + vel, 0.40)
+        tween.tween_method(func(a: float) -> void:
+            dot.set_meta("_a", a)
+        , 1.0, 0.0, 0.40)
+        tween.chain().tween_callback(dot.queue_free)
 
 ## Play a named animation if AnimatedSprite2D is present (safe no-op otherwise)
 func _play_anim(anim_name: StringName) -> void:

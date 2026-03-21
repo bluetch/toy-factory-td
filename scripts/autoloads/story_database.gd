@@ -172,6 +172,10 @@ const STORIES: Dictionary = {
 		 "text": "那我是什麼？"},
 		{"speaker": "齒輪爺爺", "portrait": "gear_grandpa",
 		 "text": "（他想了想，沒有笑，也沒有不笑）\n還太早說。今天，你選擇了保護——這件事本身，就是答案的一部分。"},
+		{"speaker": "COCO", "portrait": "coco",
+		 "text": "（她低頭看了看胸口的零件槽，光微微跳了一下）\n……那我繼續保護。"},
+		{"speaker": "旁白", "portrait": "narrator",
+		 "text": "倉庫深處，更多的齒輪開始轉動。"},
 	],
 
 	# ──────────────────────────────────────────
@@ -189,6 +193,8 @@ const STORIES: Dictionary = {
 		 "text": "（他沒有否認，也沒有承認。只是把工具袋背上）\n先休息，Coco。"},
 		{"speaker": "COCO", "portrait": "coco",
 		 "text": "（她看著他的背影，沒有再說話）"},
+		{"speaker": "旁白", "portrait": "narrator",
+		 "text": "有些問題，不是不回答，是還沒準備好面對回答之後的事。"},
 	],
 
 	# ──────────────────────────────────────────
@@ -384,6 +390,10 @@ const STORIES: Dictionary = {
 		 "text": "它沒有放棄。只是在等人回來修它。"},
 		{"speaker": "齒輪爺爺", "portrait": "gear_grandpa",
 		 "text": "（他低下頭，很久沒有說話）\n……是個老傻瓜。"},
+		{"speaker": "COCO", "portrait": "coco",
+		 "text": "（停頓，然後輕聲）\n……等我回來，幫它修好。"},
+		{"speaker": "旁白", "portrait": "narrator",
+		 "text": "他沒有說話。只是把工具袋的扣環，又扣緊了一格。"},
 	],
 
 	# ──────────────────────────────────────────
