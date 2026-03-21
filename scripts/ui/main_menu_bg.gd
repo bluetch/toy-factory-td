@@ -166,8 +166,8 @@ func _draw_treeline() -> void:
 		var x   := W * i / steps
 		## Base treeline height — tall at edges, low in centre
 		var centre_dip := 1.0 - exp(-pow((x - W * 0.5) / (W * 0.18), 2.0)) * 0.55
-		var tree_h: float = (sin(x * 0.018 + 0.5) * 30.0 + abs(sin(x * 0.057 + 1.2)) * 45.0
-			+ abs(sin(x * 0.031 + 2.8)) * 28.0) * centre_dip
+		var tree_h: float = maxf((sin(x * 0.018 + 0.5) * 30.0 + abs(sin(x * 0.057 + 1.2)) * 45.0
+			+ abs(sin(x * 0.031 + 2.8)) * 28.0) * centre_dip, 2.0)
 		poly.append(Vector2(x, HORIZ + 80.0 - tree_h))
 	poly.append(Vector2(W, HORIZ + 80.0))
 	var cols := PackedColorArray()

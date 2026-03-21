@@ -190,12 +190,12 @@ func _build_pool() -> void:
 	_def("war_economy",  "戰時經濟", "每波完成額外 +25 金",            "💹", 2, 2, "",              "wave_gold",           25.0)
 
 
-func _def(id: String, name: String, desc: String, icon: String,
+func _def(id: String, sname: String, desc: String, icon: String,
 		rarity: int, max_st: int, filter: String,
 		etype: String, evalue: float) -> void:
 	var s := SkillData.new()
 	s.skill_id     = id
-	s.skill_name   = name
+	s.skill_name   = sname
 	s.description  = desc
 	s.icon         = icon
 	s.rarity       = rarity
