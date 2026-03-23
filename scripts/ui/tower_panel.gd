@@ -32,6 +32,24 @@ const TOWER_WEAPON_ICON: Dictionary = {
 	"SniperTower":    _K + "weapon-turret.png",
 }
 
+## Body modulate — must match the Body Sprite2D modulate in each tower scene.
+const TOWER_BODY_COLOR: Dictionary = {
+	"ArrowTower":     Color(0.72, 1.00, 0.62, 1.0),
+	"CannonTower":    Color(1.00, 0.72, 0.42, 1.0),
+	"IceTower":       Color(0.55, 0.88, 1.00, 1.0),
+	"LightningTower": Color(1.00, 0.92, 0.22, 1.0),
+	"SniperTower":    Color(0.75, 0.48, 1.00, 1.0),
+}
+
+## Weapon modulate — must match the Weapon Sprite2D modulate in each tower scene.
+const TOWER_WEAPON_COLOR: Dictionary = {
+	"ArrowTower":     Color(0.60, 0.95, 0.50, 1.0),
+	"CannonTower":    Color(1.00, 0.60, 0.25, 1.0),
+	"IceTower":       Color(0.28, 0.80, 1.00, 1.0),
+	"LightningTower": Color(0.85, 1.00, 0.22, 1.0),
+	"SniperTower":    Color(0.68, 0.38, 1.00, 1.0),
+}
+
 ## Role tag shown on each card (short Traditional Chinese label).
 const TOWER_ROLE: Dictionary = {
 	"ArrowTower":     "高速",
@@ -41,13 +59,14 @@ const TOWER_ROLE: Dictionary = {
 	"SniperTower":    "穿甲",
 }
 
-## Accent colour per tower type — used for card border and icon tint.
+## Accent colour per tower type — used for card border, bg tint, and UI highlights.
+## Derived from the average of body+weapon colors for visual cohesion.
 const TOWER_ACCENT: Dictionary = {
-	"ArrowTower":     Color(0.30, 0.90, 0.42, 1.0),  ## forest green
-	"CannonTower":    Color(1.00, 0.52, 0.18, 1.0),  ## fire orange
-	"IceTower":       Color(0.28, 0.82, 1.00, 1.0),  ## ice cyan
-	"LightningTower": Color(1.00, 0.92, 0.18, 1.0),  ## electric yellow
-	"SniperTower":    Color(0.72, 0.44, 1.00, 1.0),  ## sniper purple
+	"ArrowTower":     Color(0.30, 0.92, 0.44, 1.0),
+	"CannonTower":    Color(1.00, 0.55, 0.20, 1.0),
+	"IceTower":       Color(0.28, 0.82, 1.00, 1.0),
+	"LightningTower": Color(1.00, 0.92, 0.18, 1.0),
+	"SniperTower":    Color(0.72, 0.44, 1.00, 1.0),
 }
 
 const ICON_SIZE : int = 64   ## display size for the tower icon
@@ -119,35 +138,37 @@ func _build_tower_buttons() -> void:
 
 		# --- Icon: tinted bg + composite base + weapon overlay ---
 		var icon_bg_style := StyleBoxFlat.new()
-		icon_bg_style.bg_color = Color(accent.r * 0.16, accent.g * 0.16, accent.b * 0.16, 0.92)
-		icon_bg_style.set_corner_radius_all(5)
+		icon_bg_style.bg_color = Color(accent.r * 0.14, accent.g * 0.14, accent.b * 0.14, 0.96)
+		icon_bg_style.set_corner_radius_all(6)
 		icon_bg_style.set_border_width_all(1)
-		icon_bg_style.border_color = Color(accent.r, accent.g, accent.b, 0.35)
+		icon_bg_style.border_color = Color(accent.r, accent.g, accent.b, 0.50)
 		var icon_bg := PanelContainer.new()
 		icon_bg.custom_minimum_size = Vector2(float(ICON_SIZE), float(ICON_SIZE))
 		icon_bg.add_theme_stylebox_override("panel", icon_bg_style)
 
-		## Base layer — clean platform matching in-game Body sprite
+		## Base layer — exact modulate from the tower's Body Sprite2D in the scene
+		var body_color: Color = TOWER_BODY_COLOR.get(scene_key, accent)
 		var thumb_base := TextureRect.new()
 		thumb_base.set_anchors_preset(Control.PRESET_FULL_RECT)
 		thumb_base.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		thumb_base.expand_mode  = TextureRect.EXPAND_IGNORE_SIZE
 		thumb_base.texture  = base_tex
-		thumb_base.modulate = accent.darkened(0.12)
+		thumb_base.modulate = body_color
 		icon_bg.add_child(thumb_base)
 
-		## Weapon overlay — slightly smaller, centred in upper half
+		## Weapon overlay — exact modulate from the tower's Weapon Sprite2D in the scene
+		var weap_color: Color = TOWER_WEAPON_COLOR.get(scene_key, accent.lightened(0.20))
 		var thumb_weap := TextureRect.new()
-		thumb_weap.anchor_left   = 0.10
-		thumb_weap.anchor_right  = 0.90
+		thumb_weap.anchor_left   = 0.08
+		thumb_weap.anchor_right  = 0.92
 		thumb_weap.anchor_top    = 0.0
-		thumb_weap.anchor_bottom = 0.72
+		thumb_weap.anchor_bottom = 0.70
 		thumb_weap.grow_horizontal = Control.GROW_DIRECTION_BOTH
 		thumb_weap.grow_vertical   = Control.GROW_DIRECTION_BOTH
 		thumb_weap.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		thumb_weap.expand_mode  = TextureRect.EXPAND_IGNORE_SIZE
 		thumb_weap.texture  = weap_tex
-		thumb_weap.modulate = accent.lightened(0.30)
+		thumb_weap.modulate = weap_color
 		icon_bg.add_child(thumb_weap)
 
 		hbox.add_child(icon_bg)
@@ -190,16 +211,16 @@ func _build_tower_buttons() -> void:
 		cost_label.add_theme_color_override("font_color", Color(0.97, 0.84, 0.38, 1.0))
 
 		var tid := scene_key
-		var eff_dps := data.base_damage * SkillManager.get_damage_mult(tid) \
-					* data.base_attack_speed * SkillManager.get_speed_mult(tid)
-		var dps_label := Label.new()
-		dps_label.text = "%.0f DPS" % eff_dps
-		dps_label.add_theme_font_size_override("font_size", 10)
-		dps_label.add_theme_color_override("font_color", Color(0.52, 0.60, 0.70, 0.80))
+		var eff_dmg  := data.base_damage       * SkillManager.get_damage_mult(tid)
+		var eff_spd  := data.base_attack_speed * SkillManager.get_speed_mult(tid)
+		var stats_label := Label.new()
+		stats_label.text = "⚔ %.0f  •  ⏱ %.1f/s" % [eff_dmg, eff_spd]
+		stats_label.add_theme_font_size_override("font_size", 10)
+		stats_label.add_theme_color_override("font_color", Color(0.55, 0.65, 0.78, 0.85))
 
 		vbox.add_child(top_row)
 		vbox.add_child(cost_label)
-		vbox.add_child(dps_label)
+		vbox.add_child(stats_label)
 		hbox.add_child(vbox)
 		card.set_meta("cost_label", cost_label)
 		card.set_meta("icon_bg_style", icon_bg_style)

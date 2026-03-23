@@ -1,7 +1,6 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/pause_menu.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/kenney_tower-defense-kit/Previews/weapon-ballista.png" id="2"]
 
 [sub_resource type="StyleBoxFlat" id="SBF_panel"]
 bg_color = Color(0.04, 0.07, 0.16, 0.97)
@@ -10,14 +9,14 @@ border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
 border_color = Color(0.55, 0.43, 0.18, 0.85)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
 content_margin_left = 22.0
 content_margin_right = 22.0
-content_margin_top = 18.0
-content_margin_bottom = 18.0
+content_margin_top = 22.0
+content_margin_bottom = 22.0
 
 [sub_resource type="StyleBoxFlat" id="SBF_btn_n"]
 bg_color = Color(0.09, 0.15, 0.33, 0.90)
@@ -67,6 +66,84 @@ content_margin_right = 10.0
 content_margin_top = 8.0
 content_margin_bottom = 8.0
 
+[sub_resource type="StyleBoxFlat" id="SBF_quit_n"]
+bg_color = Color(0.20, 0.06, 0.06, 0.90)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.72, 0.22, 0.18, 0.80)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 10.0
+content_margin_right = 10.0
+content_margin_top = 8.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="SBF_quit_h"]
+bg_color = Color(0.42, 0.08, 0.08, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1.0, 0.36, 0.30, 1.0)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 10.0
+content_margin_right = 10.0
+content_margin_top = 8.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="SBF_quit_p"]
+bg_color = Color(0.12, 0.04, 0.04, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.55, 0.18, 0.14, 1.0)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 10.0
+content_margin_right = 10.0
+content_margin_top = 8.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="SBF_vol_bg"]
+bg_color = Color(0.08, 0.12, 0.26, 0.80)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.55, 0.43, 0.18, 0.30)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 10.0
+content_margin_right = 10.0
+content_margin_top = 8.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="SBF_slider_bg"]
+bg_color = Color(0.14, 0.20, 0.40, 0.90)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="SBF_slider_fill"]
+bg_color = Color(0.68, 0.54, 0.22, 0.90)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
 [node name="PauseMenu" type="Control"]
 process_mode = 3
 anchors_preset = 15
@@ -83,17 +160,19 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.62)
+color = Color(0, 0, 0, 0.65)
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -130.0
-offset_top = -185.0
-offset_right = 130.0
-offset_bottom = 185.0
+offset_left = -162.0
+offset_top = -242.0
+offset_right = 162.0
+offset_bottom = 242.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_styles/panel = SubResource("SBF_panel")
 
 [node name="VBox" type="VBoxContainer" parent="PanelContainer"]
@@ -101,27 +180,20 @@ layout_mode = 2
 theme_override_constants/separation = 10
 alignment = 1
 
-[node name="Icon" type="TextureRect" parent="PanelContainer/VBox"]
-layout_mode = 2
-custom_minimum_size = Vector2(56, 56)
-size_flags_horizontal = 4
-texture = ExtResource("2")
-stretch_mode = 5
-expand_mode = 1
-
 [node name="Title" type="Label" parent="PanelContainer/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 26
 theme_override_colors/font_color = Color(0.97, 0.90, 0.62, 1.0)
 text = "⏸  已暫停"
 horizontal_alignment = 1
 
-[node name="HSep" type="HSeparator" parent="PanelContainer/VBox"]
+[node name="HSep1" type="HSeparator" parent="PanelContainer/VBox"]
 layout_mode = 2
 theme_override_colors/separator_color = Color(0.55, 0.43, 0.18, 0.50)
 
 [node name="ResumeButton" type="Button" parent="PanelContainer/VBox"]
-custom_minimum_size = Vector2(216, 46)
+custom_minimum_size = Vector2(0, 44)
+size_flags_horizontal = 3
 layout_mode = 2
 theme_override_styles/normal = SubResource("SBF_btn_n")
 theme_override_styles/hover = SubResource("SBF_btn_h")
@@ -132,8 +204,9 @@ theme_override_colors/font_hover_color = Color(0.80, 1.0, 0.70, 1.0)
 theme_override_font_sizes/font_size = 15
 text = "▶  繼續遊戲"
 
-[node name="SettingsButton" type="Button" parent="PanelContainer/VBox"]
-custom_minimum_size = Vector2(216, 46)
+[node name="RestartButton" type="Button" parent="PanelContainer/VBox"]
+custom_minimum_size = Vector2(0, 44)
+size_flags_horizontal = 3
 layout_mode = 2
 theme_override_styles/normal = SubResource("SBF_btn_n")
 theme_override_styles/hover = SubResource("SBF_btn_h")
@@ -142,10 +215,99 @@ theme_override_styles/focus = SubResource("SBF_btn_h")
 theme_override_colors/font_color = Color(0.92, 0.84, 0.56, 1.0)
 theme_override_colors/font_hover_color = Color(1.0, 0.95, 0.72, 1.0)
 theme_override_font_sizes/font_size = 15
-text = "設定"
+text = "↺  重新開始"
+
+[node name="HSep2" type="HSeparator" parent="PanelContainer/VBox"]
+layout_mode = 2
+theme_override_colors/separator_color = Color(0.55, 0.43, 0.18, 0.30)
+
+[node name="VolumeSection" type="PanelContainer" parent="PanelContainer/VBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("SBF_vol_bg")
+
+[node name="VolVBox" type="VBoxContainer" parent="PanelContainer/VBox/VolumeSection"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="VolTitle" type="Label" parent="PanelContainer/VBox/VolumeSection/VolVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.62, 0.70, 0.84, 0.72)
+text = "── 音量設定 ──"
+horizontal_alignment = 1
+
+[node name="MusicRow" type="HBoxContainer" parent="PanelContainer/VBox/VolumeSection/VolVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="MusicLabel" type="Label" parent="PanelContainer/VBox/VolumeSection/VolVBox/MusicRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(60, 0)
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.88, 0.80, 0.52, 0.90)
+text = "🎵 音樂"
+vertical_alignment = 1
+
+[node name="MusicSlider" type="HSlider" parent="PanelContainer/VBox/VolumeSection/VolVBox/MusicRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 22)
+min_value = 0.0
+max_value = 100.0
+step = 1.0
+value = 80.0
+theme_override_styles/slider = SubResource("SBF_slider_bg")
+theme_override_styles/grabber_area = SubResource("SBF_slider_fill")
+
+[node name="MusicValueLabel" type="Label" parent="PanelContainer/VBox/VolumeSection/VolVBox/MusicRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(40, 0)
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.72, 0.80, 0.95, 0.85)
+text = "80%"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="SFXRow" type="HBoxContainer" parent="PanelContainer/VBox/VolumeSection/VolVBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SFXLabel" type="Label" parent="PanelContainer/VBox/VolumeSection/VolVBox/SFXRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(60, 0)
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.88, 0.80, 0.52, 0.90)
+text = "🔊 音效"
+vertical_alignment = 1
+
+[node name="SFXSlider" type="HSlider" parent="PanelContainer/VBox/VolumeSection/VolVBox/SFXRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 22)
+min_value = 0.0
+max_value = 100.0
+step = 1.0
+value = 80.0
+theme_override_styles/slider = SubResource("SBF_slider_bg")
+theme_override_styles/grabber_area = SubResource("SBF_slider_fill")
+
+[node name="SFXValueLabel" type="Label" parent="PanelContainer/VBox/VolumeSection/VolVBox/SFXRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(40, 0)
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.72, 0.80, 0.95, 0.85)
+text = "80%"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="HSep3" type="HSeparator" parent="PanelContainer/VBox"]
+layout_mode = 2
+theme_override_colors/separator_color = Color(0.55, 0.43, 0.18, 0.30)
 
 [node name="MainMenuButton" type="Button" parent="PanelContainer/VBox"]
-custom_minimum_size = Vector2(216, 46)
+custom_minimum_size = Vector2(0, 44)
+size_flags_horizontal = 3
 layout_mode = 2
 theme_override_styles/normal = SubResource("SBF_btn_n")
 theme_override_styles/hover = SubResource("SBF_btn_h")
@@ -154,16 +316,17 @@ theme_override_styles/focus = SubResource("SBF_btn_h")
 theme_override_colors/font_color = Color(0.92, 0.84, 0.56, 1.0)
 theme_override_colors/font_hover_color = Color(1.0, 0.95, 0.72, 1.0)
 theme_override_font_sizes/font_size = 15
-text = "主選單"
+text = "🏠  主選單"
 
 [node name="QuitButton" type="Button" parent="PanelContainer/VBox"]
-custom_minimum_size = Vector2(216, 46)
+custom_minimum_size = Vector2(0, 44)
+size_flags_horizontal = 3
 layout_mode = 2
-theme_override_styles/normal = SubResource("SBF_btn_n")
-theme_override_styles/hover = SubResource("SBF_btn_h")
-theme_override_styles/pressed = SubResource("SBF_btn_p")
-theme_override_styles/focus = SubResource("SBF_btn_h")
-theme_override_colors/font_color = Color(0.92, 0.84, 0.56, 1.0)
-theme_override_colors/font_hover_color = Color(1.0, 0.95, 0.72, 1.0)
+theme_override_styles/normal = SubResource("SBF_quit_n")
+theme_override_styles/hover = SubResource("SBF_quit_h")
+theme_override_styles/pressed = SubResource("SBF_quit_p")
+theme_override_styles/focus = SubResource("SBF_quit_h")
+theme_override_colors/font_color = Color(1.0, 0.50, 0.46, 1.0)
+theme_override_colors/font_hover_color = Color(1.0, 0.72, 0.68, 1.0)
 theme_override_font_sizes/font_size = 15
-text = "退出遊戲"
+text = "✕  退出遊戲"

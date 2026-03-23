@@ -183,8 +183,8 @@ func _build_wave_preview() -> void:
 	_wave_preview_container.anchor_bottom = 0.0
 	_wave_preview_container.offset_left   = -260.0
 	_wave_preview_container.offset_right  = 260.0
-	_wave_preview_container.offset_top    = 108.0
-	_wave_preview_container.offset_bottom = 142.0
+	_wave_preview_container.offset_top    = 104.0
+	_wave_preview_container.offset_bottom = 156.0
 	_wave_preview_container.mouse_filter  = Control.MOUSE_FILTER_IGNORE
 	_wave_preview_container.modulate.a    = 0.0
 	add_child(_wave_preview_container)
@@ -218,10 +218,17 @@ func _build_wave_preview_chips(chips: Array) -> void:
 	hbox.add_child(prefix)
 
 	for entry in chips:
-		var chip := HBoxContainer.new()
-		chip.add_theme_constant_override("separation", 4)
+		## chip = VBox: top row (sprite + ×count) + name label
+		var chip := VBoxContainer.new()
+		chip.add_theme_constant_override("separation", 2)
+		chip.alignment = BoxContainer.ALIGNMENT_CENTER
+
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 4)
+		row.alignment = BoxContainer.ALIGNMENT_CENTER
 
 		## Enemy sprite thumbnail (28×28)
+		var en_color: Color = entry.get("color", Color.WHITE)
 		var sp: String = entry.get("sprite_path", "")
 		if sp != "" and ResourceLoader.exists(sp):
 			var img := TextureRect.new()
@@ -229,16 +236,28 @@ func _build_wave_preview_chips(chips: Array) -> void:
 			img.custom_minimum_size = Vector2(28, 28)
 			img.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 			img.expand_mode  = TextureRect.EXPAND_IGNORE_SIZE
-			img.modulate     = entry.get("color", Color.WHITE)
-			chip.add_child(img)
+			img.modulate     = en_color
+			row.add_child(img)
 
-		## ×N count label, tinted to match the enemy
+		## ×N count label
 		var cnt := Label.new()
 		cnt.text = "×%d" % entry.get("count", 0)
-		cnt.add_theme_font_size_override("font_size", 13)
-		cnt.add_theme_color_override("font_color", entry.get("color", Color(0.9, 0.9, 0.9)))
+		cnt.add_theme_font_size_override("font_size", 12)
+		cnt.add_theme_color_override("font_color", en_color)
 		cnt.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		chip.add_child(cnt)
+		row.add_child(cnt)
+
+		chip.add_child(row)
+
+		## Enemy name label below the icon row
+		var name_lbl := Label.new()
+		name_lbl.text = entry.get("name", "")
+		name_lbl.add_theme_font_size_override("font_size", 10)
+		var name_col := en_color.lightened(0.15) if en_color != Color.WHITE \
+				else Color(0.78, 0.88, 1.00, 0.90)
+		name_lbl.add_theme_color_override("font_color", name_col)
+		name_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		chip.add_child(name_lbl)
 
 		hbox.add_child(chip)
 

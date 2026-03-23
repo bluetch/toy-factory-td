@@ -63,11 +63,12 @@ signal all_waves_done
 const WAVE_BONUS_GOLD := 25
 
 ## Short icon strings used to build wave preview text (fallback).
+## Matches actual enemy_name fields in .tres files.
 const ENEMY_ICONS: Dictionary = {
-	"basic_enemy": "普通",
-	"fast_enemy":  "快速",
-	"tank_enemy":  "坦克",
-	"boss_enemy":  "頭目",
+	"basic_enemy": "小兵",
+	"fast_enemy":  "斥候",
+	"tank_enemy":  "重甲",
+	"boss_enemy":  "渴望",
 }
 
 ## Actual in-game sprite paths, matching the Kenney UFO sprites used by each enemy scene.
@@ -78,12 +79,16 @@ const ENEMY_SPRITES: Dictionary = {
 	"boss_enemy":  "res://assets/kenney_tower-defense-kit/Previews/enemy-ufo-d.png",
 }
 
-## Enemy accent colours — same tints used on the in-game sprites.
+## Enemy modulate colours — must match the actual in-game sprite modulates.
+## BasicEnemy: no modulate override (natural sprite).
+## FastEnemy.BODY_COLOR  = Color(0.9, 0.7, 0.1)  — golden yellow.
+## TankEnemy.BODY_COLOR  = Color(0.3, 0.3, 0.8)  — dark blue.
+## BossEnemy: no modulate override (natural ufo-d sprite, scale 1.2×).
 const ENEMY_COLORS: Dictionary = {
-	"basic_enemy": Color(0.72, 1.00, 0.60),
-	"fast_enemy":  Color(0.55, 0.88, 1.00),
-	"tank_enemy":  Color(1.00, 0.72, 0.35),
-	"boss_enemy":  Color(1.00, 0.38, 0.38),
+	"basic_enemy": Color(1.00, 1.00, 1.00),
+	"fast_enemy":  Color(0.90, 0.70, 0.10),
+	"tank_enemy":  Color(0.30, 0.30, 0.80),
+	"boss_enemy":  Color(1.00, 1.00, 1.00),
 }
 
 ## Set to true when game ends so pending spawn timers do nothing.
@@ -205,26 +210,30 @@ func get_wave_preview_string(wave_index: int) -> String:
 	return "  ".join(parts)
 
 ## Returns structured preview entries for the given wave (0-based index).
-## Each entry: { "enemy_id": String, "count": int, "sprite_path": String, "color": Color }
+## Each entry: { "enemy_id": String, "count": int, "sprite_path": String, "color": Color, "name": String }
 func get_wave_preview_entries(wave_index: int) -> Array:
 	if wave_index < 0 or wave_index >= _waves.size():
 		return []
 	var wave: WaveData = _waves[wave_index]
 	var counts: Dictionary = {}
+	var enemy_refs: Dictionary = {}   ## eid → EnemyData reference
 	var order: Array[String] = []
 	for entry in wave.entries:
 		var eid: String = str(entry.enemy_data.enemy_id)
 		if not counts.has(eid):
 			counts[eid] = 0
+			enemy_refs[eid] = entry.enemy_data
 			order.append(eid)
 		counts[eid] += entry.count
 	var result: Array = []
 	for eid in order:
+		var edata: EnemyData = enemy_refs.get(eid) as EnemyData
 		result.append({
 			"enemy_id":    eid,
 			"count":       counts[eid],
 			"sprite_path": ENEMY_SPRITES.get(eid, ""),
-			"color":       ENEMY_COLORS.get(eid, Color(0.8, 0.9, 1.0)),
+			"color":       ENEMY_COLORS.get(eid, Color(1.0, 1.0, 1.0)),
+			"name":        edata.enemy_name if edata != null else ENEMY_ICONS.get(eid, "?"),
 		})
 	return result
 
