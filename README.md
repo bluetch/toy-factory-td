@@ -7,6 +7,14 @@
 
 ---
 
+## 📸 截圖
+
+![主視覺 Key Art](screenshot/main_character_05.png)
+
+![遊玩截圖](screenshot/20260318_prototype_screenshot.png)
+
+---
+
 ## 🗺️ Alpha 路線 — Steam 上架進度
 
 > 選定路線：**Alpha（最快上架）** — 美術 → 音樂 → 教學 → 商店素材
