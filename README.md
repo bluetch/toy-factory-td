@@ -9,8 +9,6 @@
 
 ## 📸 截圖
 
-![主視覺 Key Art](screenshot/main_character_05.png)
-
 ![遊玩截圖](screenshot/20260318_prototype_screenshot.png)
 
 ---
