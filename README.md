@@ -9,7 +9,9 @@
 
 ## 📸 截圖
 
-![遊玩截圖](screenshot/20260318_prototype_screenshot.png)
+![主選單畫面](assets/screenshot/game-menu.png)
+
+![遊玩畫面（關卡 2）](assets/screenshot/game-level-2.png)
 
 ---
 
